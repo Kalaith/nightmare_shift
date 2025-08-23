@@ -1,82 +1,100 @@
-# Refactored Folder Structure
+# TypeScript Migrated Folder Structure
 
 ```
 src/
 ├── components/                 # Reusable UI components
-│   ├── common/                # Generic reusable components
+│   ├── common/                # Generic reusable components (placeholders)
 │   │   ├── Button/
-│   │   │   ├── Button.jsx
-│   │   │   └── Button.module.css
 │   │   └── Modal/
-│   │       ├── Modal.jsx
-│   │       └── Modal.module.css
-│   ├── game/                  # Game-specific components
-│   │   ├── StatusBar/
-│   │   │   ├── StatusBar.jsx
-│   │   │   └── StatusBar.module.css
+│   ├── game/                  # Game-specific components (CSS only - components removed)
+│   │   ├── BackstoryNotificationModal/
+│   │   │   └── BackstoryNotificationModal.module.css
+│   │   ├── DrivingState/
+│   │   │   └── DrivingState.module.css
+│   │   ├── InteractionState/
+│   │   │   └── InteractionState.module.css
+│   │   ├── InventoryModal/
+│   │   │   └── InventoryModal.module.css
 │   │   ├── PassengerCard/
-│   │   │   ├── PassengerCard.jsx
-│   │   │   └── PassengerCard.module.css
+│   │   ├── RideRequestState/
+│   │   │   └── RideRequestState.module.css
 │   │   ├── RuleCard/
-│   │   │   ├── RuleCard.jsx
-│   │   │   └── RuleCard.module.css
-│   │   └── InventoryModal/
-│   │       ├── InventoryModal.jsx
-│   │       └── InventoryModal.module.css
-│   └── screens/               # Screen/Page components
-│       ├── LoadingScreen/
-│       │   ├── LoadingScreen.jsx
-│       │   └── LoadingScreen.module.css
-│       ├── LeaderboardScreen/
-│       │   ├── LeaderboardScreen.jsx
-│       │   └── LeaderboardScreen.module.css
+│   │   ├── StatusBar/
+│   │   │   └── StatusBar.module.css
+│   │   └── WaitingState/
+│   │       └── WaitingState.module.css
+│   └── screens/               # Screen/Page components (TypeScript)
 │       ├── BriefingScreen/
-│       │   ├── BriefingScreen.jsx
+│       │   ├── BriefingScreen.tsx
 │       │   └── BriefingScreen.module.css
-│       ├── GameScreen/
-│       │   ├── GameScreen.jsx
-│       │   └── GameScreen.module.css
 │       ├── GameOverScreen/
-│       │   ├── GameOverScreen.jsx
+│       │   ├── GameOverScreen.tsx
 │       │   └── GameOverScreen.module.css
+│       ├── GameScreen/
+│       │   ├── GameScreen.tsx
+│       │   └── GameScreen.module.css
+│       ├── LeaderboardScreen/
+│       │   ├── LeaderboardScreen.tsx
+│       │   └── LeaderboardScreen.module.css
+│       ├── LoadingScreen/
+│       │   ├── LoadingScreen.tsx
+│       │   └── LoadingScreen.module.css
 │       └── SuccessScreen/
-│           ├── SuccessScreen.jsx
+│           ├── SuccessScreen.tsx
 │           └── SuccessScreen.module.css
-├── hooks/                     # Custom React hooks
-│   ├── useLocalStorage.js
-│   ├── useGameState.js
-│   ├── useLeaderboard.js
-│   └── useGameLogic.js
-├── services/                  # Business logic and external services
-│   ├── gameEngine.js         # Core game logic
-│   ├── ruleEngine.js         # Rule system logic
-│   ├── passengerService.js   # Passenger selection and management
-│   └── storageService.js     # LocalStorage utilities
-├── data/                     # Static game data
-│   ├── gameData.js          # All game data (rules, passengers, locations)
-│   └── constants.js         # Game constants and enums
-├── utils/                    # Pure utility functions
-│   ├── formatters.js        # Time, currency formatting
-│   ├── gameHelpers.js       # Game utility functions
-│   └── validators.js        # Input validation
-├── styles/                   # Global styles
-│   ├── globals.css          # Global CSS variables and resets
-│   ├── variables.css        # CSS custom properties
-│   └── themes.css           # Theme definitions
-├── types/                    # TypeScript type definitions (if using TS)
-│   ├── game.ts
-│   ├── passenger.ts
-│   └── rule.ts
-├── App.jsx                   # Main application orchestrator
-├── App.module.css           # App-specific styles
-└── main.jsx                 # Entry point
+├── hooks/                     # Custom React hooks (empty - ready for implementation)
+├── services/                  # Business logic and external services (TypeScript)
+│   ├── gameEngine.ts         # Core game logic with type safety
+│   ├── ruleEngine.ts         # Rule system logic
+│   ├── passengerService.ts   # Passenger selection and management
+│   └── storageService.ts     # LocalStorage utilities with types
+├── data/                     # Static game data (TypeScript)
+│   ├── gameData.ts          # All game data with proper interfaces
+│   └── constants.ts         # Game constants and enums with types
+├── utils/                    # Pure utility functions (TypeScript)
+│   ├── formatters.ts        # Time, currency formatting with types
+│   └── gameHelpers.ts       # Game utility functions
+├── types/                    # TypeScript type definitions
+│   ├── game.ts              # Core game interfaces and types
+│   └── constants.ts         # Configuration type definitions
+├── styles/                   # Global styles (placeholder)
+├── assets/                   # Static assets
+│   └── react.svg
+├── App.tsx                   # Main application orchestrator (TypeScript)
+├── App.css                   # App-specific styles
+├── main.tsx                  # Entry point (TypeScript)
+├── index.css                 # Global styles
+├── global.d.ts              # Global type declarations
+└── vite-env.d.ts            # Vite environment types
 ```
 
-## Rationale for Structure:
+## Migration Status:
 
-1. **components/**: Organized by scope (common, game-specific, screens)
-2. **hooks/**: Custom hooks for reusable stateful logic
-3. **services/**: Business logic separated from UI components
-4. **data/**: Static game data in structured format
-5. **utils/**: Pure functions for common operations
-6. **styles/**: Centralized styling with CSS modules for component-specific styles
+### ✅ **Completed**
+1. **Full TypeScript Migration**: All `.js/.jsx` files converted to `.ts/.tsx`
+2. **Type Definitions**: Comprehensive interfaces in `/types/` directory
+3. **Type-Safe Services**: All business logic with proper typing
+4. **Screen Components**: All main screens migrated to TypeScript
+5. **Build System**: Updated for TypeScript compilation
+
+### 🔄 **Current State**
+1. **Functional Screens**: All primary game screens are working TypeScript components
+2. **Consolidated Game Logic**: Game functionality integrated into main screen components
+3. **Type Safety**: Full compile-time type checking enabled
+4. **Clean Architecture**: Removed duplicate files and optimized structure
+
+### 📋 **Architecture Notes**
+
+1. **components/screens/**: Main game screens with integrated functionality
+2. **services/**: Type-safe business logic and data management  
+3. **data/**: Strongly typed game data and configuration
+4. **types/**: Centralized type definitions for the entire application
+5. **utils/**: Utility functions with proper type annotations
+
+### 🎯 **Benefits Achieved**
+
+- **Type Safety**: Compile-time error detection
+- **Better IDE Support**: Full IntelliSense and refactoring
+- **Maintainable Code**: Self-documenting interfaces
+- **Reduced Bundle Size**: Optimized TypeScript compilation
+- **Developer Experience**: Enhanced debugging and development workflow

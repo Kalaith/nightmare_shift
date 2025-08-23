@@ -32,7 +32,9 @@
       "Bash(taskkill:*)",
       "Bash(npm create:*)",
       "Bash(npx tailwindcss init:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm run lint)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

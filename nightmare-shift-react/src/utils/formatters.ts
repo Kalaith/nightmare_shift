@@ -1,7 +1,4 @@
-// Utility functions for formatting time, currency, and other game values
-
-// Format time from minutes to hours:minutes display
-export const formatTime = (minutes) => {
+export const formatTime = (minutes: number): string => {
   if (typeof minutes !== 'number' || minutes < 0) return '0:00';
   
   const hours = Math.floor(minutes / 60);
@@ -9,23 +6,20 @@ export const formatTime = (minutes) => {
   return `${hours}:${mins.toString().padStart(2, '0')}`;
 };
 
-// Format currency with proper formatting
-export const formatCurrency = (amount) => {
+export const formatCurrency = (amount: number): string => {
   if (typeof amount !== 'number') return '$0';
   
   return `$${amount.toLocaleString()}`;
 };
 
-// Format percentage for fuel display
-export const formatPercentage = (value, max = 100) => {
+export const formatPercentage = (value: number, max: number = 100): string => {
   if (typeof value !== 'number' || typeof max !== 'number') return '0%';
   
   const percentage = Math.round((value / max) * 100);
   return `${Math.max(0, Math.min(100, percentage))}%`;
 };
 
-// Format date for leaderboard display
-export const formatDate = (timestamp) => {
+export const formatDate = (timestamp: number | Date): string => {
   if (!timestamp) return 'Unknown';
   
   try {
@@ -40,8 +34,7 @@ export const formatDate = (timestamp) => {
   }
 };
 
-// Format duration in a human-readable format
-export const formatDuration = (minutes) => {
+export const formatDuration = (minutes: number): string => {
   if (typeof minutes !== 'number' || minutes < 0) return '0 minutes';
   
   if (minutes < 60) {
@@ -58,11 +51,9 @@ export const formatDuration = (minutes) => {
   return `${hours}h ${remainingMinutes}m`;
 };
 
-// Format passenger rarity for display
-export const formatRarity = (rarity) => {
-  const rarityMap = {
+export const formatRarity = (rarity: string): string => {
+  const rarityMap: Record<string, string> = {
     common: 'Common',
-    uncommon: 'Uncommon',
     rare: 'Rare',
     legendary: 'Legendary'
   };
@@ -70,8 +61,7 @@ export const formatRarity = (rarity) => {
   return rarityMap[rarity] || 'Unknown';
 };
 
-// Format score with appropriate suffixes
-export const formatScore = (score) => {
+export const formatScore = (score: number): string => {
   if (typeof score !== 'number') return '0';
   
   if (score >= 1000000) {
@@ -85,9 +75,8 @@ export const formatScore = (score) => {
   return score.toLocaleString();
 };
 
-// Format game difficulty level
-export const formatDifficulty = (level) => {
-  const difficultyLabels = {
+export const formatDifficulty = (level: number): string => {
+  const difficultyLabels: Record<number, string> = {
     0: 'Beginner',
     1: 'Novice', 
     2: 'Experienced',
@@ -98,8 +87,7 @@ export const formatDifficulty = (level) => {
   return difficultyLabels[level] || 'Unknown';
 };
 
-// Format list of items for display
-export const formatItemList = (items) => {
+export const formatItemList = (items: string[]): string => {
   if (!Array.isArray(items) || items.length === 0) {
     return 'None';
   }
@@ -115,8 +103,7 @@ export const formatItemList = (items) => {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 };
 
-// Truncate text to specified length with ellipsis
-export const truncateText = (text, maxLength = 50) => {
+export const truncateText = (text: string, maxLength: number = 50): string => {
   if (!text || typeof text !== 'string') return '';
   
   if (text.length <= maxLength) return text;
@@ -124,8 +111,7 @@ export const truncateText = (text, maxLength = 50) => {
   return text.substring(0, maxLength - 3) + '...';
 };
 
-// Format violation count for display
-export const formatViolations = (count) => {
+export const formatViolations = (count: number): string => {
   if (typeof count !== 'number' || count < 0) return 'None';
   
   if (count === 0) return 'None';

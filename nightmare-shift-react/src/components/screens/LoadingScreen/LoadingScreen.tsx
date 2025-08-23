@@ -1,7 +1,15 @@
-import { SaveGameService } from '../../../services/storageService.js';
-import './LoadingScreen.module.css';
+import React from 'react';
+import { SaveGameService } from '../../../services/storageService';
+import type { PlayerStats } from '../../../types/game';
 
-const LoadingScreen = ({ 
+interface LoadingScreenProps {
+  playerStats: PlayerStats;
+  onStartGame: () => void;
+  onLoadGame: () => void;
+  onShowLeaderboard: () => void;
+}
+
+const LoadingScreen: React.FC<LoadingScreenProps> = ({ 
   playerStats, 
   onStartGame, 
   onLoadGame, 
@@ -16,7 +24,6 @@ const LoadingScreen = ({
         <p className="text-lg text-gray-300">Professional Night Transportation</p>
       </div>
       
-      {/* Player Stats Summary */}
       <div className="bg-gray-800 border border-gray-600 rounded-lg p-4 mb-6">
         <h3 className="text-teal-300 text-lg mb-3">Driver Record</h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
@@ -60,7 +67,7 @@ const LoadingScreen = ({
             💾 Continue Saved Shift
           </button>
         )}
-        
+
         <button 
           onClick={onShowLeaderboard}
           className="w-full bg-gray-700 text-gray-200 py-2 px-5 rounded-lg text-sm hover:bg-gray-600 transition-colors"
@@ -69,7 +76,7 @@ const LoadingScreen = ({
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoadingScreen;
+export default LoadingScreen

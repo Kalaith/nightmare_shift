@@ -54,10 +54,10 @@ Five possible rules are randomly selected each shift:
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
+- Node.js (v18 or higher)
+- npm (v9 or higher)
 
-### Installation
+### Installation & Development
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -73,18 +73,50 @@ npm install
 npm run dev
 ```
 
-The game will be available at `http://localhost:5173`
+The game will be available at `http://localhost:5174` (or next available port)
 
 ### Building for Production
 ```bash
 npm run build
+npm run preview  # Preview the production build
+```
+
+### Code Quality
+```bash
+npm run lint     # Run TypeScript-aware ESLint
 ```
 
 ## 🛠️ Technology Stack
-- **React** - Frontend framework
-- **Tailwind CSS** - Utility-first CSS framework
-- **Vite** - Build tool and development server
-- **JavaScript** - Primary programming language
+
+### **✅ Current (TypeScript Implementation)**
+- **React 19.1** - Modern UI framework with hooks and function components
+- **TypeScript 5.3** - Type-safe development with strict compiler settings
+- **Vite 7.1** - Lightning-fast build tool and development server
+- **Tailwind CSS 4.1** - Utility-first CSS framework for styling
+- **ESLint 9.33** - Code quality with TypeScript support
+
+### **🔧 Development Tools**
+- **Strict Type Checking** - Comprehensive compile-time error detection
+- **CSS Modules** - Component-scoped styling
+- **Hot Module Replacement** - Instant development updates
+- **Tree Shaking** - Optimized production bundles
+- **Source Maps** - Enhanced debugging experience
+
+## 📊 Project Status
+
+### **🎯 Current State: FULLY MIGRATED TO TYPESCRIPT**
+- ✅ **100% TypeScript Coverage** - All source files migrated from JS/JSX
+- ✅ **Type-Safe Architecture** - Comprehensive interfaces and type definitions
+- ✅ **Modern Build System** - Optimized Vite configuration
+- ✅ **Clean Codebase** - Removed duplicate files and legacy code
+- ✅ **Development Ready** - Running at `http://localhost:5174`
+
+### **🔍 Migration Benefits**
+- **Enhanced Developer Experience** - Full IntelliSense and error detection
+- **Better Code Quality** - Self-documenting types and interfaces  
+- **Reduced Runtime Errors** - Compile-time validation
+- **Improved Maintainability** - Clear contracts between components
+- **Future-Proof Architecture** - Modern development practices
 
 ## 🎨 Game Design Philosophy
 Nightmare Shift combines psychological horror with strategic gameplay, emphasizing:

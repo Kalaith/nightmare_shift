@@ -1,5 +1,7 @@
+import type { GameData } from '../types/game';
+
 // Complete game data including rules, passengers, and locations
-export const gameData = {
+export const gameData: GameData = {
   shift_rules: [
     // Basic rules (always visible)
     {
@@ -50,11 +52,6 @@ export const gameData = {
       description: "No pickups after midnight from cemetery locations",
       difficulty: "medium",
       type: "conditional",
-      condition: (gameState, passenger) => {
-        const currentHour = 24 - Math.floor(gameState.timeRemaining / 60);
-        return currentHour >= 0 && passenger?.pickup?.includes("Cemetery");
-      },
-      conditionHint: "Only applies to cemetery pickups after midnight",
       visible: true
     },
     {
@@ -63,10 +60,6 @@ export const gameData = {
       description: "Do not transport supernatural entities during thunderstorms",
       difficulty: "hard",
       type: "conditional",
-      condition: (gameState, passenger) => {
-        return gameState.weather === 'storm' && passenger?.supernatural;
-      },
-      conditionHint: "Only during storms with supernatural passengers",
       visible: true
     },
     {
@@ -75,10 +68,6 @@ export const gameData = {
       description: "Medical personnel must exit at original pickup location",
       difficulty: "medium",
       type: "conditional",
-      condition: (gameState, passenger) => {
-        return passenger?.photo === "👩‍⚕️" || passenger?.photo === "👨‍⚕️";
-      },
-      conditionHint: "Only applies to medical personnel",
       visible: true
     },
     
@@ -116,44 +105,28 @@ export const gameData = {
       id: 12,
       title: "The Counting Rule",
       description: "Never pick up more than 3 passengers with the same supernatural type",
-      difficulty: "expert",
+      difficulty: "expert" as any,
       type: "hidden",
       visible: false,
-      violationMessage: "You've transported too many of the same supernatural entities. They're drawn to patterns...",
-      checkViolation: (gameState) => {
-        const supernaturalCounts = {};
-        gameState.completedRides?.forEach(ride => {
-          if (ride.passenger?.supernatural) {
-            const type = ride.passenger.supernatural.split(' ')[0]; // Get first word
-            supernaturalCounts[type] = (supernaturalCounts[type] || 0) + 1;
-          }
-        });
-        return Object.values(supernaturalCounts).some(count => count > 3);
-      }
+      violationMessage: "You've transported too many of the same supernatural entities. They're drawn to patterns..."
     },
     {
       id: 13,
       title: "The Time Limit",
       description: "No single ride should take longer than 45 minutes",
-      difficulty: "expert",
+      difficulty: "expert" as any,
       type: "hidden",
       visible: false,
-      violationMessage: "You took too long with that passenger. Time has consequences in this job...",
-      checkViolation: (gameState) => {
-        return gameState.currentRideDuration > 45;
-      }
+      violationMessage: "You took too long with that passenger. Time has consequences in this job..."
     },
     {
       id: 14,
       title: "The Silence Between",
       description: "Never speak during the last 5 minutes of your shift",
-      difficulty: "expert",
+      difficulty: "expert" as any,
       type: "hidden",
       visible: false,
-      violationMessage: "Words spoken in the final moments carry too much weight. You should have stayed quiet...",
-      checkViolation: (gameState) => {
-        return gameState.timeRemaining <= 5 && gameState.spokeRecentlu;
-      }
+      violationMessage: "Words spoken in the final moments carry too much weight. You should have stayed quiet..."
     }
   ],
 
@@ -162,10 +135,10 @@ export const gameData = {
     {
       id: 1,
       name: "Mrs. Chen",
-      photo: "👵",
+      emoji: "👵",
       description: "Elderly woman, going to Riverside Cemetery",
       pickup: "Downtown Apartments",
-      destination: "Riverside Cemetery", 
+      destination: "Riverside Cemetery",
       personalRule: "Hates bright lights - will ask you to dim dashboard",
       supernatural: "Ghost of former taxi passenger",
       fare: 15,
@@ -179,7 +152,7 @@ export const gameData = {
     {
       id: 2,
       name: "Jake Morrison", 
-      photo: "👨‍💼",
+      emoji: "👨‍💼",
       description: "Young professional, unusual pale complexion",
       pickup: "Office District",
       destination: "Industrial Warehouse",
@@ -196,7 +169,7 @@ export const gameData = {
     {
       id: 3,
       name: "Sarah Woods",
-      photo: "👩‍🦰", 
+      emoji: "👩‍🦰", 
       description: "Young woman with dirt under her fingernails",
       pickup: "Forest Road",
       destination: "Downtown Hotel",
@@ -213,7 +186,7 @@ export const gameData = {
     {
       id: 4,
       name: "Dr. Hollow",
-      photo: "👨‍⚕️",
+      emoji: "👨‍⚕️",
       description: "Doctor with old-fashioned medical bag",
       pickup: "Abandoned Hospital",
       destination: "Suburban House",
@@ -230,7 +203,7 @@ export const gameData = {
     {
       id: 5,
       name: "The Collector",
-      photo: "🕴️",
+      emoji: "🕴️",
       description: "Well-dressed figure with multiple briefcases",
       pickup: "Antique Shop",
       destination: "Private Residence",
@@ -252,7 +225,7 @@ export const gameData = {
     {
       id: 6,
       name: "Tommy Sullivan",
-      photo: "👦",
+      emoji: "👦",
       description: "Child in school uniform, shouldn't be out this late",
       pickup: "Elementary School",
       destination: "Suburban House",
@@ -269,7 +242,7 @@ export const gameData = {
     {
       id: 7,
       name: "Elena Vasquez",
-      photo: "💃",
+      emoji: "💃",
       description: "Dancer in vintage dress, speaks with old accent",
       pickup: "Old Theater District",
       destination: "Downtown Hotel",
@@ -286,7 +259,7 @@ export const gameData = {
     {
       id: 8,
       name: "Marcus Thompson",
-      photo: "🏃‍♂️",
+      emoji: "🏃‍♂️",
       description: "Jogger in athletic gear, constantly looking over shoulder",
       pickup: "Forest Road",
       destination: "Police Station",
@@ -303,7 +276,7 @@ export const gameData = {
     {
       id: 9,
       name: "Nurse Catherine",
-      photo: "👩‍⚕️",
+      emoji: "👩‍⚕️",
       description: "Hospital nurse in stained scrubs, very tired",
       pickup: "General Hospital",
       destination: "Abandoned Hospital",
@@ -320,7 +293,7 @@ export const gameData = {
     {
       id: 10,
       name: "Old Pete",
-      photo: "🎣",
+      emoji: "🎣",
       description: "Fisherman with wet clothes despite no rain",
       pickup: "Harbor District",
       destination: "Riverside Cemetery",
@@ -337,7 +310,7 @@ export const gameData = {
     {
       id: 11,
       name: "Madame Zelda",
-      photo: "🔮",
+      emoji: "🔮",
       description: "Fortune teller with knowing eyes and crystal jewelry",
       pickup: "Psychic Shop",
       destination: "Private Residence",
@@ -359,7 +332,7 @@ export const gameData = {
     {
       id: 12,
       name: "Frank the Pianist",
-      photo: "🎹",
+      emoji: "🎹",
       description: "Well-dressed musician with bandaged hands",
       pickup: "Old Theater District",
       destination: "Music Hall",
@@ -376,7 +349,7 @@ export const gameData = {
     {
       id: 13,
       name: "Sister Agnes",
-      photo: "👩‍🔬",
+      emoji: "👩‍🔬",
       description: "Nun with ancient texts and worried expression",
       pickup: "Old Cathedral",
       destination: "Seminary",
@@ -393,7 +366,7 @@ export const gameData = {
     {
       id: 14,
       name: "Detective Morrison",
-      photo: "🕵️‍♂️",
+      emoji: "🕵️‍♂️",
       description: "Tired detective with case files and coffee stains",
       pickup: "Police Station",
       destination: "Crime Scene",
@@ -410,7 +383,7 @@ export const gameData = {
     {
       id: 15,
       name: "The Midnight Mayor",
-      photo: "🎩",
+      emoji: "🎩",
       description: "Impossibly tall figure in formal attire from another era",
       pickup: "City Hall",
       destination: "Private Estate",
@@ -430,7 +403,7 @@ export const gameData = {
           id: 99,
           title: "Mayor's Decree",
           description: "Follow all commands from city officials without question",
-          difficulty: "nightmare",
+          difficulty: "nightmare" as any,
           temporary: true,
           duration: 3
         }
@@ -439,7 +412,7 @@ export const gameData = {
     {
       id: 16,
       name: "Death's Taxi Driver",
-      photo: "☠️",
+      emoji: "☠️",
       description: "Figure in dark robes who speaks in whispers",
       pickup: "Crossroads",
       destination: "End of the Line",
@@ -459,122 +432,146 @@ export const gameData = {
     {
       name: "Downtown Apartments",
       description: "Flickering streetlights illuminate empty sidewalks",
-      atmosphere: "Urban decay"
+      atmosphere: "Urban decay",
+      riskLevel: 2
     },
     {
       name: "Riverside Cemetery", 
       description: "Ancient tombstones shrouded in fog",
-      atmosphere: "Haunted"
+      atmosphere: "Haunted",
+      riskLevel: 4
     },
     {
       name: "Office District",
       description: "Glass towers with only a few lights on",
-      atmosphere: "Corporate desolation"
+      atmosphere: "Corporate desolation",
+      riskLevel: 1
     },
     {
       name: "Industrial Warehouse",
       description: "Loading docks and chain-link fences",
-      atmosphere: "Abandoned industry"
+      atmosphere: "Abandoned industry",
+      riskLevel: 3
     },
     {
       name: "Forest Road",
       description: "Tall trees block out the moonlight",
-      atmosphere: "Wilderness danger"
+      atmosphere: "Wilderness danger",
+      riskLevel: 5
     },
     {
       name: "Abandoned Hospital",
       description: "Broken windows and overgrown parking lot",
-      atmosphere: "Medical horror"
+      atmosphere: "Medical horror",
+      riskLevel: 5
     },
     {
       name: "Elementary School",
       description: "Empty playground with swings moving in windless air",
-      atmosphere: "Childhood terror"
+      atmosphere: "Childhood terror",
+      riskLevel: 3
     },
     {
       name: "Suburban House",
       description: "Cookie-cutter homes with too-perfect lawns",
-      atmosphere: "False normalcy"
+      atmosphere: "False normalcy",
+      riskLevel: 2
     },
     {
       name: "Old Theater District",
       description: "Faded marquees and darkened stage doors",
-      atmosphere: "Forgotten glamour"
+      atmosphere: "Forgotten glamour",
+      riskLevel: 3
     },
     {
       name: "Downtown Hotel",
       description: "Art deco lobby with no guests at the desk",
-      atmosphere: "Transient luxury"
+      atmosphere: "Transient luxury",
+      riskLevel: 2
     },
     {
       name: "Police Station",
       description: "Harsh fluorescent lights and barred windows",
-      atmosphere: "Institutional authority"
+      atmosphere: "Institutional authority",
+      riskLevel: 1
     },
     {
       name: "General Hospital",
       description: "Sterile corridors echoing with distant footsteps",
-      atmosphere: "Clinical dread"
+      atmosphere: "Clinical dread",
+      riskLevel: 2
     },
     {
       name: "Harbor District",
       description: "Fog-shrouded docks with creaking piers",
-      atmosphere: "Maritime mystery"
+      atmosphere: "Maritime mystery",
+      riskLevel: 4
     },
     {
       name: "Psychic Shop",
       description: "Neon palm reader sign buzzing in the window",
-      atmosphere: "Occult commerce"
+      atmosphere: "Occult commerce",
+      riskLevel: 3
     },
     {
       name: "Music Hall",
       description: "Grand concert hall with dust motes dancing in spotlight",
-      atmosphere: "Haunted artistry"
+      atmosphere: "Haunted artistry",
+      riskLevel: 3
     },
     {
       name: "Old Cathedral",
       description: "Gothic spires piercing the night sky",
-      atmosphere: "Sacred sanctuary"
+      atmosphere: "Sacred sanctuary",
+      riskLevel: 2
     },
     {
       name: "Seminary",
       description: "Ivy-covered religious institution with glowing windows",
-      atmosphere: "Theological study"
+      atmosphere: "Theological study",
+      riskLevel: 1
     },
     {
       name: "Crime Scene",
       description: "Yellow tape fluttering around chalk outlines",
-      atmosphere: "Recent violence"
+      atmosphere: "Recent violence",
+      riskLevel: 4
     },
     {
       name: "City Hall",
       description: "Imposing government building with marble columns",
-      atmosphere: "Municipal power"
+      atmosphere: "Municipal power",
+      riskLevel: 2
     },
     {
       name: "Private Estate",
       description: "Gated mansion hidden behind ancient oak trees",
-      atmosphere: "Exclusive mystery"
+      atmosphere: "Exclusive mystery",
+      riskLevel: 4
     },
     {
       name: "Private Residence",
       description: "Unremarkable house with secrets behind curtained windows",
-      atmosphere: "Hidden darkness"
+      atmosphere: "Hidden darkness",
+      riskLevel: 3
     },
     {
       name: "Antique Shop",
       description: "Cluttered storefront filled with objects from forgotten times",
-      atmosphere: "Temporal commerce"
+      atmosphere: "Temporal commerce",
+      riskLevel: 3
     },
     {
       name: "Crossroads",
       description: "Four paths meeting where streetlights fail to reach",
-      atmosphere: "Decision point"
+      atmosphere: "Decision point",
+      riskLevel: 5
     },
     {
       name: "End of the Line",
       description: "The place where all journeys ultimately lead",
-      atmosphere: "Final destination"
+      atmosphere: "Final destination",
+      riskLevel: 5
     }
   ]
 };
