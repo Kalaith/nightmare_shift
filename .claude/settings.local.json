@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Edit(*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "Bash(taskkill:*)",
+      "WebFetch(domain:tailwindcss.com)",
+      "Bash(chmod:*)",
+      "Bash(del:*)",
+      "Bash(python:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(pip install:*)",
+      "Bash(php:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(dir)",
+      "Bash(timeout:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx create-react-app:*)",
+      "Bash(mkdir:*)",
+      "Bash(composer install:*)",
+      "Bash(npm install:*)",
+      "Bash(php:*)",
+      "Bash(npm start)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(npm create:*)",
+      "Bash(npx tailwindcss init:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
