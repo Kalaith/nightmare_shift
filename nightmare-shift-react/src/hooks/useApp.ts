@@ -23,7 +23,15 @@ export const useApp = () => {
     endShift
   } = useGameState(playerStats);
 
-  const { acceptRide, declineRide, handleDrivingChoice, continueToDestination } = useGameActions({
+  const { 
+    acceptRide, 
+    declineRide, 
+    handleDrivingChoice, 
+    continueToDestination,
+    useItem,
+    tradeItem,
+    processItemEffects
+  } = useGameActions({
     gameState,
     setGameState: updateGameState,
     showRideRequest,
@@ -54,7 +62,9 @@ export const useApp = () => {
       handleDrivingChoice,
       continueToDestination,
       gameOver,
-      resetGame
+      resetGame,
+      useItem,
+      tradeItem
     }
   );
 

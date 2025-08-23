@@ -127,6 +127,68 @@ export const gameData: GameData = {
       type: "hidden",
       visible: false,
       violationMessage: "Words spoken in the final moments carry too much weight. You should have stayed quiet..."
+    },
+
+    // Weather-triggered rules (activated by weather conditions)
+    {
+      id: 101,
+      title: "Storm Silence",
+      description: "Don't use windshield wipers during thunderstorms",
+      difficulty: "hard",
+      type: "weather",
+      visible: false,
+      trigger: "thunderstorm",
+      violationMessage: "The wipers disturbed something that feeds on electrical storms..."
+    },
+    {
+      id: 102,
+      title: "Light in Darkness",
+      description: "Keep headlights on during heavy fog",
+      difficulty: "medium",
+      type: "weather",
+      visible: false,
+      trigger: "heavy_fog",
+      violationMessage: "In the fog, darkness means something different. You should have kept the lights on."
+    },
+    {
+      id: 103,
+      title: "Winter Caution",
+      description: "Drive under 25 mph in snow conditions",
+      difficulty: "medium",
+      type: "weather",
+      visible: false,
+      trigger: "snow",
+      violationMessage: "Speed in snow conditions attracted the attention of winter spirits..."
+    },
+    {
+      id: 104,
+      title: "Shelter Protocol",
+      description: "No stops during late night bad weather",
+      difficulty: "hard",
+      type: "weather",
+      visible: false,
+      trigger: "latenight_badweather",
+      violationMessage: "Stopping in bad weather during the witching hour was a mistake..."
+    },
+    {
+      id: 105,
+      title: "Clear Sight",
+      description: "Don't use air conditioning when visibility drops below 30%",
+      difficulty: "medium",
+      type: "weather",
+      visible: false,
+      trigger: "low_visibility",
+      violationMessage: "The AC created condensation just when you needed clear vision most..."
+    },
+    {
+      id: 106,
+      title: "Wind Whispers",
+      description: "Keep all windows closed during windstorms",
+      difficulty: "easy",
+      type: "weather",
+      visible: false,
+      trigger: "heavy_wind",
+      violationMessage: "The wind carried something in that you shouldn't have let inside..."
     }
   ],
 

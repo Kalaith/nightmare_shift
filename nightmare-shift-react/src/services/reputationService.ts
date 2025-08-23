@@ -1,6 +1,7 @@
-import type { PassengerReputation, RouteChoice } from '../types/game';
+import type { PassengerReputation, RouteChoice, WeatherCondition, TimeOfDay, EnvironmentalHazard } from '../types/game';
 import { GAME_CONSTANTS } from '../data/constants';
 import { GAME_BALANCE, BalanceHelpers } from '../constants/gameBalance';
+import { WeatherService } from './weatherService';
 import { ErrorHandling, type GameResult } from '../utils/errorHandling';
 
 export class ReputationService {
@@ -93,7 +94,10 @@ export class ReputationService {
 export class RouteService {
   static calculateRouteCosts(
     routeType: 'normal' | 'shortcut' | 'scenic' | 'police',
-    passengerRiskLevel: number = 1
+    passengerRiskLevel: number = 1,
+    weather?: WeatherCondition,
+    timeOfDay?: TimeOfDay,
+    hazards?: EnvironmentalHazard[]
   ): { fuelCost: number; timeCost: number; riskLevel: number } {
     let baseFuelCost: number;
     let baseTimeCost: number;
@@ -126,17 +130,60 @@ export class RouteService {
     const fuelVariation = BalanceHelpers.getFuelCostWithVariation(baseFuelCost) - baseFuelCost;
     const timeVariation = BalanceHelpers.getTimeCostWithVariation(baseTimeCost) - baseTimeCost;
     
+    let finalFuelCost = baseFuelCost + fuelVariation;
+    let finalTimeCost = baseTimeCost + timeVariation;
+    let finalRiskLevel = baseRiskLevel + (passengerRiskLevel - GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL);
+
+    // Apply weather effects if provided
+    if (weather && timeOfDay) {
+      const weatherEffects = WeatherService.applyWeatherEffects(
+        finalFuelCost,
+        finalTimeCost,
+        finalRiskLevel,
+        weather,
+        timeOfDay
+      );
+      finalFuelCost = weatherEffects.fuel;
+      finalTimeCost = weatherEffects.time;
+      finalRiskLevel = weatherEffects.risk;
+    }
+
+    // Apply hazard effects if any
+    if (hazards && hazards.length > 0) {
+      for (const hazard of hazards) {
+        // Check if hazard blocks this route type
+        if (hazard.effects.routeBlocked?.includes(routeType)) {
+          finalRiskLevel = Math.min(5, finalRiskLevel + 2); // Route is risky due to blockage
+        }
+        
+        if (hazard.effects.fuelIncrease) {
+          finalFuelCost += hazard.effects.fuelIncrease;
+        }
+        
+        if (hazard.effects.timeDelay) {
+          finalTimeCost += hazard.effects.timeDelay;
+        }
+        
+        if (hazard.effects.riskIncrease) {
+          finalRiskLevel += hazard.effects.riskIncrease;
+        }
+      }
+    }
+    
     return {
-      fuelCost: Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST, baseFuelCost + fuelVariation),
-      timeCost: Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST, baseTimeCost + timeVariation),
-      riskLevel: Math.max(GAME_BALANCE.RISK_LEVELS.SAFE, baseRiskLevel + (passengerRiskLevel - GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL))
+      fuelCost: Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST, Math.round(finalFuelCost)),
+      timeCost: Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST, Math.round(finalTimeCost)),
+      riskLevel: Math.max(GAME_BALANCE.RISK_LEVELS.SAFE, Math.min(5, Math.round(finalRiskLevel)))
     };
   }
 
   static getRouteOptions(
     currentFuel: number, 
     currentTime: number,
-    passengerRiskLevel: number = 1
+    passengerRiskLevel: number = 1,
+    weather?: WeatherCondition,
+    timeOfDay?: TimeOfDay,
+    hazards?: EnvironmentalHazard[]
   ): GameResult<Array<{
     type: 'normal' | 'shortcut' | 'scenic' | 'police';
     name: string;
@@ -177,7 +224,7 @@ export class RouteService {
         ];
 
         return routes.map(route => {
-          const costs = this.calculateRouteCosts(route.type, passengerRiskLevel);
+          const costs = this.calculateRouteCosts(route.type, passengerRiskLevel, weather, timeOfDay, hazards);
           const available = currentFuel >= costs.fuelCost && currentTime >= costs.timeCost;
           
           let bonusInfo = '';
@@ -187,6 +234,20 @@ export class RouteService {
             bonusInfo = 'No supernatural encounters';
           } else if (route.type === 'shortcut') {
             bonusInfo = 'May trigger hidden rules';
+          }
+
+          // Add weather and hazard warnings
+          if (weather && weather.intensity === 'heavy') {
+            bonusInfo += bonusInfo ? ' • ' : '';
+            bonusInfo += `Heavy ${weather.type} conditions`;
+          }
+
+          if (hazards && hazards.length > 0) {
+            const routeHazards = hazards.filter(h => h.effects.routeBlocked?.includes(route.type));
+            if (routeHazards.length > 0) {
+              bonusInfo += bonusInfo ? ' • ' : '';
+              bonusInfo += '⚠️ Route affected by hazards';
+            }
           }
 
           return {

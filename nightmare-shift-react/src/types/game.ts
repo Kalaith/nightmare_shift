@@ -3,7 +3,7 @@ export interface Rule {
   title: string;
   description: string;
   difficulty: 'easy' | 'medium' | 'hard' | 'expert' | 'nightmare';
-  type: 'basic' | 'conditional' | 'conflicting' | 'hidden';
+  type: 'basic' | 'conditional' | 'conflicting' | 'hidden' | 'weather';
   visible: boolean;
   conflictsWith?: number[];
   trigger?: string;
@@ -86,12 +86,109 @@ export interface GameState {
   passengerReputation: Record<number, PassengerReputation>;
   minimumEarnings: number;
   routeHistory: RouteChoice[];
+  // Weather and environmental properties
+  currentWeather: WeatherCondition;
+  timeOfDay: TimeOfDay;
+  season: Season;
+  environmentalHazards: EnvironmentalHazard[];
+  weatherEffects: WeatherEffect[];
 }
 
 export interface InventoryItem {
+  id: string;
   name: string;
   source: string;
   backstoryItem: boolean;
+  type: 'protective' | 'cursed' | 'consumable' | 'tradeable' | 'story';
+  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
+  description: string;
+  effects?: ItemEffect[];
+  durability?: number;
+  maxDurability?: number;
+  acquiredAt: number;
+  canUse: boolean;
+  canTrade: boolean;
+  cursedProperties?: CursedProperties;
+  protectiveProperties?: ProtectiveProperties;
+}
+
+export interface ItemEffect {
+  type: 'fuel_bonus' | 'time_bonus' | 'rule_immunity' | 'supernatural_protection' | 
+        'fuel_drain' | 'time_penalty' | 'rule_trigger' | 'reputation_modifier';
+  value: number;
+  duration?: number; // in minutes, 0 = permanent while held
+  condition?: string; // when this effect applies
+}
+
+export interface CursedProperties {
+  penaltyType: 'fuel_drain' | 'time_acceleration' | 'forced_choices' | 'attracting_danger';
+  penaltyValue: number;
+  triggersAfter: number; // minutes of possession
+  canBeRemoved: boolean;
+  removalCondition?: string;
+}
+
+export interface ProtectiveProperties {
+  protectionType: 'supernatural_immunity' | 'rule_forgiveness' | 'safe_passage' | 'lucky_encounters';
+  protectionStrength: number;
+  usesRemaining?: number;
+  protectsAgainst?: string[]; // specific passenger IDs or rule IDs
+}
+
+export interface WeatherCondition {
+  type: 'clear' | 'rain' | 'fog' | 'snow' | 'thunderstorm' | 'wind';
+  intensity: 'light' | 'moderate' | 'heavy';
+  visibility: number; // 0-100, affects driving
+  description: string;
+  icon: string;
+  effects: WeatherEffect[];
+  duration: number; // minutes
+  startTime: number; // timestamp
+}
+
+export interface TimeOfDay {
+  phase: 'dawn' | 'morning' | 'afternoon' | 'dusk' | 'night' | 'latenight';
+  hour: number; // 0-23
+  description: string;
+  ambientLight: number; // 0-100
+  supernaturalActivity: number; // 0-100
+}
+
+export interface Season {
+  type: 'spring' | 'summer' | 'fall' | 'winter';
+  month: number; // 1-12
+  temperature: 'cold' | 'cool' | 'mild' | 'warm' | 'hot';
+  description: string;
+  passengerModifiers: {
+    spawnRates: Record<string, number>; // passenger type -> modifier
+    behaviorChanges: Record<number, string>; // passenger ID -> behavior description
+  };
+}
+
+export interface WeatherEffect {
+  type: 'visibility_reduction' | 'fuel_consumption' | 'time_delay' | 'supernatural_attraction' | 
+        'passenger_behavior' | 'route_blockage' | 'rule_modification';
+  value: number;
+  description: string;
+  appliesTo?: string; // specific context where effect applies
+}
+
+export interface EnvironmentalHazard {
+  id: string;
+  type: 'construction' | 'accident' | 'supernatural_event' | 'road_closure' | 'police_checkpoint';
+  location: string;
+  severity: 'minor' | 'major' | 'extreme';
+  description: string;
+  effects: {
+    routeBlocked?: string[]; // route types that are blocked
+    timeDelay?: number;
+    fuelIncrease?: number;
+    riskIncrease?: number;
+    forcedChoice?: boolean;
+  };
+  duration: number; // minutes
+  startTime: number; // timestamp
+  weatherTriggered?: boolean;
 }
 
 export interface CompletedRide {

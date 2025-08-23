@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import type { GameState } from '../../../types/game';
+import type { GameState, Passenger } from '../../../types/game';
 import { RouteService } from '../../../services/reputationService';
 import { gameData } from '../../../data/gameData';
 import { GAME_BALANCE } from '../../../constants/gameBalance';
 import { GameResultHelpers } from '../../../utils/errorHandling';
+import InventoryModal from '../../game/InventoryModal/InventoryModal';
+import WeatherDisplay from '../../game/WeatherDisplay/WeatherDisplay';
 
 interface GameScreenProps {
   gameState: GameState;
@@ -16,6 +18,8 @@ interface GameScreenProps {
   onHandleDrivingChoice: (choice: string, phase: string) => void;
   onContinueToDestination: () => void;
   onGameOver: (reason: string) => void;
+  onUseItem?: (itemId: string) => void;
+  onTradeItem?: (itemId: string, passenger: Passenger) => void;
 }
 
 const GameScreen: React.FC<GameScreenProps> = ({
@@ -28,7 +32,9 @@ const GameScreen: React.FC<GameScreenProps> = ({
   onDeclineRide,
   onHandleDrivingChoice,
   onContinueToDestination,
-  onGameOver
+  onGameOver,
+  onUseItem,
+  onTradeItem
 }) => {
   const [showQuickRules, setShowQuickRules] = useState(false);
 
@@ -52,7 +58,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
     <div className="min-h-screen bg-gradient-to-b from-gray-800 to-slate-900 text-white">
       {/* Game Stats Header */}
       <div className="bg-gray-800/90 border-b border-gray-600 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div className="flex flex-wrap gap-4 text-sm">
             <div className="bg-gray-700 px-3 py-1 rounded">
               ⏰ {formatTime(gameState.timeRemaining)}
@@ -80,6 +86,15 @@ const GameScreen: React.FC<GameScreenProps> = ({
             </button>
           </div>
         </div>
+        
+        {/* Weather Display */}
+        <WeatherDisplay
+          weather={gameState.currentWeather}
+          timeOfDay={gameState.timeOfDay}
+          season={gameState.season}
+          hazards={gameState.environmentalHazards}
+          showDetails={false}
+        />
       </div>
 
       <div className="p-5">
@@ -236,36 +251,16 @@ const GameScreen: React.FC<GameScreenProps> = ({
         </div>
       </div>
 
-      {/* Inventory Modal */}
-      {showInventory && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 border border-gray-600 rounded-lg max-w-md w-full max-h-96 overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-gray-600">
-              <h3 className="text-xl font-semibold text-teal-300">🎒 Inventory</h3>
-              <button 
-                onClick={() => setShowInventory(false)}
-                className="text-gray-400 hover:text-white text-2xl leading-none"
-              >
-                ×
-              </button>
-            </div>
-            <div className="p-4">
-              {gameState.inventory.length === 0 ? (
-                <p className="text-gray-400 text-center py-4">No items collected yet</p>
-              ) : (
-                <div className="space-y-3">
-                  {gameState.inventory.map((item, index) => (
-                    <div key={index} className="bg-gray-700/50 p-3 rounded">
-                      <strong className="text-white">{item.name}</strong>
-                      <p className="text-gray-400 text-sm">Left by: {item.source}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Advanced Inventory Modal */}
+      <InventoryModal
+        isOpen={showInventory}
+        onClose={() => setShowInventory(false)}
+        inventory={gameState.inventory}
+        gameState={gameState}
+        onUseItem={onUseItem}
+        onTradeItem={onTradeItem}
+        currentPassenger={gameState.currentPassenger}
+      />
     </div>
   );
 };

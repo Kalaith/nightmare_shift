@@ -5,27 +5,39 @@ import { ReputationService } from '../services/reputationService';
 import { GameEngine } from '../services/gameEngine';
 import { PassengerService } from '../services/passengerService';
 import { SaveGameService } from '../services/storageService';
+import { WeatherService } from '../services/weatherService';
 import { gameData } from '../data/gameData';
 
-const getInitialGameState = (): GameState => ({
-  currentScreen: SCREENS.LOADING,
-  fuel: GAME_CONSTANTS.INITIAL_FUEL,
-  earnings: 0,
-  timeRemaining: GAME_CONSTANTS.INITIAL_TIME,
-  ridesCompleted: 0,
-  rulesViolated: 0,
-  currentRules: [],
-  inventory: [],
-  currentPassenger: null,
-  currentRide: null,
-  gamePhase: GAME_PHASES.WAITING,
-  usedPassengers: [],
-  shiftStartTime: null,
-  sessionStartTime: Date.now(),
-  passengerReputation: ReputationService.initializeReputation(),
-  minimumEarnings: GAME_CONSTANTS.MINIMUM_EARNINGS,
-  routeHistory: []
-});
+const getInitialGameState = (): GameState => {
+  const season = WeatherService.getCurrentSeason();
+  const initialWeather = WeatherService.generateInitialWeather(season);
+  
+  return {
+    currentScreen: SCREENS.LOADING,
+    fuel: GAME_CONSTANTS.INITIAL_FUEL,
+    earnings: 0,
+    timeRemaining: GAME_CONSTANTS.INITIAL_TIME,
+    ridesCompleted: 0,
+    rulesViolated: 0,
+    currentRules: [],
+    inventory: [],
+    currentPassenger: null,
+    currentRide: null,
+    gamePhase: GAME_PHASES.WAITING,
+    usedPassengers: [],
+    shiftStartTime: null,
+    sessionStartTime: Date.now(),
+    passengerReputation: ReputationService.initializeReputation(),
+    minimumEarnings: GAME_CONSTANTS.MINIMUM_EARNINGS,
+    routeHistory: [],
+    // Weather and environmental properties
+    currentWeather: initialWeather.success ? initialWeather.data : WeatherService.generateInitialWeather(season).data,
+    timeOfDay: WeatherService.updateTimeOfDay(Date.now(), Date.now()),
+    season,
+    environmentalHazards: [],
+    weatherEffects: []
+  };
+};
 
 export const useGameState = (playerStats: PlayerStats) => {
   const [gameState, setGameState] = useState<GameState>(getInitialGameState);
@@ -113,18 +125,83 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const showRideRequest = () => {
-    const passenger = getRandomPassenger();
+    // Update weather and environmental conditions
+    updateWeatherAndEnvironment();
+    
+    // Use weather-aware passenger selection
+    const passengerResult = PassengerService.selectWeatherAwarePassenger(
+      gameState.usedPassengers,
+      gameState.difficultyLevel || 1,
+      gameState.currentWeather,
+      gameState.timeOfDay,
+      gameState.season
+    );
+    
+    const passenger = passengerResult.success ? passengerResult.data : getRandomPassenger();
+    
     if (!passenger) {
       endShift(true);
       return;
     }
+
+    // Apply weather-triggered rules
+    const weatherTriggeredRules = WeatherService.getWeatherTriggeredRules(
+      gameState.currentWeather, 
+      gameState.timeOfDay
+    );
     
     setGameState(prev => ({
       ...prev,
       currentPassenger: passenger,
       gamePhase: GAME_PHASES.RIDE_REQUEST,
-      usedPassengers: [...prev.usedPassengers, passenger.id]
+      usedPassengers: [...prev.usedPassengers, passenger.id],
+      // Add weather-triggered rules to current rules
+      currentRules: [
+        ...prev.currentRules,
+        ...gameData.shift_rules.filter(rule => weatherTriggeredRules.includes(rule.id))
+      ]
     }));
+  };
+
+  const updateWeatherAndEnvironment = () => {
+    const currentTime = Date.now();
+    
+    setGameState(prev => {
+      // Update time of day
+      const newTimeOfDay = prev.shiftStartTime 
+        ? WeatherService.updateTimeOfDay(prev.shiftStartTime, currentTime)
+        : prev.timeOfDay;
+      
+      // Update weather
+      const weatherUpdateResult = WeatherService.updateWeather(
+        prev.currentWeather,
+        currentTime,
+        prev.season
+      );
+      const newWeather = weatherUpdateResult.success ? weatherUpdateResult.data : prev.currentWeather;
+      
+      // Generate environmental hazards
+      const hazardsResult = WeatherService.generateEnvironmentalHazards(
+        newWeather,
+        newTimeOfDay,
+        prev.season
+      );
+      const newHazards = hazardsResult.success ? hazardsResult.data : [];
+      
+      // Filter out expired hazards
+      const activeHazards = prev.environmentalHazards.filter(hazard => {
+        const elapsed = (currentTime - hazard.startTime) / (60 * 1000); // minutes
+        return elapsed < hazard.duration;
+      });
+      
+      return {
+        ...prev,
+        timeOfDay: newTimeOfDay,
+        currentWeather: newWeather,
+        environmentalHazards: [...activeHazards, ...newHazards],
+        weatherEffects: newWeather.effects
+      };
+    });
   };
 
   const gameOver = (reason: string) => {

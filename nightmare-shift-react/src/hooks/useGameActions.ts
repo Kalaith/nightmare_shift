@@ -1,17 +1,18 @@
 import { useCallback } from 'react';
-import type { GameState } from '../types/game';
+import type { GameState, Passenger } from '../types/game';
 import { GAME_PHASES } from '../data/constants';
 import { GAME_BALANCE } from '../constants/gameBalance';
 import { RouteService } from '../services/reputationService';
 import { PassengerService } from '../services/passengerService';
+import { ItemService } from '../services/itemService';
 import { gameData } from '../data/gameData';
 
 interface UseGameActionsProps {
   gameState: GameState;
-  setGameState: React.Dispatch<React.SetStateAction<GameState>>;
+  setGameState: (value: GameState | ((prev: GameState) => GameState)) => void;
   showRideRequest: () => void;
   gameOver: (reason: string) => void;
-  endShift: (successful: boolean) => any;
+  endShift: (successful: boolean) => unknown;
 }
 
 export const useGameActions = ({
@@ -147,17 +148,17 @@ export const useGameActions = ({
       currentDialogue: null
     }));
 
-    // Add items to inventory
+    // Add items to inventory using new ItemService
     if (passenger.items && Math.random() < GAME_BALANCE.PROBABILITIES.ITEM_DROP) {
       const randomItem = passenger.items[Math.floor(Math.random() * passenger.items.length)];
-      setGameState(prev => ({ 
-        ...prev, 
-        inventory: [...prev.inventory, { 
-          name: randomItem, 
-          source: passenger.name,
-          backstoryItem: false
-        }]
-      }));
+      const newItemResult = ItemService.createInventoryItem(randomItem, passenger.name, false);
+      
+      if (newItemResult.success) {
+        setGameState(prev => ({ 
+          ...prev, 
+          inventory: [...prev.inventory, newItemResult.data]
+        }));
+      }
     }
 
     // Check for backstory unlock
@@ -185,10 +186,92 @@ export const useGameActions = ({
     }, 1000);
   }, [gameState, setGameState, endShift, showRideRequest]);
 
+  const useItem = useCallback((itemId: string) => {
+    const item = gameState.inventory.find(i => i.id === itemId);
+    if (!item || !item.canUse) return;
+
+    // Apply item effects
+    const newGameStateResult = ItemService.applyItemEffects(gameState, item);
+    if (newGameStateResult.success) {
+      setGameState(prev => {
+        let newState = newGameStateResult.data;
+        
+        // Update item uses if it has limited uses
+        if (item.protectiveProperties?.usesRemaining) {
+          const updatedItem = ItemService.useProtectiveItem(item);
+          newState = {
+            ...newState,
+            inventory: prev.inventory.map(i => 
+              i.id === itemId ? updatedItem : i
+            ).filter(i => !i.protectiveProperties || (i.protectiveProperties.usesRemaining && i.protectiveProperties.usesRemaining > 0))
+          };
+        }
+        
+        return newState;
+      });
+    }
+  }, [gameState, setGameState]);
+
+  const tradeItem = useCallback((itemId: string, passenger: Passenger) => {
+    const item = gameState.inventory.find(i => i.id === itemId);
+    if (!item || !ItemService.canTradeWith(item, passenger)) return;
+
+    const tradeOptions = ItemService.getTradeOptions(item, passenger);
+    if (tradeOptions.length === 0) return;
+
+    // Execute the first available trade
+    const trade = tradeOptions[0];
+    
+    setGameState(prev => {
+      let newInventory = prev.inventory.filter(i => i.id !== itemId);
+      
+      // Add received item if any
+      if (trade.receive) {
+        newInventory.push(trade.receive);
+      }
+      
+      // Handle special consequences
+      let newState = { ...prev, inventory: newInventory };
+      
+      if (passenger.id === 11 && !trade.receive) {
+        // Madame Zelda reveals hidden rule
+        if (prev.hiddenRules && prev.hiddenRules.length > 0) {
+          const revealedRule = prev.hiddenRules[0];
+          newState = {
+            ...newState,
+            hiddenRules: prev.hiddenRules.slice(1),
+            revealedHiddenRules: [...(prev.revealedHiddenRules || []), revealedRule]
+          };
+        }
+      }
+      
+      return newState;
+    });
+  }, [gameState, setGameState]);
+
+  // Process item deterioration and cursed effects periodically
+  const processItemEffects = useCallback(() => {
+    setGameState(prev => {
+      // Apply deterioration
+      const deterioratedInventory = ItemService.processItemDeterioration(prev.inventory);
+      
+      // Apply cursed effects
+      const cursedEffectsResult = ItemService.applyCursedEffects({
+        ...prev,
+        inventory: deterioratedInventory
+      });
+      
+      return cursedEffectsResult.success ? cursedEffectsResult.data : prev;
+    });
+  }, [setGameState]);
+
   return {
     acceptRide,
     declineRide,
     handleDrivingChoice,
-    continueToDestination
+    continueToDestination,
+    useItem,
+    tradeItem,
+    processItemEffects
   };
 };

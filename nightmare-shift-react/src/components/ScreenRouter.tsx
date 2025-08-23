@@ -1,5 +1,5 @@
 import React from 'react';
-import type { GameState, PlayerStats } from '../types/game';
+import type { GameState, PlayerStats, Passenger } from '../types/game';
 import { SCREENS } from '../data/constants';
 import { LeaderboardService } from '../services/storageService';
 import LoadingScreen from './screens/LoadingScreen/LoadingScreen';
@@ -28,6 +28,8 @@ interface ScreenRouterProps {
   onGameOver: (reason: string) => void;
   onResetAndStart: () => void;
   onResetAndShow: (screen: string) => void;
+  onUseItem?: (itemId: string) => void;
+  onTradeItem?: (itemId: string, passenger: Passenger) => void;
 }
 
 const ScreenRouter: React.FC<ScreenRouterProps> = ({
@@ -48,7 +50,9 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
   onContinueToDestination,
   onGameOver,
   onResetAndStart,
-  onResetAndShow
+  onResetAndShow,
+  onUseItem,
+  onTradeItem
 }) => {
   switch (gameState.currentScreen) {
     case SCREENS.LOADING:
@@ -90,6 +94,8 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
           onHandleDrivingChoice={onHandleDrivingChoice}
           onContinueToDestination={onContinueToDestination}
           onGameOver={onGameOver}
+          onUseItem={onUseItem}
+          onTradeItem={onTradeItem}
         />
       );
 

@@ -1,5 +1,5 @@
 import { gameData } from '../data/gameData';
-import type { Rule, PlayerStats, GameState, GameEngineResult, HiddenRuleViolation } from '../types/game';
+import type { Rule, PlayerStats, GameState, GameEngineResult, HiddenRuleViolation, Passenger } from '../types/game';
 
 export class GameEngine {
   static calculatePlayerExperience(playerStats: PlayerStats): number {

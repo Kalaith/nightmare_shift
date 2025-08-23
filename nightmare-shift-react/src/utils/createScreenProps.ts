@@ -1,4 +1,4 @@
-import type { GameState, PlayerStats } from '../types/game';
+import type { GameState, PlayerStats, Passenger } from '../types/game';
 import { SCREENS } from '../data/constants';
 
 export const createScreenProps = (
@@ -19,6 +19,8 @@ export const createScreenProps = (
     continueToDestination: () => void;
     gameOver: (reason: string) => void;
     resetGame: () => void;
+    useItem?: (itemId: string) => void;
+    tradeItem?: (itemId: string, passenger: Passenger) => void;
   }
 ) => ({
   gameState,
@@ -38,5 +40,7 @@ export const createScreenProps = (
   onContinueToDestination: actions.continueToDestination,
   onGameOver: actions.gameOver,
   onResetAndStart: () => { actions.resetGame(); actions.startGame(); },
-  onResetAndShow: (screen: string) => { actions.resetGame(); actions.showScreen(screen); }
+  onResetAndShow: (screen: string) => { actions.resetGame(); actions.showScreen(screen); },
+  onUseItem: actions.useItem,
+  onTradeItem: actions.tradeItem
 });
