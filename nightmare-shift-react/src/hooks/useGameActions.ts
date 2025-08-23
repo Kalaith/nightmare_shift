@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { GameState } from '../types/game';
 import { GAME_PHASES } from '../data/constants';
+import { GAME_BALANCE } from '../constants/gameBalance';
 import { RouteService } from '../services/reputationService';
 import { PassengerService } from '../services/passengerService';
 import { gameData } from '../data/gameData';
@@ -101,7 +102,8 @@ export const useGameActions = ({
     }));
 
     // Handle supernatural encounters based on risk level
-    if (routeCosts.riskLevel > 2 && Math.random() < 0.3) {
+    if (routeCosts.riskLevel > GAME_BALANCE.RISK_LEVELS.SUPERNATURAL_THRESHOLD && 
+        Math.random() < GAME_BALANCE.PROBABILITIES.HIGH_RISK_ENCOUNTER) {
       console.log(`High risk route taken (${routeCosts.riskLevel}), supernatural encounter possible...`);
     }
 
@@ -146,7 +148,7 @@ export const useGameActions = ({
     }));
 
     // Add items to inventory
-    if (passenger.items && Math.random() < 0.4) {
+    if (passenger.items && Math.random() < GAME_BALANCE.PROBABILITIES.ITEM_DROP) {
       const randomItem = passenger.items[Math.floor(Math.random() * passenger.items.length)];
       setGameState(prev => ({ 
         ...prev, 

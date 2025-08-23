@@ -8,9 +8,9 @@ export interface Rule {
   conflictsWith?: number[];
   trigger?: string;
   violationMessage?: string;
-  condition?: (gameState: any, passenger: any) => boolean;
+  condition?: (gameState: GameState, passenger: Passenger) => boolean;
   conditionHint?: string;
-  checkViolation?: (gameState: any) => boolean;
+  checkViolation?: (gameState: GameState) => boolean;
   temporary?: boolean;
   duration?: number;
 }
@@ -64,13 +64,13 @@ export interface GameState {
   hiddenRules?: Rule[];
   inventory: InventoryItem[];
   currentPassenger: Passenger | null;
-  currentRide: any | null;
-  gamePhase: string;
+  currentRide: CurrentRide | null;
+  gamePhase: 'waiting' | 'rideRequest' | 'driving' | 'interaction' | 'gameOver' | 'success';
   usedPassengers: number[];
   shiftStartTime: number | null;
   sessionStartTime: number;
-  currentDialogue?: any;
-  currentDrivingPhase?: string;
+  currentDialogue?: Dialogue;
+  currentDrivingPhase?: 'pickup' | 'destination';
   currentLocation?: Location;
   difficultyLevel?: number;
   gameOverReason?: string;
@@ -81,7 +81,7 @@ export interface GameState {
   showBackstoryNotification?: BackstoryNotification;
   passengerBackstories?: Record<number, boolean>;
   relationshipTriggered?: number | null;
-  ruleConflicts?: any[];
+  ruleConflicts?: RuleConflict[];
   // New gameplay enhancement properties
   passengerReputation: Record<number, PassengerReputation>;
   minimumEarnings: number;
@@ -116,7 +116,7 @@ export interface PlayerStats {
   bestShiftRides: number;
   longestShiftMinutes: number;
   passengersEncountered: Set<number>;
-  rulesViolatedHistory: any[];
+  rulesViolatedHistory: Rule[];
   backstoriesUnlocked: Set<number>;
   legendaryPassengersEncountered: Set<number>;
   achievementsUnlocked: Set<string>;
@@ -147,10 +147,34 @@ export interface GameData {
   locations: Location[];
 }
 
+export interface RuleConflict {
+  rule1: Rule;
+  rule2: Rule;
+  conflictType: 'direct' | 'indirect' | 'conditional';
+  description: string;
+}
+
+export interface CurrentRide {
+  passenger: Passenger;
+  pickupLocation: Location;
+  destinationLocation: Location;
+  startTime: number;
+  estimatedDuration: number;
+  actualFare: number;
+  routeType: 'normal' | 'shortcut' | 'scenic' | 'police';
+}
+
+export interface Dialogue {
+  text: string;
+  speaker: 'passenger' | 'driver' | 'system';
+  timestamp: number;
+  type: 'normal' | 'supernatural' | 'rule_related' | 'backstory';
+}
+
 export interface GameEngineResult {
   visibleRules: Rule[];
   hiddenRules: Rule[];
-  conflicts?: any[];
+  conflicts?: RuleConflict[];
   difficultyLevel: number;
 }
 

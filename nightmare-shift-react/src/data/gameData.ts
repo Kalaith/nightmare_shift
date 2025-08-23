@@ -105,7 +105,7 @@ export const gameData: GameData = {
       id: 12,
       title: "The Counting Rule",
       description: "Never pick up more than 3 passengers with the same supernatural type",
-      difficulty: "expert" as any,
+      difficulty: "expert",
       type: "hidden",
       visible: false,
       violationMessage: "You've transported too many of the same supernatural entities. They're drawn to patterns..."
@@ -114,7 +114,7 @@ export const gameData: GameData = {
       id: 13,
       title: "The Time Limit",
       description: "No single ride should take longer than 45 minutes",
-      difficulty: "expert" as any,
+      difficulty: "expert",
       type: "hidden",
       visible: false,
       violationMessage: "You took too long with that passenger. Time has consequences in this job..."
@@ -123,7 +123,7 @@ export const gameData: GameData = {
       id: 14,
       title: "The Silence Between",
       description: "Never speak during the last 5 minutes of your shift",
-      difficulty: "expert" as any,
+      difficulty: "expert",
       type: "hidden",
       visible: false,
       violationMessage: "Words spoken in the final moments carry too much weight. You should have stayed quiet..."
@@ -403,7 +403,7 @@ export const gameData: GameData = {
           id: 99,
           title: "Mayor's Decree",
           description: "Follow all commands from city officials without question",
-          difficulty: "nightmare" as any,
+          difficulty: "nightmare",
           temporary: true,
           duration: 3
         }

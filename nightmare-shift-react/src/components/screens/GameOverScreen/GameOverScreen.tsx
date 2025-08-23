@@ -1,7 +1,8 @@
 import React from 'react';
+import type { GameState } from '../../../types/game';
 
 interface GameOverScreenProps {
-  gameState: any;
+  gameState: GameState;
   onTryAgain: () => void;
   onShowLeaderboard: () => void;
   onShowMainMenu: () => void;

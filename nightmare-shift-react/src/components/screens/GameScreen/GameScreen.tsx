@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import type { GameState } from '../../../types/game';
 import { RouteService } from '../../../services/reputationService';
 import { gameData } from '../../../data/gameData';
+import { GAME_BALANCE } from '../../../constants/gameBalance';
+import { GameResultHelpers } from '../../../utils/errorHandling';
 
 interface GameScreenProps {
   gameState: GameState;
@@ -31,9 +33,12 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const [showQuickRules, setShowQuickRules] = useState(false);
 
   const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}:${mins.toString().padStart(2, '0')}`;
+    const hours = Math.floor(minutes / GAME_BALANCE.TIME_FORMATTING.MINUTES_PER_HOUR);
+    const mins = minutes % GAME_BALANCE.TIME_FORMATTING.MINUTES_PER_HOUR;
+    return `${hours}:${mins.toString().padStart(
+      GAME_BALANCE.TIME_FORMATTING.PAD_START_LENGTH, 
+      GAME_BALANCE.TIME_FORMATTING.PAD_CHARACTER
+    )}`;
   };
 
   const handleEndShiftEarly = () => {
@@ -146,8 +151,25 @@ const GameScreen: React.FC<GameScreenProps> = ({
 
           {gameState.gamePhase === 'driving' && (() => {
             const passengerRiskLevel = gameState.currentPassenger ? 
-              gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)?.riskLevel || 1 : 1;
-            const routeOptions = RouteService.getRouteOptions(gameState.fuel, gameState.timeRemaining, passengerRiskLevel);
+              gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)?.riskLevel || GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL : GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL;
+            const routeOptionsResult = RouteService.getRouteOptions(gameState.fuel, gameState.timeRemaining, passengerRiskLevel);
+            const routeOptions = GameResultHelpers.unwrapOr(routeOptionsResult, []);
+            
+            // If we got an error but have a fallback, show an error message
+            if (!routeOptionsResult.success && routeOptions.length === 0) {
+              return (
+                <div className="bg-red-800/50 border border-red-600 rounded-lg p-6 text-center">
+                  <h2 className="text-2xl font-bold text-red-300 mb-4">⚠️ Route Error</h2>
+                  <p className="text-gray-300 mb-4">Unable to calculate route options. Try ending your shift.</p>
+                  <button 
+                    onClick={() => onGameOver('Route calculation failed')}
+                    className="bg-red-600 hover:bg-red-500 py-2 px-4 rounded transition-colors"
+                  >
+                    End Shift
+                  </button>
+                </div>
+              );
+            }
             
             return (
               <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-6">

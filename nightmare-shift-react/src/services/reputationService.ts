@@ -1,5 +1,7 @@
 import type { PassengerReputation, RouteChoice } from '../types/game';
 import { GAME_CONSTANTS } from '../data/constants';
+import { GAME_BALANCE, BalanceHelpers } from '../constants/gameBalance';
+import { ErrorHandling, type GameResult } from '../utils/errorHandling';
 
 export class ReputationService {
   static initializeReputation(): Record<number, PassengerReputation> {
@@ -40,11 +42,12 @@ export class ReputationService {
     // Calculate relationship level based on interaction history
     const positiveRatio = reputation.positiveChoices / reputation.interactions;
     
-    if (positiveRatio >= 0.8 && reputation.interactions >= 3) {
+    if (positiveRatio >= GAME_BALANCE.REPUTATION.THRESHOLDS.TRUSTED_RATIO && 
+        reputation.interactions >= GAME_BALANCE.REPUTATION.THRESHOLDS.MINIMUM_INTERACTIONS_FOR_TRUSTED) {
       reputation.relationshipLevel = 'trusted';
-    } else if (positiveRatio >= 0.6) {
+    } else if (positiveRatio >= GAME_BALANCE.REPUTATION.THRESHOLDS.FRIENDLY_RATIO) {
       reputation.relationshipLevel = 'friendly';
-    } else if (positiveRatio <= 0.3) {
+    } else if (positiveRatio <= GAME_BALANCE.REPUTATION.THRESHOLDS.HOSTILE_RATIO) {
       reputation.relationshipLevel = 'hostile';
     } else {
       reputation.relationshipLevel = 'neutral';
@@ -61,26 +64,26 @@ export class ReputationService {
     switch (reputation.relationshipLevel) {
       case 'trusted':
         return {
-          fareMultiplier: 1.5,
-          riskModifier: -1,
+          fareMultiplier: GAME_BALANCE.REPUTATION.MULTIPLIERS.TRUSTED_FARE,
+          riskModifier: GAME_BALANCE.REPUTATION.RISK_MODIFIERS.TRUSTED_MODIFIER,
           specialOptions: ['protective_charm', 'safe_route_info']
         };
       case 'friendly':
         return {
-          fareMultiplier: 1.2,
-          riskModifier: 0,
+          fareMultiplier: GAME_BALANCE.REPUTATION.MULTIPLIERS.FRIENDLY_FARE,
+          riskModifier: GAME_BALANCE.REPUTATION.RISK_MODIFIERS.FRIENDLY_MODIFIER,
           specialOptions: ['warning_about_dangers']
         };
       case 'hostile':
         return {
-          fareMultiplier: 0.7,
-          riskModifier: 2,
+          fareMultiplier: GAME_BALANCE.REPUTATION.MULTIPLIERS.HOSTILE_FARE,
+          riskModifier: GAME_BALANCE.REPUTATION.RISK_MODIFIERS.HOSTILE_MODIFIER,
           specialOptions: ['makes_demands', 'threatens_driver']
         };
       default:
         return {
-          fareMultiplier: 1.0,
-          riskModifier: 0,
+          fareMultiplier: GAME_BALANCE.REPUTATION.MULTIPLIERS.DEFAULT_FARE,
+          riskModifier: GAME_BALANCE.REPUTATION.RISK_MODIFIERS.DEFAULT_MODIFIER,
           specialOptions: []
         };
     }
@@ -120,13 +123,13 @@ export class RouteService {
     }
 
     // Add some randomness and passenger risk influence
-    const fuelVariation = Math.floor(Math.random() * 6) - 3; // ±3 fuel
-    const timeVariation = Math.floor(Math.random() * 10) - 5; // ±5 minutes
+    const fuelVariation = BalanceHelpers.getFuelCostWithVariation(baseFuelCost) - baseFuelCost;
+    const timeVariation = BalanceHelpers.getTimeCostWithVariation(baseTimeCost) - baseTimeCost;
     
     return {
-      fuelCost: Math.max(5, baseFuelCost + fuelVariation),
-      timeCost: Math.max(5, baseTimeCost + timeVariation),
-      riskLevel: Math.max(0, baseRiskLevel + (passengerRiskLevel - 1))
+      fuelCost: Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST, baseFuelCost + fuelVariation),
+      timeCost: Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST, baseTimeCost + timeVariation),
+      riskLevel: Math.max(GAME_BALANCE.RISK_LEVELS.SAFE, baseRiskLevel + (passengerRiskLevel - GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL))
     };
   }
 
@@ -134,7 +137,7 @@ export class RouteService {
     currentFuel: number, 
     currentTime: number,
     passengerRiskLevel: number = 1
-  ): Array<{
+  ): GameResult<Array<{
     type: 'normal' | 'shortcut' | 'scenic' | 'police';
     name: string;
     description: string;
@@ -143,49 +146,59 @@ export class RouteService {
     riskLevel: number;
     available: boolean;
     bonusInfo?: string;
-  }> {
-    const routes = [
-      {
-        type: 'normal' as const,
-        name: 'Take Normal Route',
-        description: 'Safe and reliable, follows GPS exactly'
-      },
-      {
-        type: 'shortcut' as const,
-        name: 'Take Shortcut',
-        description: 'Faster and saves fuel, but higher risk of supernatural encounters'
-      },
-      {
-        type: 'scenic' as const,
-        name: 'Take Scenic Route', 
-        description: 'Longer route through beautiful areas, passenger pays bonus'
-      },
-      {
-        type: 'police' as const,
-        name: 'Police-Patrolled Route',
-        description: 'Safest option, but uses more fuel and time'
-      }
-    ];
+  }>> {
+    return ErrorHandling.wrap(
+      () => {
+        if (currentFuel < 0 || currentTime < 0) {
+          throw ErrorHandling.serviceError('RouteService', 'getRouteOptions', 'Invalid fuel or time values');
+        }
 
-    return routes.map(route => {
-      const costs = this.calculateRouteCosts(route.type, passengerRiskLevel);
-      const available = currentFuel >= costs.fuelCost && currentTime >= costs.timeCost;
-      
-      let bonusInfo = '';
-      if (route.type === 'scenic') {
-        bonusInfo = 'Passenger pays +$10 bonus';
-      } else if (route.type === 'police') {
-        bonusInfo = 'No supernatural encounters';
-      } else if (route.type === 'shortcut') {
-        bonusInfo = 'May trigger hidden rules';
-      }
+        const routes = [
+          {
+            type: 'normal' as const,
+            name: 'Take Normal Route',
+            description: 'Safe and reliable, follows GPS exactly'
+          },
+          {
+            type: 'shortcut' as const,
+            name: 'Take Shortcut',
+            description: 'Faster and saves fuel, but higher risk of supernatural encounters'
+          },
+          {
+            type: 'scenic' as const,
+            name: 'Take Scenic Route', 
+            description: 'Longer route through beautiful areas, passenger pays bonus'
+          },
+          {
+            type: 'police' as const,
+            name: 'Police-Patrolled Route',
+            description: 'Safest option, but uses more fuel and time'
+          }
+        ];
 
-      return {
-        ...route,
-        ...costs,
-        available,
-        bonusInfo
-      };
-    });
+        return routes.map(route => {
+          const costs = this.calculateRouteCosts(route.type, passengerRiskLevel);
+          const available = currentFuel >= costs.fuelCost && currentTime >= costs.timeCost;
+          
+          let bonusInfo = '';
+          if (route.type === 'scenic') {
+            bonusInfo = 'Passenger pays +$10 bonus';
+          } else if (route.type === 'police') {
+            bonusInfo = 'No supernatural encounters';
+          } else if (route.type === 'shortcut') {
+            bonusInfo = 'May trigger hidden rules';
+          }
+
+          return {
+            ...route,
+            ...costs,
+            available,
+            bonusInfo
+          };
+        });
+      },
+      'route_options_failed',
+      [] // Empty array as fallback
+    );
   }
 }

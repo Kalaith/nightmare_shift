@@ -1,11 +1,21 @@
-import type { PlayerStats } from '../types/game';
+import type { PlayerStats, GameState } from '../types/game';
+
+export interface ShiftData {
+  timeSpent: number;
+  ridesCompleted: number;
+  earnings: number;
+  rulesViolated: number;
+  score: number;
+  survived: boolean;
+  difficultyLevel: number;
+}
 
 export const createStatsUpdater = (
   playerStats: PlayerStats, 
   updatePlayerStats: (updates: Partial<PlayerStats>) => void,
-  addToLeaderboard: (data: any) => void
+  addToLeaderboard: (data: ShiftData) => void
 ) => {
-  return (successful: boolean, shiftData: any) => {
+  return (successful: boolean, shiftData: ShiftData) => {
     const baseUpdates = {
       totalTimePlayedMinutes: playerStats.totalTimePlayedMinutes + shiftData.timeSpent,
       totalRidesCompleted: playerStats.totalRidesCompleted + shiftData.ridesCompleted,

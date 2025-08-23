@@ -1,5 +1,5 @@
 import React from 'react';
-import type { GameState, PlayerStats, LeaderboardEntry } from '../types/game';
+import type { GameState, PlayerStats } from '../types/game';
 import { SCREENS } from '../data/constants';
 import { LeaderboardService } from '../services/storageService';
 import LoadingScreen from './screens/LoadingScreen/LoadingScreen';

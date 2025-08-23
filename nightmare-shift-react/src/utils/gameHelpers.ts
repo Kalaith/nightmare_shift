@@ -79,7 +79,7 @@ export const lerp = (start: number, end: number, factor: number): number => {
   return start + (end - start) * clamp(factor, 0, 1);
 };
 
-export const debounce = <T extends (...args: any[]) => any>(func: T, delay: number) => {
+export const debounce = <T extends (...args: unknown[]) => unknown>(func: T, delay: number) => {
   let timeoutId: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);

@@ -1,6 +1,5 @@
 import { gameData } from '../data/gameData';
-import { RARITY_WEIGHTS, GAME_CONSTANTS } from '../data/constants';
-import type { Rule, PlayerStats, GameState, Passenger, GameEngineResult, HiddenRuleViolation } from '../types/game';
+import type { Rule, PlayerStats, GameState, GameEngineResult, HiddenRuleViolation } from '../types/game';
 
 export class GameEngine {
   static calculatePlayerExperience(playerStats: PlayerStats): number {
@@ -72,7 +71,7 @@ export class GameEngine {
     }
   }
 
-  private static isHiddenRuleViolated(rule: Rule, gameState: GameState, passenger: Passenger): boolean {
+  private static isHiddenRuleViolated(_rule: Rule, _gameState: GameState, _passenger: Passenger): boolean {
     // Simplified hidden rule checking
     return false;
   }

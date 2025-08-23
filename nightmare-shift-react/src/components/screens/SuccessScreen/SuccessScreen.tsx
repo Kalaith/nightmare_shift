@@ -1,7 +1,8 @@
 import React from 'react';
+import type { GameState } from '../../../types/game';
 
 interface SuccessScreenProps {
-  gameState: any;
+  gameState: GameState;
   onStartNextShift: () => void;
   onShowLeaderboard: () => void;
   onShowMainMenu: () => void;
@@ -37,7 +38,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({
         {gameState.inventory && gameState.inventory.length > 0 && (
           <div className="mb-6">
             <h4 className="text-teal-300 mb-3">Items Found:</h4>
-            {gameState.inventory.map((item: any, index: number) => (
+            {gameState.inventory.map((item, index: number) => (
               <p key={index} className="text-gray-300">• {item.name} (from {item.source})</p>
             ))}
           </div>

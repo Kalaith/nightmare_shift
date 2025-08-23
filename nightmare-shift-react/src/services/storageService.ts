@@ -2,7 +2,7 @@ import { STORAGE_KEYS } from '../data/constants';
 import type { PlayerStats, LeaderboardEntry, SaveData } from '../types/game';
 
 const LocalStorage = {
-  save: (key: string, data: any): void => {
+  save: (key: string, data: unknown): void => {
     try {
       localStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
