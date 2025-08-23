@@ -1,0 +1,116 @@
+/* InteractionState specific styles */
+.interactionCard {
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+}
+
+.interactionHeader {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.interactionTitle {
+  color: #14b8a6;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.dialogueBox {
+  background-color: #4b5563;
+  border: 1px solid #4b5563;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dialogueText {
+  color: #e5e7eb;
+  font-style: italic;
+}
+
+.promptText {
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.choiceList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.choiceButton {
+  width: 100%;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  text-align: left;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.choiceSafe {
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  color: #e5e7eb;
+}
+
+.choiceSafe:hover {
+  background-color: #4b5563;
+  border-color: #14b8a6;
+}
+
+.choiceDangerous {
+  background-color: #374151;
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  color: #e5e7eb;
+}
+
+.choiceDangerous:hover {
+  background-color: rgba(248, 113, 113, 0.1);
+  border-color: #f87171;
+}
+
+.choiceRisky {
+  background-color: #374151;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  color: #e5e7eb;
+}
+
+.choiceRisky:hover {
+  background-color: rgba(251, 191, 36, 0.1);
+  border-color: #fbbf24;
+}
+
+.choiceIndicator {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.indicatorSafe {
+  color: #10b981;
+}
+
+.indicatorDangerous {
+  color: #f87171;
+}
+
+.indicatorRisky {
+  color: #fbbf24;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .interactionCard {
+    padding: 1rem;
+  }
+  
+  .choiceButton {
+    padding: 0.75rem;
+  }
+  
+  .dialogueBox {
+    padding: 0.75rem;
+  }
+}

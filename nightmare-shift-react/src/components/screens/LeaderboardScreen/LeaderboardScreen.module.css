@@ -1,0 +1,91 @@
+/* LeaderboardScreen specific styles */
+.tabNavigation {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background-color: #374151;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.tabButtonActive {
+  background-color: #14b8a6;
+  color: #374151;
+}
+
+.tabButtonInactive {
+  color: #9ca3af;
+  background-color: transparent;
+}
+
+.tabButtonInactive:hover {
+  color: #e5e7eb;
+  background-color: #4b5563;
+}
+
+.leaderboardCard {
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.leaderboardEntry {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #4b5563;
+}
+
+.leaderboardEntry:last-child {
+  border-bottom: none;
+}
+
+.rankBadge {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.rankGold {
+  background-color: #fbbf24;
+  color: #111827;
+}
+
+.rankSilver {
+  background-color: #9ca3af;
+  color: #111827;
+}
+
+.rankBronze {
+  background-color: #fb923c;
+  color: #111827;
+}
+
+.rankDefault {
+  background-color: #4b5563;
+  color: #d1d5db;
+}
+
+.emptyState {
+  padding: 2rem;
+  text-align: center;
+  color: #9ca3af;
+}

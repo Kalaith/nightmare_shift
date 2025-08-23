@@ -1,0 +1,77 @@
+/* DrivingState specific styles */
+.drivingCard {
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+}
+
+.drivingHeader {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.drivingTitle {
+  color: #14b8a6;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.locationDescription {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.choiceButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.choiceButton {
+  width: 100%;
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  text-align: left;
+  color: #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.choiceButton:hover {
+  background-color: #4b5563;
+  border-color: #14b8a6;
+}
+
+.choiceButtonDangerous {
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+.choiceButtonDangerous:hover {
+  background-color: rgba(248, 113, 113, 0.1);
+  border-color: #f87171;
+}
+
+.fuelWarning {
+  color: #f87171;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .drivingCard {
+    padding: 1rem;
+  }
+  
+  .choiceButton {
+    padding: 0.75rem;
+  }
+  
+  .drivingTitle {
+    font-size: 1.125rem;
+  }
+}

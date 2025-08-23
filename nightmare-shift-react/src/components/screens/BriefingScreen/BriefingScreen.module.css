@@ -1,0 +1,105 @@
+/* BriefingScreen specific styles */
+.ruleCard {
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.ruleCardConditional {
+  border-color: rgba(251, 191, 36, 0.5);
+}
+
+.ruleCardConflicting {
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+.ruleTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #14b8a6;
+  margin-bottom: 0.5rem;
+}
+
+.ruleType {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+.ruleTypeConditional {
+  color: #f59e0b;
+  background-color: rgba(251, 191, 36, 0.1);
+}
+
+.ruleTypeConflicting {
+  color: #ef4444;
+  background-color: rgba(248, 113, 113, 0.1);
+}
+
+.ruleDescription {
+  color: #e5e7eb;
+  margin-bottom: 0.5rem;
+}
+
+.ruleHint {
+  color: #f59e0b;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.conflictWarning {
+  background-color: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.conflictTitle {
+  color: #ef4444;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.conflictDescription {
+  color: #fca5a5;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.difficultyInfo {
+  text-align: center;
+  margin-top: 1rem;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.warningText {
+  color: #ef4444;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.startButton {
+  width: 100%;
+  background-color: #14b8a6;
+  color: #374151;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.startButton:hover {
+  background-color: #0d9488;
+}

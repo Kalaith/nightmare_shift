@@ -31,7 +31,8 @@
       "Bash(curl:*)",
       "Bash(taskkill:*)",
       "Bash(npm create:*)",
-      "Bash(npx tailwindcss init:*)"
+      "Bash(npx tailwindcss init:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
