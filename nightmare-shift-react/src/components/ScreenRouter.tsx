@@ -30,6 +30,9 @@ interface ScreenRouterProps {
   onResetAndShow: (screen: string) => void;
   onUseItem?: (itemId: string) => void;
   onTradeItem?: (itemId: string, passenger: Passenger) => void;
+  onRefuelFull?: () => void;
+  onRefuelPartial?: () => void;
+  onContinueFromDropOff?: () => void;
 }
 
 const ScreenRouter: React.FC<ScreenRouterProps> = ({
@@ -52,7 +55,10 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
   onResetAndStart,
   onResetAndShow,
   onUseItem,
-  onTradeItem
+  onTradeItem,
+  onRefuelFull,
+  onRefuelPartial,
+  onContinueFromDropOff
 }) => {
   switch (gameState.currentScreen) {
     case SCREENS.LOADING:
@@ -96,6 +102,9 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
           onGameOver={onGameOver}
           onUseItem={onUseItem}
           onTradeItem={onTradeItem}
+          onRefuelFull={onRefuelFull}
+          onRefuelPartial={onRefuelPartial}
+          onContinueFromDropOff={onContinueFromDropOff}
         />
       );
 

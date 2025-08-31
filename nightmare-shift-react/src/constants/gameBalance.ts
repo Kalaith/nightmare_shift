@@ -15,7 +15,11 @@ export const GAME_BALANCE = {
     LOW_FUEL_WARNING: 20,
     CRITICAL_FUEL: 10,
     EMPTY_TANK: 0,
-    FUEL_CHECK_MINIMUM: 20, // Minimum fuel needed to accept rides
+    FUEL_CHECK_MINIMUM: 5, // Minimum fuel needed to accept rides
+  },
+
+  FUEL_COSTS: {
+    PER_PERCENT: 0.5, // $0.50 per fuel percentage point
   },
 
   // ===== TIMING SYSTEM =====

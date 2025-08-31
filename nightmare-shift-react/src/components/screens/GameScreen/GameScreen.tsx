@@ -6,6 +6,9 @@ import { GAME_BALANCE } from '../../../constants/gameBalance';
 import { GameResultHelpers } from '../../../utils/errorHandling';
 import InventoryModal from '../../game/InventoryModal/InventoryModal';
 import WeatherDisplay from '../../game/WeatherDisplay/WeatherDisplay';
+import WaitingState from '../../game/WaitingState/WaitingState';
+import DropOffState from '../../game/DropOffState/DropOffState';
+import Portrait from '../../common/Portrait/Portrait';
 
 interface GameScreenProps {
   gameState: GameState;
@@ -20,6 +23,9 @@ interface GameScreenProps {
   onGameOver: (reason: string) => void;
   onUseItem?: (itemId: string) => void;
   onTradeItem?: (itemId: string, passenger: Passenger) => void;
+  onRefuelFull?: () => void;
+  onRefuelPartial?: () => void;
+  onContinueFromDropOff?: () => void;
 }
 
 const GameScreen: React.FC<GameScreenProps> = ({
@@ -34,7 +40,10 @@ const GameScreen: React.FC<GameScreenProps> = ({
   onContinueToDestination,
   onGameOver,
   onUseItem,
-  onTradeItem
+  onTradeItem,
+  onRefuelFull,
+  onRefuelPartial,
+  onContinueFromDropOff
 }) => {
   const [showQuickRules, setShowQuickRules] = useState(false);
 
@@ -123,23 +132,25 @@ const GameScreen: React.FC<GameScreenProps> = ({
         {/* Game Content */}
         <div className="max-w-4xl mx-auto">
           {gameState.gamePhase === 'waiting' && (
-            <div className="text-center py-12">
-              <h2 className="text-3xl font-bold text-teal-300 mb-4">🚗 Waiting for passengers...</h2>
-              <p className="text-gray-300 mb-6">Your taxi is parked under a flickering streetlight</p>
-              <button 
-                onClick={() => setShowInventory(!showInventory)}
-                className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition-colors"
-              >
-                🎒 Inventory ({gameState.inventory.length})
-              </button>
-            </div>
+            <WaitingState
+              gameState={gameState}
+              showInventory={showInventory}
+              onToggleInventory={() => setShowInventory(!showInventory)}
+              onRefuelFull={onRefuelFull || (() => {})}
+              onRefuelPartial={onRefuelPartial || (() => {})}
+            />
           )}
 
           {gameState.gamePhase === 'rideRequest' && gameState.currentPassenger && (
             <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-6">
               <h2 className="text-2xl font-bold text-teal-300 mb-4">📱 New Ride Request</h2>
               <div className="flex items-start gap-4 mb-6">
-                <span className="text-4xl">{gameState.currentPassenger.emoji}</span>
+                <Portrait 
+                  passengerName={gameState.currentPassenger.name}
+                  emoji={gameState.currentPassenger.emoji}
+                  size="large"
+                  className="flex-shrink-0"
+                />
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold text-white mb-2">{gameState.currentPassenger.name}</h3>
                   <p className="text-gray-300">From: {gameState.currentPassenger.pickup}</p>
@@ -247,6 +258,17 @@ const GameScreen: React.FC<GameScreenProps> = ({
                 Continue to Destination
               </button>
             </div>
+          )}
+
+          {gameState.gamePhase === 'dropOff' && gameState.lastRideCompletion && (
+            <DropOffState
+              gameState={gameState}
+              completedPassenger={gameState.lastRideCompletion.passenger}
+              fareEarned={gameState.lastRideCompletion.fareEarned}
+              itemsReceived={gameState.lastRideCompletion.itemsReceived}
+              backstoryUnlocked={gameState.lastRideCompletion.backstoryUnlocked}
+              onContinue={onContinueFromDropOff || (() => {})}
+            />
           )}
         </div>
       </div>

@@ -30,7 +30,10 @@ export const useApp = () => {
     continueToDestination,
     useItem,
     tradeItem,
-    processItemEffects
+    processItemEffects: _processItemEffects,
+    refuelFull,
+    refuelPartial,
+    continueFromDropOff
   } = useGameActions({
     gameState,
     setGameState: updateGameState,
@@ -64,7 +67,10 @@ export const useApp = () => {
       gameOver,
       resetGame,
       useItem,
-      tradeItem
+      tradeItem,
+      refuelFull,
+      refuelPartial,
+      continueFromDropOff
     }
   );
 

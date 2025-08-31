@@ -206,10 +206,30 @@ export const gameData: GameData = {
       fare: 15,
       rarity: "common",
       items: ["old locket", "withered flowers"],
-      dialogue: ["It's so cold tonight, isn't it?", "I haven't been home in so long...", "Thank you for the ride, dear"],
+      dialogue: ["It's so cold tonight, isn't it?", "I haven't been home in so long...", "Thank you for the ride, dear", "Why won't you look at me, dear?"],
       relationships: [],
       backstoryUnlocked: false,
-      backstoryDetails: "Mrs. Chen was a regular taxi passenger for 40 years before her accident on this very route..."
+      backstoryDetails: "Mrs. Chen was a regular taxi passenger for 40 years before her accident on this very route...",
+      tells: [
+        {
+          type: 'verbal',
+          intensity: 'moderate',
+          description: "Asks why you won't make eye contact",
+          triggerPhrase: "Why won't you look at me",
+          reliability: 0.8
+        },
+        {
+          type: 'behavioral',
+          intensity: 'subtle',
+          description: "Fidgets with old locket when ignored",
+          animationCue: "fidget_locket",
+          reliability: 0.6
+        }
+      ],
+      guidelineExceptions: ["eye_contact_lonely"],
+      deceptionLevel: 0.1,
+      stressLevel: 0.7,
+      trustRequired: 0.3
     },
     {
       id: 2,
@@ -240,10 +260,30 @@ export const gameData: GameData = {
       fare: 28,
       rarity: "common",
       items: ["muddy branch", "torn fabric", "cash with soil on it"],
-      dialogue: ["I need to get back to civilization", "Stay away from the woods tonight", "They might still be following"],
+      dialogue: ["I need to get back to civilization", "Stay away from the woods tonight", "They might still be following", "Don't take the highway, please - they use the main roads"],
       relationships: [8],
       backstoryUnlocked: false,
-      backstoryDetails: "Sarah was part of a hiking group that went missing three years ago. She was the only one who 'returned'..."
+      backstoryDetails: "Sarah was part of a hiking group that went missing three years ago. She was the only one who 'returned'...",
+      tells: [
+        {
+          type: 'verbal',
+          intensity: 'obvious',
+          description: "Warns against taking main roads",
+          triggerPhrase: "Don't take",
+          reliability: 0.9
+        },
+        {
+          type: 'behavioral',
+          intensity: 'moderate',
+          description: "Shows visible panic when approaching highway entrances",
+          animationCue: "panic_approach",
+          reliability: 0.8
+        }
+      ],
+      guidelineExceptions: ["gps_passenger_warning"],
+      deceptionLevel: 0.2,
+      stressLevel: 0.8,
+      trustRequired: 0.4
     },
     {
       id: 4,
@@ -257,10 +297,30 @@ export const gameData: GameData = {
       fare: 35,
       rarity: "uncommon",
       items: ["antique syringe", "prescription pad", "surgical tools"],
-      dialogue: ["House calls are so rare these days", "I can help with any pain you're feeling", "Medicine has come so far since my day"],
+      dialogue: ["House calls are so rare these days", "I can help with any pain you're feeling", "Medicine has come so far since my day", "Please, I need to stop - someone might need medical attention!"],
       relationships: [2, 9],
       backstoryUnlocked: false,
-      backstoryDetails: "Dr. Hollow lost his license in 1987 for conducting unauthorized experiments on terminal patients..."
+      backstoryDetails: "Dr. Hollow lost his license in 1987 for conducting unauthorized experiments on terminal patients...",
+      tells: [
+        {
+          type: 'verbal',
+          intensity: 'obvious',
+          description: "Insists on stopping to help with medical emergencies",
+          triggerPhrase: "need to stop",
+          reliability: 0.8
+        },
+        {
+          type: 'behavioral',
+          intensity: 'moderate',
+          description: "Constantly checking medical equipment in bag",
+          animationCue: "check_medical_bag",
+          reliability: 0.7
+        }
+      ],
+      guidelineExceptions: ["stop_emergency_need"],
+      deceptionLevel: 0.3,
+      stressLevel: 0.5,
+      trustRequired: 0.6
     },
     {
       id: 5,
@@ -296,10 +356,30 @@ export const gameData: GameData = {
       fare: 12,
       rarity: "common",
       items: ["torn homework", "old lunch box", "class photo"],
-      dialogue: ["Is mommy waiting for me?", "I don't like the dark", "Teacher said I should go straight home"],
+      dialogue: ["Is mommy waiting for me?", "I don't like the dark", "Teacher said I should go straight home", "Why won't anyone look at me? Am I being bad?"],
       relationships: [],
       backstoryUnlocked: false,
-      backstoryDetails: "Tommy went missing from school in 1982. His backpack was found, but he never was..."
+      backstoryDetails: "Tommy went missing from school in 1982. His backpack was found, but he never was...",
+      tells: [
+        {
+          type: 'verbal',
+          intensity: 'obvious',
+          description: "Asks why no one will look at him",
+          triggerPhrase: "Why won't anyone look at me",
+          reliability: 0.9
+        },
+        {
+          type: 'behavioral',
+          intensity: 'moderate',
+          description: "Voice trembles with increasing distress",
+          audioCue: "child_distress",
+          reliability: 0.7
+        }
+      ],
+      guidelineExceptions: ["eye_contact_lonely"],
+      deceptionLevel: 0.0,
+      stressLevel: 0.6,
+      trustRequired: 0.2
     },
     {
       id: 7,
@@ -313,10 +393,38 @@ export const gameData: GameData = {
       fare: 30,
       rarity: "uncommon",
       items: ["vintage lipstick", "burned dance card", "pearl necklace"],
-      dialogue: ["The music never stops playing in my head", "I had the most wonderful audition tonight", "Do you know any Glenn Miller?"],
+      dialogue: ["The music never stops playing in my head", "I had the most wonderful audition tonight", "Do you know any Glenn Miller?", "Please, I can't breathe - there's too much smoke in here!", "Could you open a window? The air is so thick..."],
       relationships: [12],
       backstoryUnlocked: false,
-      backstoryDetails: "Elena was the star performer at the Moonlight Club before the fire of 1943 claimed 30 lives..."
+      backstoryDetails: "Elena was the star performer at the Moonlight Club before the fire of 1943 claimed 30 lives...",
+      tells: [
+        {
+          type: 'verbal',
+          intensity: 'obvious',
+          description: "Complains about smoke and thick air",
+          triggerPhrase: "can't breathe",
+          reliability: 0.85
+        },
+        {
+          type: 'behavioral',
+          intensity: 'obvious',
+          description: "Coughing and gasping, touching throat frequently",
+          animationCue: "fire_victim_cough",
+          audioCue: "distressed_breathing",
+          reliability: 0.9
+        },
+        {
+          type: 'behavioral',
+          intensity: 'moderate',
+          description: "Panics when looking at closed windows",
+          animationCue: "claustrophobic_panic",
+          reliability: 0.7
+        }
+      ],
+      guidelineExceptions: ["windows_suffocation"],
+      deceptionLevel: 0.0,
+      stressLevel: 0.7,
+      trustRequired: 0.3
     },
     {
       id: 8,
@@ -330,10 +438,37 @@ export const gameData: GameData = {
       fare: 20,
       rarity: "common",
       items: ["torn running shoe", "strange claw marks on clothes", "broken GPS watch"],
-      dialogue: ["Did you see that behind us?", "We need to go faster!", "I should have listened to the locals"],
+      dialogue: ["Did you see that behind us?", "We need to go faster!", "I should have listened to the locals", "Talk to me, please - the silence is making me paranoid!", "We need to take a shortcut - they know the main roads!"],
       relationships: [3],
       backstoryUnlocked: false,
-      backstoryDetails: "Marcus was training for a marathon when he took a wrong turn into the old growth forest..."
+      backstoryDetails: "Marcus was training for a marathon when he took a wrong turn into the old growth forest...",
+      tells: [
+        {
+          type: 'verbal',
+          intensity: 'obvious',
+          description: "Begs for conversation to calm paranoia",
+          triggerPhrase: "Talk to me",
+          reliability: 0.85
+        },
+        {
+          type: 'behavioral',
+          intensity: 'moderate',
+          description: "Constantly looking over shoulder with terror",
+          animationCue: "paranoid_looking",
+          reliability: 0.8
+        },
+        {
+          type: 'verbal',
+          intensity: 'obvious',
+          description: "Urgently requests shortcuts to avoid main roads",
+          triggerPhrase: "take a shortcut",
+          reliability: 0.9
+        }
+      ],
+      guidelineExceptions: ["speak_nervous_passenger", "shortcut_time_critical"],
+      deceptionLevel: 0.1,
+      stressLevel: 0.9,
+      trustRequired: 0.3
     },
     {
       id: 9,
@@ -347,10 +482,37 @@ export const gameData: GameData = {
       fare: 25,
       rarity: "common",
       items: ["medical clipboard", "broken stethoscope", "guilt-stained badge"],
-      dialogue: ["Another long shift ending", "Some mistakes you can never take back", "The patients keep calling my name"],
+      dialogue: ["Another long shift ending", "Some mistakes you can never take back", "The patients keep calling my name", "Please, just talk to me - I can't handle the silence right now", "I need to stop - I feel sick, really sick"],
       relationships: [4],
       backstoryUnlocked: false,
-      backstoryDetails: "Catherine accidentally administered the wrong medication to a patient during a 36-hour shift..."
+      backstoryDetails: "Catherine accidentally administered the wrong medication to a patient during a 36-hour shift...",
+      tells: [
+        {
+          type: 'verbal',
+          intensity: 'obvious',
+          description: "Desperately asks for conversation to escape guilt",
+          triggerPhrase: "just talk to me",
+          reliability: 0.8
+        },
+        {
+          type: 'behavioral',
+          intensity: 'obvious',
+          description: "Shows signs of severe nausea and distress",
+          animationCue: "nausea_distress",
+          reliability: 0.9
+        },
+        {
+          type: 'behavioral',
+          intensity: 'moderate',
+          description: "Clutching medical clipboard with trembling hands",
+          animationCue: "trembling_clipboard",
+          reliability: 0.7
+        }
+      ],
+      guidelineExceptions: ["speak_nervous_passenger", "stop_emergency_need"],
+      deceptionLevel: 0.1,
+      stressLevel: 0.8,
+      trustRequired: 0.4
     },
     {
       id: 10,

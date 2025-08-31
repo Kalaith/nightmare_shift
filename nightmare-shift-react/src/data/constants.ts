@@ -13,7 +13,7 @@ export const GAME_CONSTANTS: GameConstants = {
   SURVIVAL_BONUS: 50,
   BACKSTORY_UNLOCK_FIRST: 0.2,
   BACKSTORY_UNLOCK_REPEAT: 0.5,
-  MINIMUM_EARNINGS: 120,
+  MINIMUM_EARNINGS: 80,
   // Route fuel costs
   FUEL_COST_NORMAL: 15,
   FUEL_COST_SHORTCUT: 8,
@@ -50,5 +50,6 @@ export const GAME_PHASES: GamePhases = {
   WAITING: 'waiting',
   RIDE_REQUEST: 'rideRequest',
   DRIVING: 'driving',
-  INTERACTION: 'interaction'
+  INTERACTION: 'interaction',
+  DROP_OFF: 'dropOff'
 };

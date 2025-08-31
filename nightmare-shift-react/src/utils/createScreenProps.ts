@@ -21,6 +21,9 @@ export const createScreenProps = (
     resetGame: () => void;
     useItem?: (itemId: string) => void;
     tradeItem?: (itemId: string, passenger: Passenger) => void;
+    refuelFull?: () => void;
+    refuelPartial?: () => void;
+    continueFromDropOff?: () => void;
   }
 ) => ({
   gameState,
@@ -42,5 +45,8 @@ export const createScreenProps = (
   onResetAndStart: () => { actions.resetGame(); actions.startGame(); },
   onResetAndShow: (screen: string) => { actions.resetGame(); actions.showScreen(screen); },
   onUseItem: actions.useItem,
-  onTradeItem: actions.tradeItem
+  onTradeItem: actions.tradeItem,
+  onRefuelFull: actions.refuelFull,
+  onRefuelPartial: actions.refuelPartial,
+  onContinueFromDropOff: actions.continueFromDropOff
 });

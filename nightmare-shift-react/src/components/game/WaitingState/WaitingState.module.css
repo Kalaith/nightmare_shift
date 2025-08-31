@@ -1,72 +1,273 @@
-/* WaitingState specific styles */
 .waitingContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
   text-align: center;
-  padding: 2rem 1rem;
+  margin-bottom: 2rem;
 }
 
-.carIcon {
-  font-size: 5rem;
-  margin-bottom: 1.5rem;
-  opacity: 0.7;
-  animation: pulse 2s ease-in-out infinite;
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #5EEAD4;
+  margin-bottom: 1rem;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+.description {
+  color: #D1D5DB;
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
-.waitingTitle {
-  font-size: 1.25rem;
-  color: #e5e7eb;
-  margin-bottom: 0.5rem;
+.fuelStatus {
+  background: rgba(55, 65, 81, 0.5);
+  border: 1px solid #4B5563;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-.waitingDescription {
-  color: #9ca3af;
-  margin-bottom: 1.5rem;
+.fuelStatusCritical {
+  border-color: #DC2626;
+  background: rgba(185, 28, 28, 0.1);
 }
 
-.actionButtons {
+.fuelHeader {
   display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.fuelLabel {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.fuelValue {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #FBBF24;
+}
+
+.fuelBarContainer {
+  background: #374151;
+  border-radius: 9999px;
+  height: 12px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.fuelBar {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.fuelGood {
+  background: linear-gradient(90deg, #10B981, #34D399);
+}
+
+.fuelMedium {
+  background: linear-gradient(90deg, #F59E0B, #FBBF24);
+}
+
+.fuelLow {
+  background: linear-gradient(90deg, #EF4444, #F87171);
+}
+
+.fuelCritical {
+  background: linear-gradient(90deg, #DC2626, #EF4444);
+  animation: pulse 2s infinite;
+}
+
+.fuelWarning {
+  color: #FCA5A5;
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+.actionGrid {
+  display: grid;
+  gap: 1.5rem;
 }
 
 .inventoryButton {
-  background-color: #4b5563;
-  color: #e5e7eb;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #374151;
+  border: 1px solid #4B5563;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
 .inventoryButton:hover {
-  background-color: #374151;
+  background: #4B5563;
+  transform: translateY(-1px);
+}
+
+.fuelSection {
+  background: rgba(55, 65, 81, 0.3);
+  border: 1px solid #4B5563;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.sectionTitle {
+  color: #5EEAD4;
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
 }
 
 .fuelButton {
-  border: 1px solid #4b5563;
-  background-color: transparent;
-  color: #e5e7eb;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: 1px solid;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  margin-bottom: 0.75rem;
 }
 
-.fuelButton:hover {
-  background-color: #4b5563;
+.fuelButton:last-child {
+  margin-bottom: 0;
+}
+
+.fullRefuel {
+  background: #059669;
+  border-color: #10B981;
+  color: white;
+}
+
+.fullRefuel:hover:not(:disabled) {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+.partialRefuel {
+  background: #D97706;
+  border-color: #F59E0B;
+  color: white;
+}
+
+.partialRefuel:hover:not(:disabled) {
+  background: #B45309;
+  transform: translateY(-1px);
 }
 
 .fuelButton:disabled {
-  opacity: 0.5;
+  background: #374151;
+  border-color: #4B5563;
+  color: #9CA3AF;
   cursor: not-allowed;
+  transform: none;
 }
 
-.fuelButton:disabled:hover {
-  background-color: transparent;
+.buttonIcon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.buttonText {
+  font-size: 1.1rem;
+}
+
+.fuelButtonContent {
+  flex: 1;
+  text-align: left;
+}
+
+.buttonDetails {
+  display: block;
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+}
+
+.buttonDisabled {
+  display: block;
+  font-size: 0.875rem;
+  color: #EF4444;
+  margin-top: 0.25rem;
+}
+
+.fuelFullMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10B981;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.fuelFullIcon {
+  font-size: 1.5rem;
+}
+
+.fuelFullText {
+  color: #34D399;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.tips {
+  background: rgba(55, 65, 81, 0.3);
+  border: 1px solid #4B5563;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.tipsTitle {
+  color: #FBBF24;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+}
+
+.tipsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: #D1D5DB;
+}
+
+.tipsList li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+}
+
+.tipsList li:last-child {
+  border-bottom: none;
+}
+
+.hazardTip {
+  color: #FBBF24 !important;
+  font-weight: 600;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }

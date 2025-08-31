@@ -15,6 +15,49 @@ export interface Rule {
   duration?: number;
 }
 
+export interface Guideline extends Rule {
+  isGuideline: true;
+  exceptions: GuidelineException[];
+  defaultSafety: 'safe' | 'risky' | 'dangerous';
+  breakConsequences: GuidelineConsequence[];
+  followConsequences: GuidelineConsequence[];
+}
+
+export interface GuidelineException {
+  id: string;
+  passengerIds?: number[];
+  passengerTypes?: string[];
+  conditions: ExceptionCondition[];
+  tells: PassengerTell[];
+  breakingSafer: boolean;
+  description: string;
+  probability: number;
+}
+
+export interface ExceptionCondition {
+  type: 'passenger_dialogue' | 'passenger_behavior' | 'environmental' | 'time_based' | 'weather';
+  value: string | number;
+  operator?: 'equals' | 'contains' | 'greater_than' | 'less_than';
+  description: string;
+}
+
+export interface PassengerTell {
+  type: 'verbal' | 'behavioral' | 'visual' | 'environmental';
+  intensity: 'subtle' | 'moderate' | 'obvious';
+  description: string;
+  triggerPhrase?: string;
+  animationCue?: string;
+  audioCue?: string;
+  reliability: number; // 0-1, how trustworthy this tell is
+}
+
+export interface GuidelineConsequence {
+  type: 'death' | 'survival' | 'reputation' | 'money' | 'fuel' | 'time' | 'item' | 'story_unlock';
+  value: number;
+  description: string;
+  probability: number;
+}
+
 export interface Passenger {
   id: number;
   name: string;
@@ -31,6 +74,11 @@ export interface Passenger {
   relationships: number[];
   backstoryUnlocked: boolean;
   backstoryDetails: string;
+  tells?: PassengerTell[];
+  guidelineExceptions?: string[]; // IDs of guideline exceptions this passenger triggers
+  deceptionLevel?: number; // 0-1, how likely they are to lie or misdirect
+  stressLevel?: number; // 0-1, current psychological state
+  trustRequired?: number; // 0-1, how much player trust is needed to trigger exceptions
   ruleModification?: {
     canModify: boolean;
     type: 'remove_rule' | 'reveal_hidden' | 'add_temporary';
@@ -61,17 +109,27 @@ export interface GameState {
   ridesCompleted: number;
   rulesViolated: number;
   currentRules: Rule[];
+  currentGuidelines?: Guideline[];
   hiddenRules?: Rule[];
   inventory: InventoryItem[];
   currentPassenger: Passenger | null;
   currentRide: CurrentRide | null;
-  gamePhase: 'waiting' | 'rideRequest' | 'driving' | 'interaction' | 'gameOver' | 'success';
+  gamePhase: 'waiting' | 'rideRequest' | 'driving' | 'interaction' | 'dropOff' | 'gameOver' | 'success';
   usedPassengers: number[];
   shiftStartTime: number | null;
   sessionStartTime: number;
   currentDialogue?: Dialogue;
   currentDrivingPhase?: 'pickup' | 'destination';
   currentLocation?: Location;
+  lastRideCompletion?: {
+    passenger: Passenger;
+    fareEarned: number;
+    itemsReceived: InventoryItem[];
+    backstoryUnlocked?: {
+      passenger: string;
+      backstory: string;
+    };
+  };
   difficultyLevel?: number;
   gameOverReason?: string;
   survivalBonus?: number;
@@ -92,6 +150,11 @@ export interface GameState {
   season: Season;
   environmentalHazards: EnvironmentalHazard[];
   weatherEffects: WeatherEffect[];
+  // Guideline system properties
+  activeExceptions?: GuidelineException[];
+  detectedTells?: DetectedTell[];
+  playerTrust?: number; // 0-1, player's accumulated trust level
+  decisionHistory?: GuidelineDecision[];
 }
 
 export interface InventoryItem {
@@ -273,6 +336,7 @@ export interface GameEngineResult {
   hiddenRules: Rule[];
   conflicts?: RuleConflict[];
   difficultyLevel: number;
+  guidelines?: Guideline[];
 }
 
 export interface HiddenRuleViolation {
@@ -295,5 +359,25 @@ export interface RouteChoice {
   timeCost: number;
   riskLevel: number;
   passenger?: number;
+  timestamp: number;
+}
+
+export interface DetectedTell {
+  tell: PassengerTell;
+  passengerId: number;
+  detectionTime: number;
+  playerNoticed: boolean;
+  relatedGuideline: number;
+  exceptionId?: string;
+}
+
+export interface GuidelineDecision {
+  guidelineId: number;
+  passengerId: number;
+  action: 'follow' | 'break';
+  outcome: GuidelineConsequence[];
+  wasCorrect: boolean;
+  tellsPresent: PassengerTell[];
+  playerReason?: string;
   timestamp: number;
 }

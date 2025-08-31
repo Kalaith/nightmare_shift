@@ -49,4 +49,5 @@ export interface GamePhases {
   RIDE_REQUEST: string;
   DRIVING: string;
   INTERACTION: string;
+  DROP_OFF: string;
 }

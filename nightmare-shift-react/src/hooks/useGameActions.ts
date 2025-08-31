@@ -24,7 +24,7 @@ export const useGameActions = ({
 }: UseGameActionsProps) => {
   
   const acceptRide = useCallback(() => {
-    if (gameState.fuel < 20) {
+    if (gameState.fuel < 5) {
       gameOver("You ran out of fuel with a passenger in the car. They were not pleased...");
       return;
     }
@@ -138,53 +138,56 @@ export const useGameActions = ({
 
     const baseFare = passenger.fare;
     const earnedFare = Math.floor(baseFare + (Math.random() * 10) - 5);
-
-    setGameState(prev => ({ 
-      ...prev, 
-      earnings: prev.earnings + Math.max(earnedFare, 5),
-      ridesCompleted: prev.ridesCompleted + 1,
-      gamePhase: GAME_PHASES.WAITING,
-      currentPassenger: null,
-      currentDialogue: null
-    }));
-
-    // Add items to inventory using new ItemService
+    const actualEarnings = Math.max(earnedFare, 5);
+    
+    // Collect items that might be received
+    const itemsReceived: import('../types/game').InventoryItem[] = [];
     if (passenger.items && Math.random() < GAME_BALANCE.PROBABILITIES.ITEM_DROP) {
       const randomItem = passenger.items[Math.floor(Math.random() * passenger.items.length)];
       const newItemResult = ItemService.createInventoryItem(randomItem, passenger.name, false);
       
       if (newItemResult.success) {
-        setGameState(prev => ({ 
-          ...prev, 
-          inventory: [...prev.inventory, newItemResult.data]
-        }));
+        itemsReceived.push(newItemResult.data);
       }
     }
 
     // Check for backstory unlock
+    let backstoryUnlocked: { passenger: string; backstory: string } | undefined;
     const backstoryChance = PassengerService.calculateBackstoryChance(passenger.id, gameState.passengerBackstories || {});
     if (Math.random() < backstoryChance) {
-      setTimeout(() => {
-        setGameState(prev => ({
-          ...prev,
-          showBackstoryNotification: {
-            passenger: passenger.name,
-            backstory: passenger.backstoryDetails!
-          }
-        }));
-      }, 1500);
+      backstoryUnlocked = {
+        passenger: passenger.name,
+        backstory: passenger.backstoryDetails || `${passenger.name} shares a mysterious secret from their past...`
+      };
     }
 
-    setTimeout(() => {
-      if (gameState.timeRemaining <= 60 || gameState.fuel <= 15) {
-        endShift(true);
-      } else {
-        setTimeout(() => {
-          showRideRequest();
-        }, 3000 + Math.random() * 4000);
-      }
-    }, 1000);
-  }, [gameState, setGameState, endShift, showRideRequest]);
+    // Update game state with earnings and completion data
+    setGameState(prev => ({ 
+      ...prev, 
+      earnings: prev.earnings + actualEarnings,
+      ridesCompleted: prev.ridesCompleted + 1,
+      gamePhase: GAME_PHASES.DROP_OFF,
+      inventory: [...prev.inventory, ...itemsReceived],
+      lastRideCompletion: {
+        passenger,
+        fareEarned: actualEarnings,
+        itemsReceived,
+        backstoryUnlocked
+      },
+      currentDialogue: null
+    }));
+
+    // Add backstory to unlocked collection if applicable
+    if (backstoryUnlocked) {
+      setGameState(prev => ({
+        ...prev,
+        passengerBackstories: {
+          ...prev.passengerBackstories,
+          [passenger.id]: (prev.passengerBackstories?.[passenger.id] || 0) + 1
+        }
+      }));
+    }
+  }, [gameState, setGameState]);
 
   const useItem = useCallback((itemId: string) => {
     const item = gameState.inventory.find(i => i.id === itemId);
@@ -198,7 +201,13 @@ export const useGameActions = ({
         
         // Update item uses if it has limited uses
         if (item.protectiveProperties?.usesRemaining) {
-          const updatedItem = ItemService.useProtectiveItem(item);
+          const updatedItem = {
+            ...item,
+            protectiveProperties: {
+              ...item.protectiveProperties,
+              usesRemaining: item.protectiveProperties.usesRemaining - 1
+            }
+          };
           newState = {
             ...newState,
             inventory: prev.inventory.map(i => 
@@ -265,6 +274,53 @@ export const useGameActions = ({
     });
   }, [setGameState]);
 
+  const refuelFull = useCallback(() => {
+    const fuelNeeded = 100 - gameState.fuel;
+    const cost = Math.ceil(fuelNeeded * GAME_BALANCE.FUEL_COSTS.PER_PERCENT);
+    
+    if (gameState.earnings >= cost && gameState.fuel < 100) {
+      setGameState(prev => ({
+        ...prev,
+        fuel: 100,
+        earnings: prev.earnings - cost
+      }));
+    }
+  }, [gameState.fuel, gameState.earnings, setGameState]);
+
+  const refuelPartial = useCallback(() => {
+    const fuelToAdd = Math.min(25, 100 - gameState.fuel);
+    const cost = Math.ceil(fuelToAdd * GAME_BALANCE.FUEL_COSTS.PER_PERCENT);
+    
+    if (gameState.earnings >= cost && gameState.fuel < 75) {
+      setGameState(prev => ({
+        ...prev,
+        fuel: prev.fuel + fuelToAdd,
+        earnings: prev.earnings - cost
+      }));
+    }
+  }, [gameState.fuel, gameState.earnings, setGameState]);
+
+  const continueFromDropOff = useCallback(() => {
+    // Clear the completed ride data and return to waiting phase
+    setGameState(prev => ({
+      ...prev,
+      gamePhase: GAME_PHASES.WAITING,
+      currentPassenger: null,
+      lastRideCompletion: undefined
+    }));
+
+    // Schedule next ride request based on current state
+    setTimeout(() => {
+      if (gameState.timeRemaining <= 60 || gameState.fuel <= 5) {
+        endShift(true);
+      } else {
+        setTimeout(() => {
+          showRideRequest();
+        }, 2000 + Math.random() * 3000);
+      }
+    }, 500);
+  }, [gameState, setGameState, endShift, showRideRequest]);
+
   return {
     acceptRide,
     declineRide,
@@ -272,6 +328,9 @@ export const useGameActions = ({
     continueToDestination,
     useItem,
     tradeItem,
-    processItemEffects
+    processItemEffects,
+    refuelFull,
+    refuelPartial,
+    continueFromDropOff
   };
 };
