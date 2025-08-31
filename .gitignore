@@ -1,0 +1,29 @@
+
+# Backup files
+# Build artifacts (if any)
+# Environment files
+# IDE files
+# Logs
+# OS generated files
+# Temporary files
+*.backup
+*.bak
+*.log
+*.swo
+*.swp
+*.temp
+*.tmp
+._*
+.DS_Store
+.DS_Store?
+.env
+.env.local
+.idea/
+.Spotlight-V100
+.Trashes
+.vscode/
+/build/
+/dist/
+ehthumbs.db
+mcp
+Thumbs.db

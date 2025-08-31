@@ -1,31 +1,48 @@
-# nightmare_shift Publishing Script
-# Publishes React frontend to preview/production environments
+# Game Publishing Script
+# Publishes frontend and PHP backend to F:\WebHatchery for server sync
 
 param(
+    [Alias('f')]
     [switch]$Frontend,
+    [Alias('b')]
     [switch]$Backend,
+    [Alias('a')]
     [switch]$All,
+    [Alias('c')]
     [switch]$Clean,
+    [Alias('v')]
     [switch]$Verbose,
-    [switch]$Production,
-    [switch]$Prod
+    [Alias('p')]
+    [switch]$Production
 )
 
-# Configuration
-$SOURCE_DIR = "H:\Claude\nightmare_shift"
-$PREVIEW_ROOT = "H:\xampp\htdocs"
-$PRODUCTION_ROOT = "F:\WebHatchery"
+# Auto-detect project name from current directory
+$PROJECT_NAME = Split-Path -Leaf $PSScriptRoot
 
-# Determine environment - production if any production flag is set, otherwise preview
-$Environment = if ($Production -or $Prod) { 'production' } else { 'preview' }
+# Load .env file
+$envFile = Join-Path $PSScriptRoot ".env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | ForEach-Object {
+        if ($_ -match "^(\w+)=(.*)$") {
+            $name = $matches[1]
+            $value = $matches[2]
+            Set-Variable -Name $name -Value $value -Scope Script
+        }
+    }
+} else {
+    Write-Error ".env file not found! Please create a .env file in the project root with the following content:"
+    Write-Host "PREVIEW_ROOT=" -ForegroundColor Yellow
+    Write-Host "PRODUCTION_ROOT=" -ForegroundColor Yellow
+    exit 1
+}
 
-# Set destination based on environment
-$DEST_ROOT = if ($Environment -eq 'preview') { $PREVIEW_ROOT } else { $PRODUCTION_ROOT }
-$DEST_DIR = Join-Path $DEST_ROOT "nightmare_shift"
-$FRONTEND_SRC = "$SOURCE_DIR\nightmare-shift-react"
-$BACKEND_SRC = "$SOURCE_DIR\backend"  # For future use when backend is added
+# Set destination based on Production flag
+$DEST_ROOT = if ($Production) { $PRODUCTION_ROOT } else { $PREVIEW_ROOT }
+$DEST_DIR = Join-Path $DEST_ROOT $PROJECT_NAME
+$FRONTEND_SRC = "$PSScriptRoot\frontend"
+$BACKEND_SRC = "$PSScriptRoot\backend"
 $FRONTEND_DEST = $DEST_DIR  # Frontend goes to root, not subdirectory
-$BACKEND_DEST = "$DEST_DIR\backend"   # For future use
+$BACKEND_DEST = "$DEST_DIR\backend"
 
 # Color output functions
 function Write-Success($message) {
@@ -65,16 +82,54 @@ function Clean-Directory($path) {
     }
 }
 
+# Copy files with exclusions
+function Copy-WithExclusions($source, $destination, $excludePatterns) {
+    Write-Progress "Copying from $source to $destination"
+    
+    # Ensure destination exists
+    Ensure-Directory $destination
+    
+    # Get all items from source
+    $items = Get-ChildItem -Path $source -Recurse
+    
+    foreach ($item in $items) {
+        $relativePath = $item.FullName.Substring($source.Length + 1)
+        $destPath = Join-Path $destination $relativePath
+        
+        # Check if item should be excluded
+        $shouldExclude = $false
+        foreach ($pattern in $excludePatterns) {
+            if ($relativePath -like $pattern) {
+                $shouldExclude = $true
+                break
+            }
+        }
+        
+        if (-not $shouldExclude) {
+            if ($item.PSIsContainer) {
+                # Create directory
+                Ensure-Directory $destPath
+            } else {
+                # Copy file
+                $destDir = Split-Path $destPath -Parent
+                Ensure-Directory $destDir
+                Copy-Item $item.FullName $destPath -Force
+                if ($Verbose) {
+                    Write-Host "  Copied: $relativePath" -ForegroundColor Gray
+                }
+            }
+        } else {
+            if ($Verbose) {
+                Write-Host "  Excluded: $relativePath" -ForegroundColor DarkGray
+            }
+        }
+    }
+}
+
 # Build frontend
 function Build-Frontend {
-    Write-Progress "Building Xytherra frontend..."
+    Write-Progress "Building frontend..."
     Set-Location $FRONTEND_SRC
-    
-    # Check if this is actually the React project
-    if (!(Test-Path "package.json")) {
-        Write-Error "Frontend source directory doesn't contain package.json. Expected React project at: $FRONTEND_SRC"
-        return $false
-    }
     
     # Install dependencies if node_modules doesn't exist
     if (!(Test-Path "node_modules")) {
@@ -86,15 +141,44 @@ function Build-Frontend {
         }
     }
     
+    # Set up environment configuration
+    $environment = if ($Production) { "production" } else { "preview" }
+    Write-Info "Setting up $environment environment for frontend build..."
+    $envSrc = ".env.$environment"
+    $envTemp = ".env.local"
+    
+    if (Test-Path $envSrc) {
+        # Copy environment file to .env.local to ensure it's used during build
+        Copy-Item $envSrc $envTemp -Force
+        Write-Info "Using $envSrc for frontend build"
+    } else {
+        Write-Warning "$envSrc not found - using default environment"
+    }
+    
     # Build the frontend
     Write-Info "Building frontend for production..."
     $env:NODE_ENV = "production"
     
-    # Build for production (automatically uses /xytherra/ base path)
-    Write-Info "Building for $Environment environment..."
-    npm run build
+    # Set base path based on environment
+    if ($Production) {
+        # Production uses root path
+        $env:VITE_BASE_PATH = "/"
+        npx vite build --mode production
+    } else {
+        Write-Info "Setting base path for preview environment..."
+        $env:VITE_BASE_PATH = "/$PROJECT_NAME/"
+        # Build with preview mode to use .env.preview
+        npx vite build --mode preview
+    }
     
-    if ($LASTEXITCODE -ne 0) {
+    $buildResult = $LASTEXITCODE
+    
+    # Clean up temporary env file
+    if (Test-Path $envTemp) {
+        Remove-Item $envTemp -Force
+    }
+    
+    if ($buildResult -ne 0) {
         Write-Error "Failed to build frontend"
         return $false
     }
@@ -112,21 +196,18 @@ function Publish-Frontend {
         return $false
     }
     
-    # Clean destination if requested (but preserve backend directory if it exists)
+    # Clean destination if requested (but preserve backend directory)
     if ($Clean) {
-        Write-Warning "Cleaning frontend files from destination (preserving backend)..."
+        Write-Warning "Cleaning frontend files from root directory (preserving backend)..."
         # Clean only frontend files, not the backend directory
-        Get-ChildItem -Path $FRONTEND_DEST -Exclude "backend" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -Path $FRONTEND_DEST -Exclude "backend" | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
         Write-Success "Frontend files cleaned"
     }
     
-    # Copy built files (dist folder) to destination
+    # Copy built files (dist folder) to root
     $distPath = "$FRONTEND_SRC\dist"
     if (Test-Path $distPath) {
-        Write-Info "Copying built frontend files to destination..."
-        
-        # Ensure destination exists
-        Ensure-Directory $FRONTEND_DEST
+        Write-Info "Copying built frontend files to root directory..."
         
         # Get all items from the dist folder
         Get-ChildItem -Path $distPath | ForEach-Object {
@@ -138,7 +219,7 @@ function Publish-Frontend {
             if ($itemName -ne "backend") {
                 # If destination exists and it's a directory, remove it first to prevent nesting
                 if ((Test-Path $destPath) -and (Get-Item $destPath).PSIsContainer) {
-                    if ($Verbose) { Write-Host "Removing existing directory: $destPath" }
+                    Write-Verbose "Removing existing directory: $destPath"
                     Remove-Item $destPath -Recurse -Force -ErrorAction SilentlyContinue
                 }
                 
@@ -156,7 +237,7 @@ function Publish-Frontend {
                 }
             }
         }
-        Write-Success "Frontend published to $FRONTEND_DEST"
+        Write-Success "Frontend published to $FRONTEND_DEST (root)"
         return $true
     } else {
         Write-Error "Frontend build output not found at $distPath"
@@ -164,41 +245,137 @@ function Publish-Frontend {
     }
 }
 
-# Placeholder for future backend functionality
+# Install PHP backend dependencies
+function Install-BackendDependencies {
+    Write-Progress "Installing PHP backend dependencies..."
+    Set-Location $BACKEND_SRC
+    
+    # Check if composer is available
+    try {
+        composer --version | Out-Null
+    } catch {
+        Write-Error "Composer not found. Please install Composer first."
+        return $false
+    }
+    
+    # Install dependencies
+    composer install --no-dev --optimize-autoloader
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to install PHP dependencies"
+        return $false
+    }
+    
+    Write-Success "PHP dependencies installed"
+    return $true
+}
+
+# Publish PHP backend
 function Publish-Backend {
-    Write-Warning "Backend publishing not yet implemented."
-    Write-Info "Backend directory will be: $BACKEND_DEST"
-    Write-Info "This functionality will be added when PHP backend is developed."
+    Write-Progress "Publishing PHP backend..."
+    
+    # Install dependencies
+    if (!(Install-BackendDependencies)) {
+        return $false
+    }
+    
+    # Clean destination if requested
+    if ($Clean) {
+        Clean-Directory $BACKEND_DEST
+    }
+    
+    # Define exclusion patterns for backend
+    $excludePatterns = @(
+        "node_modules\*",
+        ".git\*",
+        ".env",
+        ".env.local",
+        ".env.example",
+        "tests\*",
+        "*.log",
+        "*.tmp",
+        "storage\logs\*",
+        "storage\cache\*",
+        "var\cache\*",
+        "vendor\*\tests\*",
+        "vendor\*\test\*",
+        "vendor\*\.git\*",
+        "*.md",
+        "composer.lock",
+        "phpunit.xml",
+        "init-db.ps1",
+        "debug_bet.php",
+        "debug_bet_api.php",
+        "test-di.php",
+        "install.php",
+        "NODE_TO_PHP_MIGRATION_GUIDE.md",
+        "DI_IMPLEMENTATION.md",
+        "improvement.md",
+        "codereview.md"
+    )
+    
+    # Copy backend files with exclusions
+    Copy-WithExclusions $BACKEND_SRC $BACKEND_DEST $excludePatterns
+    
+    # Handle environment configuration file
+    $environment = if ($Production) { "production" } else { "preview" }
+    Write-Info "Setting up $environment environment configuration..."
+    $envSrc = "$BACKEND_SRC\.env.$environment"
+    $envDest = "$BACKEND_DEST\.env"
+    
+    if (Test-Path $envSrc) {
+        Copy-Item $envSrc $envDest -Force
+        Write-Success "Copied $envSrc to .env for $environment use"
+    } else {
+        Write-Warning "$envSrc not found in source - copying base .env file"
+        $baseEnvSrc = "$BACKEND_SRC\.env"
+        if (Test-Path $baseEnvSrc) {
+            Copy-Item $baseEnvSrc $envDest -Force
+            Write-Info "Copied base .env file to $environment deployment"
+        } else {
+            Write-Error "No .env file found in source directory!"
+            return $false
+        }
+    }
+    
+    # Create necessary directories and files for production
+    $storageDir = "$BACKEND_DEST\storage"
+    $varDir = "$BACKEND_DEST\var"
+    Ensure-Directory "$storageDir\logs"
+    Ensure-Directory "$varDir\cache"
+    
+    # Set proper permissions for storage directories (Windows equivalent)
+    Write-Info "Setting up storage permissions..."
+    
+    # Copy essential production files
+    Write-Info "Setting up production configuration..."
+    
+    # Copy .htaccess if it doesn't exist
+    $htaccessSrc = "$BACKEND_SRC\public\.htaccess"
+    $htaccessDest = "$BACKEND_DEST\public\.htaccess"
+    if ((Test-Path $htaccessSrc) -and !(Test-Path $htaccessDest)) {
+        Copy-Item $htaccessSrc $htaccessDest
+        Write-Info "Copied .htaccess file"
+    }
+    
+    Write-Success "PHP backend published to $BACKEND_DEST"
     return $true
 }
 
 # Main execution
 function Main {
-    Write-Info "Xytherra Game Design Document Publishing Script"
-    Write-Info "============================================="
+    Write-Info "$PROJECT_NAME Publishing Script"
+    Write-Info "=========================="
     
-    # Check if frontend source exists
-    if (!(Test-Path $FRONTEND_SRC)) {
-        Write-Error "Frontend source directory not found: $FRONTEND_SRC"
-        Write-Error "Expected React project directory with package.json"
-        exit 1
-    }
-    
-    # Ensure destination directory exists
+    # Ensure WebHatchery directory exists
     Ensure-Directory $DEST_DIR
     
     $success = $true
     
     # Determine what to publish
-    if ($Backend -and !(Test-Path $BACKEND_SRC)) {
-        Write-Warning "Backend requested but source directory doesn't exist: $BACKEND_SRC"
-        Write-Info "Skipping backend publishing..."
-        $Backend = $false
-    }
-    
     if ($All -or (!$Frontend -and !$Backend)) {
-        Write-Info "Publishing frontend (backend not available yet)..."
+        Write-Info "Publishing both frontend and backend..."
         $Frontend = $true
+        $Backend = $true
     }
     
     # Store original location
@@ -212,7 +389,7 @@ function Main {
             }
         }
         
-        # Publish backend (future functionality)
+        # Publish backend
         if ($Backend) {
             if (!(Publish-Backend)) {
                 $success = $false
@@ -220,13 +397,17 @@ function Main {
         }
         
         if ($success) {
+            # Copy root .htaccess file for URL rewriting
+            $rootHtaccessSrc = "$SOURCE_DIR\.htaccess"
+            $rootHtaccessDest = "$DEST_DIR\.htaccess"
+            if (Test-Path $rootHtaccessSrc) {
+                Copy-Item $rootHtaccessSrc $rootHtaccessDest -Force
+                Write-Info "Copied root .htaccess file for URL rewriting"
+            }
+            
             Write-Success "`n✅ Publishing completed successfully!"
             Write-Info "Files published to: $DEST_DIR"
-            Write-Info "Environment: $Environment"
-            
-            if ($Environment -eq 'preview') {
-                Write-Info "Preview URL: http://localhost/xytherra/"
-            }
+            Write-Info "Ready for server sync."
         } else {
             Write-Error "`n❌ Publishing failed!"
             exit 1
@@ -241,43 +422,46 @@ function Main {
 # Show help
 function Show-Help {
     Write-Host @"
-Xytherra Game Design Document Publishing Script
-===============================================
+$PROJECT_NAME Publishing Script
+==========================
 
 Usage: .\publish.ps1 [OPTIONS]
 
 OPTIONS:
-    -Frontend    Publish only the frontend (React app)
-    -Backend     Publish only the backend (not yet implemented)
-    -All         Publish both (default, currently only frontend)
-    -Clean       Clean destination directories before publishing
-    -Verbose     Show detailed output during copying
-    -Prod        Deploy to production environment (F:\WebHatchery\xytherra)
-    -Production  Deploy to production environment (F:\WebHatchery\xytherra)
-    -Help        Show this help message
-    
-ENVIRONMENT:
-    Default: Preview (H:\xampp\htdocs\xytherra)
-    Production: Use -Prod or -Production flags
+    -Frontend, -f    Publish only the frontend
+    -Backend, -b     Publish only the PHP backend  
+    -All, -a         Publish both (default if no specific option given)
+    -Clean, -c       Clean destination directories before publishing
+    -Verbose, -v     Show detailed output during copying
+    -Production, -p  Deploy to production environment (F:\WebHatchery)
+                     Default: Deploy to preview environment (H:\xampp\htdocs)
+    -Help            Show this help message
 
 EXAMPLES:
-    .\publish.ps1                                       # Publish frontend to preview
-    .\publish.ps1 -Prod                                # Publish frontend to production
-    .\publish.ps1 -Production                          # Publish frontend to production
-    .\publish.ps1 -Clean -Verbose                      # Clean and publish to preview with details
-    .\publish.ps1 -Prod -Clean -Verbose                # Clean and publish to production with details
+    .\publish.ps1                                       # Publish both to preview (H:\xampp\htdocs)
+    .\publish.ps1 -f                                   # Publish only frontend to preview
+    .\publish.ps1 -b                                   # Publish only backend to preview
+    .\publish.ps1 -f -p                               # Publish frontend to production
+    .\publish.ps1 -a -c -p                            # Clean and publish both to production
+    .\publish.ps1 -Frontend -Verbose -Production       # Publish frontend to production with details
 
 DESCRIPTION:
-    This script builds and publishes the Xytherra interactive game design document.
-    The React frontend is built using Vite and deployed to the specified environment.
+    This script builds and publishes the $PROJECT_NAME web game to either the 
+    preview environment (H:\xampp\htdocs) or production environment (F:\WebHatchery).
+    The frontend is built using npm and deployed to the root directory, while
+    the PHP backend is deployed to the backend/ subdirectory with dependencies
+    optimized for the target environment.
     
-    Current project structure:
-    H:\Claude\xytherra\
-    ├── xytherra-design-doc\   # React frontend (Vite + TypeScript)
-    ├── readme.md              # Game design document
-    └── CLAUDE.md              # Project documentation
-    
-    Future backend support will be added when PHP backend is developed.
+    Deployment Structure (for both environments):
+    <root>\$PROJECT_NAME\
+    ├── index.html          # Frontend files (root)
+    ├── assets\             # Frontend assets
+    └── backend\            # PHP backend
+        ├── public\
+        ├── src\
+        ├── vendor\
+        ├── storage\
+        └── var\
 
 "@ -ForegroundColor White
 }
