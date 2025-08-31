@@ -178,21 +178,74 @@ const GameScreen: React.FC<GameScreenProps> = ({
           {gameState.gamePhase === 'driving' && (() => {
             const passengerRiskLevel = gameState.currentPassenger ? 
               gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)?.riskLevel || GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL : GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL;
-            const routeOptionsResult = RouteService.getRouteOptions(gameState.fuel, gameState.timeRemaining, passengerRiskLevel);
+            const routeOptionsResult = RouteService.getRouteOptions(
+              gameState.fuel, 
+              gameState.timeRemaining, 
+              passengerRiskLevel,
+              gameState.currentWeather,
+              gameState.timeOfDay,
+              gameState.environmentalHazards,
+              gameState.currentPassenger || undefined,
+              gameState.routeMastery,
+              gameState.routeConsequences
+            );
             const routeOptions = GameResultHelpers.unwrapOr(routeOptionsResult, []);
             
-            // If we got an error but have a fallback, show an error message
-            if (!routeOptionsResult.success && routeOptions.length === 0) {
+            
+            // If we somehow still have no routes, provide a basic fallback
+            if (routeOptions.length === 0) {
+              const basicRoutes = [
+                {
+                  type: 'normal' as const,
+                  name: 'Take Detour Route',
+                  description: 'Alternative route through side streets',
+                  fuelCost: Math.min(15, gameState.fuel),
+                  timeCost: Math.min(20, gameState.timeRemaining),
+                  riskLevel: 1,
+                  available: gameState.fuel >= 1 && gameState.timeRemaining >= 1,
+                  bonusInfo: 'Last available route',
+                  passengerReaction: 'neutral' as const,
+                  fareModifier: 1.0
+                }
+              ];
+              
               return (
-                <div className="bg-red-800/50 border border-red-600 rounded-lg p-6 text-center">
-                  <h2 className="text-2xl font-bold text-red-300 mb-4">⚠️ Route Error</h2>
-                  <p className="text-gray-300 mb-4">Unable to calculate route options. Try ending your shift.</p>
-                  <button 
-                    onClick={() => onGameOver('Route calculation failed')}
-                    className="bg-red-600 hover:bg-red-500 py-2 px-4 rounded transition-colors"
-                  >
-                    End Shift
-                  </button>
+                <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-6">
+                  <h2 className="text-2xl font-bold text-teal-300 mb-4 text-center">🚗 Taking a Detour</h2>
+                  <p className="text-gray-300 mb-6 text-center">Road conditions force an alternate route:</p>
+                  
+                  <div className="grid gap-3 max-w-4xl mx-auto">
+                    {basicRoutes.map((route) => (
+                      <button 
+                        key={route.type}
+                        onClick={() => onHandleDrivingChoice(route.type, gameState.currentDrivingPhase || 'pickup')}
+                        disabled={!route.available}
+                        className="p-4 rounded-lg font-semibold transition-all duration-200 text-left bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border border-slate-500/50 hover:border-slate-400/70 shadow-lg"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-lg font-bold">{route.name}</div>
+                            <div className="text-sm opacity-90">{route.description}</div>
+                            <div className="text-xs mt-1 font-medium text-amber-200/80">{route.bonusInfo}</div>
+                          </div>
+                          <div className="text-right text-sm space-y-1">
+                            <div className="flex items-center gap-1 justify-end">
+                              <span className="text-blue-300">⛽</span>
+                              <span className="text-blue-200">-{route.fuelCost} fuel</span>
+                            </div>
+                            <div className="flex items-center gap-1 justify-end">
+                              <span className="text-cyan-300">⏰</span>
+                              <span className="text-cyan-200">-{route.timeCost} min</span>
+                            </div>
+                            <div className="flex items-center gap-1 justify-end">
+                              <span className="text-gray-400">⚠️</span>
+                              <span className="text-gray-300">Risk: {route.riskLevel}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               );
             }
@@ -208,30 +261,82 @@ const GameScreen: React.FC<GameScreenProps> = ({
                       key={route.type}
                       onClick={() => onHandleDrivingChoice(route.type, gameState.currentDrivingPhase || 'pickup')}
                       disabled={!route.available}
-                      className={`p-4 rounded-lg font-semibold transition-colors text-left ${
+                      className={`p-4 rounded-lg font-semibold transition-all duration-200 text-left relative shadow-lg ${
                         !route.available 
-                          ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50' 
-                          : route.type === 'normal'
-                            ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                            : route.type === 'shortcut' 
-                              ? 'bg-orange-600 hover:bg-orange-500 text-white'
-                              : route.type === 'scenic'
-                                ? 'bg-green-600 hover:bg-green-500 text-white' 
-                                : 'bg-purple-600 hover:bg-purple-500 text-white'
+                          ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50 border border-slate-700' 
+                          : route.riskLevel >= 4
+                            ? route.type === 'normal'
+                              ? 'bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20'
+                              : route.type === 'shortcut' 
+                                ? 'bg-gradient-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 text-white border-2 border-amber-500 shadow-amber-500/20'
+                                : route.type === 'scenic'
+                                  ? 'bg-gradient-to-br from-emerald-800 to-slate-800 hover:from-emerald-700 hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20' 
+                                  : 'bg-gradient-to-br from-indigo-800 to-slate-800 hover:from-indigo-700 hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20'
+                            : route.riskLevel >= 3
+                              ? route.type === 'normal'
+                                ? 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10'
+                                : route.type === 'shortcut' 
+                                  ? 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border border-yellow-400/60 shadow-yellow-400/10'
+                                  : route.type === 'scenic'
+                                    ? 'bg-gradient-to-br from-emerald-700 to-slate-700 hover:from-emerald-600 hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10' 
+                                    : 'bg-gradient-to-br from-indigo-700 to-slate-700 hover:from-indigo-600 hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10'
+                              : route.passengerReaction === 'positive'
+                                ? route.type === 'normal'
+                                  ? 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border-2 border-emerald-400/80 shadow-emerald-400/20'
+                                  : route.type === 'shortcut' 
+                                    ? 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20'
+                                    : route.type === 'scenic'
+                                      ? 'bg-gradient-to-br from-emerald-700 to-emerald-800 hover:from-emerald-600 hover:to-emerald-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20' 
+                                      : 'bg-gradient-to-br from-indigo-700 to-indigo-800 hover:from-indigo-600 hover:to-indigo-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20'
+                                : route.passengerReaction === 'negative'
+                                  ? route.type === 'normal'
+                                    ? 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10'
+                                    : route.type === 'shortcut' 
+                                      ? 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border-2 border-rose-400/60 shadow-rose-400/10'
+                                      : route.type === 'scenic'
+                                        ? 'bg-gradient-to-br from-emerald-700 to-slate-700 hover:from-emerald-600 hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10' 
+                                        : 'bg-gradient-to-br from-indigo-700 to-slate-700 hover:from-indigo-600 hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10'
+                                  : route.type === 'normal'
+                                    ? 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border border-slate-500/50 hover:border-slate-400/70'
+                                    : route.type === 'shortcut' 
+                                      ? 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border border-gray-500/50 hover:border-gray-400/70'
+                                      : route.type === 'scenic'
+                                        ? 'bg-gradient-to-br from-emerald-700 to-emerald-800 hover:from-emerald-600 hover:to-emerald-700 text-white border border-emerald-500/50 hover:border-emerald-400/70' 
+                                        : 'bg-gradient-to-br from-indigo-700 to-indigo-800 hover:from-indigo-600 hover:to-indigo-700 text-white border border-indigo-500/50 hover:border-indigo-400/70'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-lg font-bold">{route.name}</div>
+                          <div className="text-lg font-bold flex items-center gap-2">
+                            {route.name}
+                            {route.fareModifier && route.fareModifier !== 1.0 && (
+                              <span className={`text-xs px-2 py-1 rounded-md backdrop-blur-sm ${
+                                route.fareModifier > 1.0 
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
+                                  : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                              }`}>
+                                {route.fareModifier > 1.0 ? '+' : ''}{Math.round((route.fareModifier - 1) * 100)}% fare
+                              </span>
+                            )}
+                          </div>
                           <div className="text-sm opacity-90">{route.description}</div>
                           {route.bonusInfo && (
-                            <div className="text-xs mt-1 font-semibold text-yellow-300">{route.bonusInfo}</div>
+                            <div className="text-xs mt-1 font-medium text-amber-200/80">{route.bonusInfo}</div>
                           )}
                         </div>
-                        <div className="text-right text-sm">
-                          <div>⛽ -{route.fuelCost} fuel</div>
-                          <div>⏰ -{route.timeCost} min</div>
-                          <div>⚠️ Risk: {route.riskLevel}</div>
+                        <div className="text-right text-sm space-y-1">
+                          <div className="flex items-center gap-1 justify-end">
+                            <span className="text-blue-300">⛽</span>
+                            <span className="text-blue-200">-{route.fuelCost} fuel</span>
+                          </div>
+                          <div className="flex items-center gap-1 justify-end">
+                            <span className="text-cyan-300">⏰</span>
+                            <span className="text-cyan-200">-{route.timeCost} min</span>
+                          </div>
+                          <div className="flex items-center gap-1 justify-end">
+                            <span className={route.riskLevel >= 4 ? "text-amber-400" : route.riskLevel >= 3 ? "text-yellow-400" : "text-gray-400"}>⚠️</span>
+                            <span className={route.riskLevel >= 4 ? "text-amber-300" : route.riskLevel >= 3 ? "text-yellow-300" : "text-gray-300"}>Risk: {route.riskLevel}</span>
+                          </div>
                         </div>
                       </div>
                     </button>

@@ -229,7 +229,45 @@ export const gameData: GameData = {
       guidelineExceptions: ["eye_contact_lonely"],
       deceptionLevel: 0.1,
       stressLevel: 0.7,
-      trustRequired: 0.3
+      trustRequired: 0.3,
+      routePreferences: [
+        {
+          route: 'normal',
+          preference: 'fears',
+          reason: 'Too many memories on the main roads...',
+          fareModifier: 0.7,
+          stressModifier: 0.3,
+          specialDialogue: 'Please... not the main road. Too many memories there.',
+          triggerChance: 0.8
+        },
+        {
+          route: 'scenic',
+          preference: 'loves',
+          reason: 'The quiet paths remind me of peaceful times',
+          fareModifier: 1.4,
+          stressModifier: -0.2,
+          specialDialogue: 'Oh, the scenic route! How lovely... it reminds me of better days.',
+          triggerChance: 0.9
+        },
+        {
+          route: 'shortcut',
+          preference: 'likes',
+          reason: 'Quick paths away from the crowds',
+          fareModifier: 1.1,
+          stressModifier: -0.1,
+          specialDialogue: 'A quiet shortcut... yes, away from all the noise.',
+          triggerChance: 0.6
+        },
+        {
+          route: 'police',
+          preference: 'dislikes',
+          reason: 'Uniformed officers make me nervous',
+          fareModifier: 0.9,
+          stressModifier: 0.2,
+          specialDialogue: 'So many police cars... it makes me anxious.',
+          triggerChance: 0.7
+        }
+      ]
     },
     {
       id: 2,
@@ -246,7 +284,45 @@ export const gameData: GameData = {
       dialogue: ["Working late again...", "Do you mind if I keep the windows up?", "Some jobs you just can't talk about"],
       relationships: [4],
       backstoryUnlocked: false,
-      backstoryDetails: "Jake works the night shift at a blood bank, though his employment records don't seem to exist..."
+      backstoryDetails: "Jake works the night shift at a blood bank, though his employment records don't seem to exist...",
+      routePreferences: [
+        {
+          route: 'police',
+          preference: 'fears',
+          reason: 'Police attention is... problematic for my kind',
+          fareModifier: 0.6,
+          stressModifier: 0.4,
+          specialDialogue: 'Not the police route! They ask too many questions...',
+          triggerChance: 0.9
+        },
+        {
+          route: 'shortcut',
+          preference: 'loves',
+          reason: 'Dark alleys and back roads suit me',
+          fareModifier: 1.3,
+          stressModifier: -0.2,
+          specialDialogue: 'Perfect. The shadows will hide us well.',
+          triggerChance: 0.7
+        },
+        {
+          route: 'normal',
+          preference: 'dislikes',
+          reason: 'Too many streetlights and witnesses',
+          fareModifier: 0.9,
+          stressModifier: 0.1,
+          specialDialogue: 'So many lights... so many watching eyes.',
+          triggerChance: 0.5
+        },
+        {
+          route: 'scenic',
+          preference: 'neutral',
+          reason: 'Acceptable as long as it\'s not too bright',
+          fareModifier: 1.0,
+          stressModifier: 0.0,
+          specialDialogue: 'This route will do... peaceful enough.',
+          triggerChance: 0.3
+        }
+      ]
     },
     {
       id: 3,
@@ -379,7 +455,45 @@ export const gameData: GameData = {
       guidelineExceptions: ["eye_contact_lonely"],
       deceptionLevel: 0.0,
       stressLevel: 0.6,
-      trustRequired: 0.2
+      trustRequired: 0.2,
+      routePreferences: [
+        {
+          route: 'shortcut',
+          preference: 'fears',
+          reason: 'Dark alleys scare children',
+          fareModifier: 0.5,
+          stressModifier: 0.4,
+          specialDialogue: 'I don\'t like this way! It\'s too scary and dark!',
+          triggerChance: 0.9
+        },
+        {
+          route: 'normal',
+          preference: 'likes',
+          reason: 'Well-lit streets feel safer',
+          fareModifier: 1.2,
+          stressModifier: -0.1,
+          specialDialogue: 'This is the way I usually go home from school.',
+          triggerChance: 0.6
+        },
+        {
+          route: 'police',
+          preference: 'loves',
+          reason: 'Police officers make children feel safe',
+          fareModifier: 1.5,
+          stressModifier: -0.3,
+          specialDialogue: 'Look! Police cars! They keep us safe from bad people!',
+          triggerChance: 0.8
+        },
+        {
+          route: 'scenic',
+          preference: 'dislikes',
+          reason: 'Longer routes make children anxious to get home',
+          fareModifier: 0.8,
+          stressModifier: 0.2,
+          specialDialogue: 'This is taking too long... I want to go home to mommy.',
+          triggerChance: 0.7
+        }
+      ]
     },
     {
       id: 7,

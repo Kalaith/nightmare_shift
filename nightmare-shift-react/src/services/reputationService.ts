@@ -97,7 +97,9 @@ export class RouteService {
     passengerRiskLevel: number = 1,
     weather?: WeatherCondition,
     timeOfDay?: TimeOfDay,
-    hazards?: EnvironmentalHazard[]
+    hazards?: EnvironmentalHazard[],
+    routeMastery?: Record<string, number>,
+    passenger?: import('../types/game').Passenger
   ): { fuelCost: number; timeCost: number; riskLevel: number } {
     let baseFuelCost: number;
     let baseTimeCost: number;
@@ -148,6 +150,45 @@ export class RouteService {
       finalRiskLevel = weatherEffects.risk;
     }
 
+    // Apply additional penalties for dangerous conditions instead of blocking
+    if (weather) {
+      // Heavy weather makes routes more dangerous but not impossible
+      if (routeType === 'shortcut' && weather.intensity === 'heavy' && 
+          (weather.type === 'rain' || weather.type === 'fog' || weather.type === 'snow')) {
+        finalFuelCost += 8; // Extra fuel for careful driving
+        finalTimeCost += 10; // Extra time for safety
+        finalRiskLevel = Math.min(5, finalRiskLevel + 2); // Much more dangerous
+      }
+      
+      if (routeType === 'scenic' && weather.type === 'thunderstorm') {
+        finalFuelCost += 5; // Extra fuel for detours around storm damage
+        finalTimeCost += 15; // Much slower due to conditions
+        finalRiskLevel = Math.min(5, finalRiskLevel + 1); // More dangerous
+      }
+    }
+
+    // Apply time-based penalties
+    if (timeOfDay) {
+      if (routeType === 'scenic' && timeOfDay.phase === 'latenight') {
+        finalFuelCost += 3; // Need headlights and careful driving
+        finalTimeCost += 8; // Slower speeds for safety
+        finalRiskLevel = Math.min(5, finalRiskLevel + 1); // Higher crime risk at night
+      }
+    }
+
+    // Apply passenger fear penalties instead of random blocking
+    if (passenger) {
+      const strongFear = passenger.routePreferences?.find(
+        pref => pref.route === routeType && pref.preference === 'fears'
+      );
+      if (strongFear) {
+        // Passenger fear makes routes more stressful and expensive
+        finalFuelCost += 5; // Stress driving uses more fuel
+        finalTimeCost += 8; // Passenger complaints slow you down
+        finalRiskLevel = Math.min(5, finalRiskLevel + 1); // Stressed passengers are dangerous
+      }
+    }
+
     // Apply hazard effects if any
     if (hazards && hazards.length > 0) {
       for (const hazard of hazards) {
@@ -169,6 +210,22 @@ export class RouteService {
         }
       }
     }
+
+    // Apply route mastery bonuses
+    if (routeMastery && routeMastery[routeType]) {
+      const masteryLevel = routeMastery[routeType];
+      const fuelReduction = Math.min(4, Math.floor(masteryLevel / 3)); // -1 fuel per 3 uses, max -4
+      const timeReduction = Math.min(6, Math.floor(masteryLevel / 2)); // -1 time per 2 uses, max -6
+      const riskReduction = Math.min(1, Math.floor(masteryLevel / 10)); // -1 risk per 10 uses, max -1
+      
+      finalFuelCost = Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST, finalFuelCost - fuelReduction);
+      finalTimeCost = Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST, finalTimeCost - timeReduction);
+      finalRiskLevel = Math.max(GAME_BALANCE.RISK_LEVELS.SAFE, finalRiskLevel - riskReduction);
+    }
+
+    // Apply severe penalties for previously blocked conditions (instead of making routes unavailable)
+    // These are now just very expensive/risky rather than impossible
+    // Note: routeConsequences would need to be passed as parameter for full implementation
     
     return {
       fuelCost: Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST, Math.round(finalFuelCost)),
@@ -183,7 +240,10 @@ export class RouteService {
     passengerRiskLevel: number = 1,
     weather?: WeatherCondition,
     timeOfDay?: TimeOfDay,
-    hazards?: EnvironmentalHazard[]
+    hazards?: EnvironmentalHazard[],
+    passenger?: import('../types/game').Passenger,
+    routeMastery?: Record<string, number>,
+    routeConsequences?: string[]
   ): GameResult<Array<{
     type: 'normal' | 'shortcut' | 'scenic' | 'police';
     name: string;
@@ -193,12 +253,14 @@ export class RouteService {
     riskLevel: number;
     available: boolean;
     bonusInfo?: string;
+    passengerReaction?: 'positive' | 'negative' | 'neutral';
+    fareModifier?: number;
   }>> {
     return ErrorHandling.wrap(
       () => {
-        if (currentFuel < 0 || currentTime < 0) {
-          throw ErrorHandling.serviceError('RouteService', 'getRouteOptions', 'Invalid fuel or time values');
-        }
+        // Handle negative values gracefully instead of throwing errors
+        const safeFuel = Math.max(0, currentFuel);
+        const safeTime = Math.max(0, currentTime);
 
         const routes = [
           {
@@ -223,43 +285,167 @@ export class RouteService {
           }
         ];
 
-        return routes.map(route => {
-          const costs = this.calculateRouteCosts(route.type, passengerRiskLevel, weather, timeOfDay, hazards);
-          const available = currentFuel >= costs.fuelCost && currentTime >= costs.timeCost;
-          
-          let bonusInfo = '';
-          if (route.type === 'scenic') {
-            bonusInfo = 'Passenger pays +$10 bonus';
-          } else if (route.type === 'police') {
-            bonusInfo = 'No supernatural encounters';
-          } else if (route.type === 'shortcut') {
-            bonusInfo = 'May trigger hidden rules';
-          }
+        const resultRoutes = routes.map(route => {
+          try {
+            const costs = this.calculateRouteCosts(route.type, passengerRiskLevel, weather, timeOfDay, hazards, routeMastery, passenger);
+            
+            // ALL ROUTES ARE ALWAYS AVAILABLE - no fuel/time restrictions
+            let available = true;
+            
+            // checkRouteAvailability always returns true now, but keeping for future flexibility
+            available = available && this.checkRouteAvailability(route.type, weather, timeOfDay, routeConsequences, passenger);
+            
+            // Get passenger preference for this route
+            const passengerPreference = passenger?.routePreferences?.find(pref => pref.route === route.type);
+            const passengerReaction = passengerPreference ? this.getReactionFromPreference(passengerPreference.preference) : 'neutral';
+            const fareModifier = passengerPreference?.fareModifier || 1.0;
+            
+            let bonusInfo = this.buildRouteInfo(route.type, passengerPreference, routeMastery, weather, hazards, timeOfDay);
 
-          // Add weather and hazard warnings
-          if (weather && weather.intensity === 'heavy') {
-            bonusInfo += bonusInfo ? ' • ' : '';
-            bonusInfo += `Heavy ${weather.type} conditions`;
+            const routeResult = {
+              ...route,
+              ...costs,
+              available,
+              bonusInfo,
+              passengerReaction,
+              fareModifier
+            };
+            
+            return routeResult;
+          } catch (error) {
+            console.error('Route processing error for', route.type, ':', error);
+            // Return a basic route if processing fails
+            return {
+              ...route,
+              fuelCost: 15,
+              timeCost: 20,
+              riskLevel: 1,
+              available: safeFuel >= 15 && safeTime >= 20,
+              bonusInfo: 'Basic route (error recovery)',
+              passengerReaction: 'neutral' as const,
+              fareModifier: 1.0
+            };
           }
-
-          if (hazards && hazards.length > 0) {
-            const routeHazards = hazards.filter(h => h.effects.routeBlocked?.includes(route.type));
-            if (routeHazards.length > 0) {
-              bonusInfo += bonusInfo ? ' • ' : '';
-              bonusInfo += '⚠️ Route affected by hazards';
-            }
-          }
-
-          return {
-            ...route,
-            ...costs,
-            available,
-            bonusInfo
-          };
         });
+        
+        return resultRoutes;
       },
       'route_options_failed',
       [] // Empty array as fallback
     );
+  }
+
+  /**
+   * Check if a route is available based on current game conditions
+   * ALL ROUTES ARE ALWAYS AVAILABLE - no route blocking, only penalties
+   */
+  static checkRouteAvailability(
+    routeType: 'normal' | 'shortcut' | 'scenic' | 'police',
+    weather?: WeatherCondition,
+    timeOfDay?: TimeOfDay,
+    routeConsequences?: string[],
+    passenger?: import('../types/game').Passenger
+  ): boolean {
+    // ALL ROUTES ARE ALWAYS AVAILABLE
+    // Former blocking conditions now just add severe penalties instead of disabling routes
+    return true;
+  }
+
+  /**
+   * Build informative text about route choice including passenger reactions
+   */
+  static buildRouteInfo(
+    routeType: 'normal' | 'shortcut' | 'scenic' | 'police',
+    passengerPreference?: import('../types/game').RoutePreference,
+    routeMastery?: Record<string, number>,
+    weather?: WeatherCondition,
+    hazards?: EnvironmentalHazard[],
+    timeOfDay?: import('../types/game').TimeOfDay
+  ): string {
+    const infoSections: string[] = [];
+
+    // Base route benefits
+    switch (routeType) {
+      case 'scenic':
+        const bonus = passengerPreference?.fareModifier ? 
+          Math.round((passengerPreference.fareModifier - 1) * 100) : 10;
+        infoSections.push(`+${bonus}% fare bonus`);
+        break;
+      case 'police':
+        infoSections.push('No supernatural encounters');
+        break;
+      case 'shortcut':
+        infoSections.push('Risk of supernatural encounters');
+        break;
+    }
+
+    // Passenger reaction with penalty warnings
+    if (passengerPreference) {
+      const reactionText = {
+        'loves': '😍 Passenger loves this route',
+        'likes': '😊 Passenger likes this route', 
+        'neutral': '😐 Passenger is indifferent',
+        'dislikes': '😒 Passenger dislikes this route',
+        'fears': '😨 PASSENGER FEAR: +5 fuel, +8 min, +1 risk'
+      }[passengerPreference.preference];
+      
+      if (reactionText && passengerPreference.preference !== 'neutral') {
+        infoSections.push(reactionText);
+      }
+    }
+
+    // Mastery bonuses
+    if (routeMastery && routeMastery[routeType] >= 5) {
+      const level = routeMastery[routeType];
+      if (level >= 10) {
+        infoSections.push('⭐ Master level - Max bonuses');
+      } else {
+        infoSections.push(`✨ Experienced (${level} uses) - Reduced costs`);
+      }
+    }
+
+    // Weather warnings with specific impacts
+    if (weather) {
+      if (weather.intensity === 'heavy') {
+        if (routeType === 'shortcut' && (weather.type === 'rain' || weather.type === 'fog' || weather.type === 'snow')) {
+          infoSections.push(`⚠️ DANGEROUS: Heavy ${weather.type} (+8 fuel, +10 min, +2 risk)`);
+        } else if (routeType === 'scenic' && weather.type === 'thunderstorm') {
+          infoSections.push(`⚠️ RISKY: Storm damage (+5 fuel, +15 min, +1 risk)`);
+        } else {
+          infoSections.push(`🌦️ Heavy ${weather.type} conditions`);
+        }
+      }
+    }
+
+    // Time-based warnings
+    if (timeOfDay && routeType === 'scenic' && timeOfDay.phase === 'latenight') {
+      infoSections.push('🌙 NIGHT RISK: +3 fuel, +8 min, +1 risk');
+    }
+
+    // Hazard warnings  
+    if (hazards && hazards.length > 0) {
+      const routeHazards = hazards.filter(h => h.effects.routeBlocked?.includes(routeType));
+      if (routeHazards.length > 0) {
+        infoSections.push('⚠️ Route affected by hazards - increased costs');
+      }
+    }
+
+    return infoSections.join(' • ');
+  }
+
+  /**
+   * Convert preference level to reaction type
+   */
+  static getReactionFromPreference(preference: string): 'positive' | 'negative' | 'neutral' {
+    switch (preference) {
+      case 'loves':
+      case 'likes':
+        return 'positive';
+      case 'dislikes':
+      case 'fears':
+        return 'negative';
+      default:
+        return 'neutral';
+    }
   }
 }

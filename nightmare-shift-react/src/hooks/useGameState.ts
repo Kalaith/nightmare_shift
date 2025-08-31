@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { GameState, PlayerStats, Passenger } from '../types/game';
+import type { ShiftData } from '../utils/statsHandler';
 import { STORAGE_KEYS, GAME_CONSTANTS, SCREENS, GAME_PHASES } from '../data/constants';
 import { ReputationService } from '../services/reputationService';
 import { GameEngine } from '../services/gameEngine';
@@ -35,7 +36,11 @@ const getInitialGameState = (): GameState => {
     timeOfDay: WeatherService.updateTimeOfDay(Date.now(), Date.now()),
     season,
     environmentalHazards: [],
-    weatherEffects: []
+    weatherEffects: [],
+    // Route mastery and consequence tracking
+    routeMastery: { normal: 0, shortcut: 0, scenic: 0, police: 0 },
+    routeConsequences: [],
+    consecutiveRouteStreak: { type: '', count: 0 }
   };
 };
 
@@ -82,7 +87,11 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const startShift = () => {
-    setGameState(prev => ({ ...prev, shiftStartTime: Date.now() }));
+    setGameState(prev => ({ 
+      ...prev, 
+      shiftStartTime: Date.now(),
+      fuel: GAME_CONSTANTS.INITIAL_FUEL // Reset fuel to 100% at start of each shift
+    }));
     showScreen(SCREENS.GAME);
     setTimeout(() => showRideRequest(), 2000 + Math.random() * 3000);
   };
@@ -113,7 +122,7 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const deleteSavedGame = () => {
-    SaveGameService.deleteSavedGame();
+    SaveGameService.clearSave();
   };
 
   const getRandomPassenger = (): Passenger | null => {
@@ -125,22 +134,66 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const showRideRequest = () => {
+    // Don't show new ride request if in active phases (but allow if transitioning from dropOff)
+    if (gameState.currentPassenger && 
+        gameState.gamePhase !== GAME_PHASES.DROP_OFF && 
+        gameState.gamePhase !== GAME_PHASES.WAITING) {
+      console.log('showRideRequest blocked - active passenger:', {
+        hasPassenger: !!gameState.currentPassenger,
+        gamePhase: gameState.gamePhase
+      });
+      return;
+    }
+    
+    console.log('showRideRequest proceeding - current state:', {
+      gamePhase: gameState.gamePhase,
+      hasPassenger: !!gameState.currentPassenger
+    });
+    
     // Update weather and environmental conditions
     updateWeatherAndEnvironment();
     
+    // Check if all passengers have been used and reset if necessary
+    const availablePassengers = gameData.passengers.filter(
+      passenger => !gameState.usedPassengers.includes(passenger.id)
+    );
+    
+    // If no passengers available, either reset the used passenger list or select from all
+    let currentUsedPassengers = gameState.usedPassengers;
+    if (availablePassengers.length === 0) {
+      // Allow passengers to repeat after all have been used once
+      currentUsedPassengers = [];
+    }
+    
     // Use weather-aware passenger selection
     const passengerResult = PassengerService.selectWeatherAwarePassenger(
-      gameState.usedPassengers,
+      currentUsedPassengers,
       gameState.difficultyLevel || 1,
       gameState.currentWeather,
       gameState.timeOfDay,
       gameState.season
     );
     
-    const passenger = passengerResult.success ? passengerResult.data : getRandomPassenger();
+    let passenger = passengerResult.success ? passengerResult.data : null;
     
+    // If weather-aware selection fails, use fallback selection
     if (!passenger) {
-      endShift(true);
+      passenger = PassengerService.getRandomPassenger(
+        gameData.passengers,
+        currentUsedPassengers,
+        gameState.difficultyLevel || 1
+      );
+    }
+    
+    // If we still don't have a passenger, force select one from all available
+    if (!passenger && gameData.passengers.length > 0) {
+      passenger = gameData.passengers[Math.floor(Math.random() * gameData.passengers.length)];
+    }
+    
+    // Only end shift if there are truly no passengers available (should never happen)
+    if (!passenger) {
+      console.warn('No passengers available - this should never happen');
+      endShift(false);
       return;
     }
 
@@ -154,7 +207,7 @@ export const useGameState = (playerStats: PlayerStats) => {
       ...prev,
       currentPassenger: passenger,
       gamePhase: GAME_PHASES.RIDE_REQUEST,
-      usedPassengers: [...prev.usedPassengers, passenger.id],
+      usedPassengers: [...currentUsedPassengers, passenger.id],
       // Add weather-triggered rules to current rules
       currentRules: [
         ...prev.currentRules,
@@ -213,7 +266,7 @@ export const useGameState = (playerStats: PlayerStats) => {
     showScreen(SCREENS.GAME_OVER);
   };
 
-  const endShift = (successful: boolean) => {
+  const endShift = (successful: boolean): ShiftData => {
     const shiftEndTime = Date.now();
     const shiftDuration = gameState.shiftStartTime ? 
       Math.round((shiftEndTime - gameState.shiftStartTime) / (1000 * 60)) : 0;
@@ -248,14 +301,18 @@ export const useGameState = (playerStats: PlayerStats) => {
       gameOver(failureReason);
     }
 
+    const finalEarningsForScore = actuallySuccessful ? gameState.earnings + GAME_CONSTANTS.SURVIVAL_BONUS : gameState.earnings;
+    const calculatedScore = finalEarningsForScore + (gameState.ridesCompleted * 10) - ((gameState.rulesViolated || 0) * 5);
+
     return {
-      earnings: actuallySuccessful ? gameState.earnings + GAME_CONSTANTS.SURVIVAL_BONUS : gameState.earnings,
+      earnings: finalEarningsForScore,
       ridesCompleted: gameState.ridesCompleted,
       timeSpent: shiftDuration,
-      successful: actuallySuccessful,
+      survived: actuallySuccessful,
       rulesViolated: gameState.rulesViolated || 0,
       passengersEncountered: gameState.usedPassengers.length,
-      difficultyLevel: gameState.difficultyLevel || 0
+      difficultyLevel: gameState.difficultyLevel || 0,
+      score: calculatedScore
     };
   };
 

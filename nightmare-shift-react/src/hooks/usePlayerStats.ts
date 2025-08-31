@@ -30,14 +30,14 @@ export const usePlayerStats = () => {
   const updatePlayerStats = (updates: Partial<PlayerStats>) => {
     const newStats = { ...playerStats, ...updates, lastPlayDate: Date.now() };
     setPlayerStats(newStats);
-    PlayerStatsService.updatePlayerStats(updates);
+    PlayerStatsService.updateStats(updates);
   };
 
   const addToLeaderboard = (entry: {
     earnings: number;
     ridesCompleted: number;
     timeSpent: number;
-    successful: boolean;
+    survived: boolean;
     rulesViolated: number;
     passengersEncountered: number;
     difficultyLevel: number;
@@ -46,13 +46,13 @@ export const usePlayerStats = () => {
       score: entry.earnings + (entry.ridesCompleted * 10) - (entry.rulesViolated * 5),
       timeRemaining: 0, // This would need to be calculated from game state
       date: new Date().toLocaleDateString(),
-      survived: entry.successful,
+      survived: entry.survived,
       passengersTransported: entry.ridesCompleted,
       difficultyLevel: entry.difficultyLevel,
       rulesViolated: entry.rulesViolated
     };
 
-    LeaderboardService.addEntry(leaderboardEntry);
+    LeaderboardService.addScore(leaderboardEntry);
   };
 
   return {

@@ -32,10 +32,17 @@ export const useGameActions = ({
   }, [gameState.fuel, gameOver]);
 
   const declineRide = useCallback(() => {
+    // Reset to waiting state after declining
+    setGameState(prev => ({
+      ...prev,
+      gamePhase: GAME_PHASES.WAITING,
+      currentPassenger: null
+    }));
+    
     setTimeout(() => {
       showRideRequest();
     }, 2000 + Math.random() * 3000);
-  }, [showRideRequest]);
+  }, [showRideRequest, setGameState]);
 
   const startDriving = useCallback((phase: 'pickup' | 'destination') => {
     const location = phase === 'pickup' 
@@ -55,7 +62,15 @@ export const useGameActions = ({
     const passengerRiskLevel = gameState.currentPassenger ? 
       gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)?.riskLevel || 1 : 1;
     
-    const routeCosts = RouteService.calculateRouteCosts(routeChoice, passengerRiskLevel);
+    const routeCosts = RouteService.calculateRouteCosts(
+      routeChoice, 
+      passengerRiskLevel, 
+      gameState.currentWeather,
+      gameState.timeOfDay,
+      gameState.environmentalHazards,
+      gameState.routeMastery,
+      gameState.currentPassenger || undefined
+    );
     
     // Check if player has enough resources
     if (gameState.fuel < routeCosts.fuelCost) {
@@ -77,11 +92,18 @@ export const useGameActions = ({
       }
     }
 
-    // Apply route effects
-    let bonusEarnings = 0;
-    if (routeChoice === 'scenic' && gameState.currentPassenger) {
-      bonusEarnings = 10; // Scenic route bonus
+    // Get passenger preference and calculate dialogue trigger
+    const passengerPreference = gameState.currentPassenger?.routePreferences?.find(
+      pref => pref.route === routeChoice
+    );
+    
+    let routeDialogue: string | null = null;
+    if (passengerPreference && Math.random() < (passengerPreference.triggerChance || 0.5)) {
+      routeDialogue = passengerPreference.specialDialogue || null;
     }
+
+    // Apply route effects - no more flat bonuses, use passenger multipliers
+    let bonusEarnings = 0;
 
     // Record route choice in history
     const routeHistoryEntry = {
@@ -99,7 +121,18 @@ export const useGameActions = ({
       fuel: prev.fuel - routeCosts.fuelCost,
       timeRemaining: prev.timeRemaining - routeCosts.timeCost,
       earnings: prev.earnings + bonusEarnings,
-      routeHistory: [...prev.routeHistory, routeHistoryEntry]
+      routeHistory: [...prev.routeHistory, routeHistoryEntry],
+      // Update route mastery
+      routeMastery: {
+        ...prev.routeMastery,
+        [routeChoice]: (prev.routeMastery?.[routeChoice] || 0) + 1
+      },
+      // Track route streaks for consequences
+      consecutiveRouteStreak: prev.consecutiveRouteStreak?.type === routeChoice 
+        ? { type: routeChoice, count: prev.consecutiveRouteStreak.count + 1 }
+        : { type: routeChoice, count: 1 },
+      // Store route dialogue for interaction phase
+      pendingRouteDialogue: routeDialogue
     }));
 
     // Handle supernatural encounters based on risk level
@@ -119,14 +152,17 @@ export const useGameActions = ({
     const passenger = gameState.currentPassenger;
     if (!passenger) return;
 
-    const dialogue = passenger.dialogue[Math.floor(Math.random() * passenger.dialogue.length)];
+    // Use route dialogue if available, otherwise use random dialogue
+    const dialogue = gameState.pendingRouteDialogue || 
+      passenger.dialogue[Math.floor(Math.random() * passenger.dialogue.length)];
 
     setGameState(prev => ({ 
       ...prev, 
       gamePhase: GAME_PHASES.INTERACTION,
-      currentDialogue: dialogue
+      currentDialogue: dialogue,
+      pendingRouteDialogue: null // Clear after use
     }));
-  }, [gameState.currentPassenger, setGameState]);
+  }, [gameState.currentPassenger, gameState.pendingRouteDialogue, setGameState]);
 
   const continueToDestination = useCallback(() => {
     startDriving('destination');
@@ -136,8 +172,20 @@ export const useGameActions = ({
     const passenger = gameState.currentPassenger;
     if (!passenger) return;
 
+    // Get the route choice from recent history
+    const recentRoute = gameState.routeHistory?.[gameState.routeHistory.length - 1];
+    const routeChoice = recentRoute?.choice;
+    
+    // Find passenger's preference for the chosen route
+    const passengerPreference = passenger.routePreferences?.find(
+      pref => pref.route === routeChoice
+    );
+    
+    // Apply fare modifier based on passenger preference
+    const fareModifier = passengerPreference?.fareModifier || 1.0;
     const baseFare = passenger.fare;
-    const earnedFare = Math.floor(baseFare + (Math.random() * 10) - 5);
+    const modifiedFare = Math.floor(baseFare * fareModifier);
+    const earnedFare = Math.floor(modifiedFare + (Math.random() * 10) - 5);
     const actualEarnings = Math.max(earnedFare, 5);
     
     // Collect items that might be received
@@ -301,24 +349,38 @@ export const useGameActions = ({
   }, [gameState.fuel, gameState.earnings, setGameState]);
 
   const continueFromDropOff = useCallback(() => {
+    console.log('continueFromDropOff called - current state:', {
+      currentPassenger: gameState.currentPassenger?.name,
+      gamePhase: gameState.gamePhase
+    });
+    
     // Clear the completed ride data and return to waiting phase
-    setGameState(prev => ({
-      ...prev,
-      gamePhase: GAME_PHASES.WAITING,
-      currentPassenger: null,
-      lastRideCompletion: undefined
-    }));
+    setGameState(prev => {
+      console.log('continueFromDropOff setState - clearing passenger and setting to waiting');
+      return {
+        ...prev,
+        gamePhase: GAME_PHASES.WAITING,
+        currentPassenger: null,
+        lastRideCompletion: undefined
+      };
+    });
 
     // Schedule next ride request based on current state
     setTimeout(() => {
+      console.log('continueFromDropOff timeout - checking state for next action:', {
+        timeRemaining: gameState.timeRemaining,
+        fuel: gameState.fuel
+      });
+      
+      // Check current game state values to decide whether to continue or end
       if (gameState.timeRemaining <= 60 || gameState.fuel <= 5) {
+        console.log('Ending shift due to low resources');
         endShift(true);
       } else {
-        setTimeout(() => {
-          showRideRequest();
-        }, 2000 + Math.random() * 3000);
+        console.log('Calling showRideRequest from continueFromDropOff timeout');
+        showRideRequest();
       }
-    }, 500);
+    }, 2500 + Math.random() * 2500); // Single timeout with random delay
   }, [gameState, setGameState, endShift, showRideRequest]);
 
   return {

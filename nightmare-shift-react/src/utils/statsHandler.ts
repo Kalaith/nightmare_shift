@@ -8,6 +8,7 @@ export interface ShiftData {
   score: number;
   survived: boolean;
   difficultyLevel: number;
+  passengersEncountered: number;
 }
 
 export const createStatsUpdater = (

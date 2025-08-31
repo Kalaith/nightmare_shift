@@ -58,6 +58,16 @@ export interface GuidelineConsequence {
   probability: number;
 }
 
+export interface RoutePreference {
+  route: 'normal' | 'shortcut' | 'scenic' | 'police';
+  preference: 'loves' | 'likes' | 'neutral' | 'dislikes' | 'fears';
+  reason: string;
+  fareModifier: number; // Multiplier for fare (0.5 = 50% fare, 1.5 = 150% fare)
+  stressModifier: number; // How much this route affects their stress (-0.3 to +0.5)
+  specialDialogue?: string; // What they say when you pick this route
+  triggerChance?: number; // 0-1, chance they'll comment on route choice
+}
+
 export interface Passenger {
   id: number;
   name: string;
@@ -79,6 +89,7 @@ export interface Passenger {
   deceptionLevel?: number; // 0-1, how likely they are to lie or misdirect
   stressLevel?: number; // 0-1, current psychological state
   trustRequired?: number; // 0-1, how much player trust is needed to trigger exceptions
+  routePreferences?: RoutePreference[]; // How they feel about different route choices
   ruleModification?: {
     canModify: boolean;
     type: 'remove_rule' | 'reveal_hidden' | 'add_temporary';
@@ -152,6 +163,11 @@ export interface GameState {
   weatherEffects: WeatherEffect[];
   // Guideline system properties
   activeExceptions?: GuidelineException[];
+  // Route mastery and consequence tracking
+  routeMastery?: Record<string, number>; // Track uses of each route type
+  routeConsequences?: string[]; // Active route-based consequences
+  consecutiveRouteStreak?: { type: string; count: number }; // Track route patterns
+  pendingRouteDialogue?: string | null; // Dialogue triggered by route choice
   detectedTells?: DetectedTell[];
   playerTrust?: number; // 0-1, player's accumulated trust level
   decisionHistory?: GuidelineDecision[];
