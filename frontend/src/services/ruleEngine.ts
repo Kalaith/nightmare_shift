@@ -1,50 +1,115 @@
-import type { Rule, GameState, Passenger } from '../types/game';
+import type {
+  GuidelineException,
+  Passenger,
+  PassengerNeedState,
+  Rule,
+  RuleEvaluationResult
+} from '../types/game';
+
+const STAGE_ORDER: Record<string, number> = {
+  calm: 0,
+  warning: 1,
+  critical: 2,
+  meltdown: 3
+};
 
 export class RuleEngine {
-  static validateAction(rules: Rule[], gameState: GameState, action: string): Rule | null {
-    for (const rule of rules) {
-      if (this.isViolation(rule, gameState, action)) {
-        return rule;
+  static evaluateAction(
+    action: string,
+    rules: Rule[],
+    passenger: Passenger | null,
+    needState: PassengerNeedState | null,
+    ruleConfidence: number
+  ): RuleEvaluationResult | null {
+    const rule = this.findMatchingRule(action, rules);
+    if (!rule) return null;
+
+    if (rule.actionType && rule.actionType !== 'forbidden') {
+      return {
+        rule,
+        action,
+        violation: false,
+        consequences: rule.followConsequences || [],
+        confidenceDelta: 0,
+        needAdjustment: rule.followNeedAdjustment || 0
+      };
+    }
+
+    const activeException = this.findActiveException(rule, passenger, needState);
+
+    if (activeException && activeException.breakingSafer) {
+      return {
+        rule,
+        action,
+        violation: false,
+        triggeredException: activeException,
+        consequences: rule.exceptionRewards || [],
+        confidenceDelta: this.calculateConfidenceDelta(ruleConfidence, true),
+        needAdjustment: rule.exceptionNeedAdjustment ?? -20
+      };
+    }
+
+    return {
+      rule,
+      action,
+      violation: true,
+      consequences: rule.breakConsequences || [],
+      confidenceDelta: this.calculateConfidenceDelta(ruleConfidence, false),
+      needAdjustment: rule.breakNeedAdjustment ?? 10,
+      message: rule.violationMessage || `Breaking "${rule.title}" backfired disastrously.`
+    };
+  }
+
+  private static findMatchingRule(action: string, rules: Rule[]): Rule | null {
+    return rules.find(rule => rule.actionKey === action) || null;
+  }
+
+  private static findActiveException(
+    rule: Rule,
+    passenger: Passenger | null,
+    needState: PassengerNeedState | null
+  ): GuidelineException | null {
+    if (!rule.exceptions || rule.exceptions.length === 0) return null;
+    if (!passenger?.guidelineExceptions || passenger.guidelineExceptions.length === 0) {
+      return null;
+    }
+
+    for (const exception of rule.exceptions) {
+      if (!passenger.guidelineExceptions.includes(exception.id)) continue;
+
+      if (this.meetsStageRequirement(exception, needState)) {
+        return exception;
       }
     }
+
     return null;
   }
 
-  static isViolation(rule: Rule, gameState: GameState, action: string): boolean {
-    switch (rule.id) {
-      case 1: // No Eye Contact
-        return action === 'eye_contact';
-      case 2: // Silent Night
-        return action === 'play_music';
-      case 3: // Cash Only
-        return action === 'accept_tip';
-      case 4: // Windows Sealed
-        return action === 'open_window';
-      case 5: // Route Restriction
-        return action === 'take_shortcut';
-      default:
-        return false;
-    }
+  private static meetsStageRequirement(
+    exception: GuidelineException,
+    needState: PassengerNeedState | null
+  ): boolean {
+    if (!needState) return false;
+
+    const requiredStage = exception.requiredStage || 'warning';
+    const currentStageRank = STAGE_ORDER[needState.stage] ?? 0;
+    const requiredStageRank = STAGE_ORDER[requiredStage] ?? 0;
+
+    return currentStageRank >= requiredStageRank;
   }
 
-  static checkConflicts(rules: Rule[]): Rule[] {
-    const conflicts: Rule[] = [];
-    
-    for (const rule of rules) {
-      if (rule.conflictsWith) {
-        for (const conflictId of rule.conflictsWith) {
-          if (rules.some(r => r.id === conflictId)) {
-            conflicts.push(rule);
-            break;
-          }
-        }
-      }
-    }
-    
-    return conflicts;
-  }
+  private static calculateConfidenceDelta(currentConfidence: number, correctBreak: boolean): number {
+    const base = correctBreak ? 0.1 : -0.15;
 
-  static getViolationMessage(rule: Rule): string {
-    return rule.violationMessage || `Rule violation: ${rule.title}`;
+    // Reward low confidence players a little more when they're right, punish reckless players harder when wrong
+    if (correctBreak && currentConfidence < 0.5) {
+      return base + 0.05;
+    }
+
+    if (!correctBreak && currentConfidence > 0.7) {
+      return base - 0.05;
+    }
+
+    return base;
   }
 }

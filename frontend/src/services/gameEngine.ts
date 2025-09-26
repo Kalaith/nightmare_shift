@@ -58,7 +58,16 @@ export class GameEngine {
       visible: guideline.visible,
       conflictsWith: guideline.conflictsWith,
       trigger: guideline.trigger,
-      violationMessage: guideline.violationMessage
+      violationMessage: guideline.violationMessage,
+      actionKey: guideline.actionKey,
+      actionType: guideline.actionType,
+      defaultSafety: guideline.defaultSafety,
+      defaultOutcome: guideline.defaultOutcome,
+      exceptions: guideline.exceptions,
+      followConsequences: guideline.followConsequences,
+      breakConsequences: guideline.breakConsequences,
+      exceptionRewards: guideline.exceptionRewards,
+      relatedGuidelineId: guideline.id
     }));
     
     return {
