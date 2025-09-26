@@ -54,7 +54,8 @@ export const guidelineData: Guideline[] = [
         ],
         breakingSafer: true,
         description: "Lonely passengers need acknowledgment or they become hostile",
-        probability: 0.3
+        probability: 0.3,
+        requiredStage: 'warning'
       }
     ],
     followConsequences: [
@@ -71,6 +72,20 @@ export const guidelineData: Guideline[] = [
         value: 1,
         description: "Made eye contact - face twisted into void",
         probability: 0.7
+      }
+    ],
+    exceptionRewards: [
+      {
+        type: 'reputation',
+        value: 8,
+        description: 'Acknowledged a lonely spirit with compassion.',
+        probability: 0.75
+      },
+      {
+        type: 'story_unlock',
+        value: 1,
+        description: 'Unlocked a new memory from the restless passenger.',
+        probability: 0.5
       }
     ]
   },
@@ -121,7 +136,8 @@ export const guidelineData: Guideline[] = [
         ],
         breakingSafer: true,
         description: "Passenger knows of supernatural danger on the GPS route",
-        probability: 0.4
+        probability: 0.4,
+        requiredStage: 'warning'
       }
     ],
     followConsequences: [
@@ -144,6 +160,20 @@ export const guidelineData: Guideline[] = [
         value: 1,
         description: "Supernatural ambush on unknown route",
         probability: 0.3
+      }
+    ],
+    exceptionRewards: [
+      {
+        type: 'reputation',
+        value: 10,
+        description: 'Proved you can read the signs and save passengers in danger.',
+        probability: 0.7
+      },
+      {
+        type: 'money',
+        value: 20,
+        description: 'Passenger doubled the fare in gratitude for the detour.',
+        probability: 0.6
       }
     ]
   },
@@ -194,7 +224,8 @@ export const guidelineData: Guideline[] = [
         ],
         breakingSafer: true,
         description: "Ghosts can't handle physical currency - refusing their payment angers them",
-        probability: 0.25
+        probability: 0.25,
+        requiredStage: 'warning'
       }
     ],
     followConsequences: [
@@ -212,9 +243,119 @@ export const guidelineData: Guideline[] = [
         description: "Cursed payment drained your life force",
         probability: 0.5
       }
+    ],
+    exceptionRewards: [
+      {
+        type: 'reputation',
+        value: 7,
+        description: 'Offered grace to a spirit who could not pay.',
+        probability: 0.65
+      },
+      {
+        type: 'story_unlock',
+        value: 1,
+        description: 'Gained a favor redeemable with the spectral community.',
+        probability: 0.45
+      }
     ]
   },
-  
+
+  {
+    id: 1011,
+    title: "Maintain Broadcast Silence",
+    description: "Keep the cab silent to avoid tuning into supernatural frequencies",
+    difficulty: 'easy',
+    type: 'basic',
+    visible: true,
+    isGuideline: true,
+    defaultSafety: 'safe',
+    actionKey: 'play_music',
+    actionType: 'forbidden',
+    exceptions: [
+      {
+        id: 'silent_soothing_song',
+        passengerTypes: ['Insomniac medium with restless spirits', 'Teenage banshee with stage fright'],
+        conditions: [
+          {
+            type: 'passenger_dialogue',
+            value: 'music',
+            operator: 'contains',
+            description: 'Passenger pleads for calming music'
+          },
+          {
+            type: 'passenger_behavior',
+            value: 0.65,
+            operator: 'greater_than',
+            description: 'Stress level high enough to risk an outburst'
+          }
+        ],
+        tells: [
+          {
+            type: 'verbal',
+            intensity: 'obvious',
+            description: "Please—just a soft song before I scream", 
+            triggerPhrase: 'soft song',
+            reliability: 0.85
+          },
+          {
+            type: 'behavioral',
+            intensity: 'moderate',
+            description: 'Passenger rocks back and forth gripping the seat',
+            animationCue: 'rocking_panic',
+            reliability: 0.7
+          },
+          {
+            type: 'verbal',
+            intensity: 'subtle',
+            description: 'Hums the first few notes of a lullaby under their breath',
+            audioCue: 'hummed_lullaby',
+            reliability: 0.6
+          }
+        ],
+        breakingSafer: true,
+        description: 'Certain passengers need a calming melody to keep their powers in check',
+        probability: 0.3,
+        requiredStage: 'warning'
+      }
+    ],
+    followConsequences: [
+      {
+        type: 'survival',
+        value: 1,
+        description: 'Silence kept the radio ghouls asleep',
+        probability: 0.8
+      }
+    ],
+    breakConsequences: [
+      {
+        type: 'death',
+        value: 1,
+        description: 'Amplified whispers lured something terrible into the cab',
+        probability: 0.4
+      },
+      {
+        type: 'fuel',
+        value: -5,
+        description: 'Interference with onboard systems drained power',
+        probability: 0.5
+      }
+    ],
+    exceptionRewards: [
+      {
+        type: 'reputation',
+        value: 6,
+        description: 'Known as the driver who keeps nervous passengers steady',
+        probability: 0.7
+      },
+      {
+        type: 'item',
+        value: 1,
+        description: 'Passenger gifts you a charm that tunes out hostile frequencies',
+        probability: 0.35
+      }
+    ]
+  },
+
   {
     id: 1004,
     title: "Never Speak First",
@@ -266,7 +407,8 @@ export const guidelineData: Guideline[] = [
         ],
         breakingSafer: true,
         description: "Nervous passengers need conversation to prevent violent breakdown",
-        probability: 0.35
+        probability: 0.35,
+        requiredStage: 'warning'
       }
     ],
     followConsequences: [
@@ -283,6 +425,14 @@ export const guidelineData: Guideline[] = [
         value: 1,
         description: "Breaking silence attracted something hostile",
         probability: 0.4
+      }
+    ],
+    exceptionRewards: [
+      {
+        type: 'reputation',
+        value: 6,
+        description: 'Talked a passenger down from the brink.',
+        probability: 0.65
       }
     ]
   },
@@ -332,7 +482,8 @@ export const guidelineData: Guideline[] = [
         ],
         breakingSafer: true,
         description: "Some passengers have legitimate emergency needs",
-        probability: 0.2
+        probability: 0.2,
+        requiredStage: 'critical'
       }
     ],
     followConsequences: [
@@ -348,6 +499,14 @@ export const guidelineData: Guideline[] = [
         type: 'death',
         value: 1,
         description: "Something caught up while stopped",
+        probability: 0.6
+      }
+    ],
+    exceptionRewards: [
+      {
+        type: 'reputation',
+        value: 9,
+        description: 'Trusted the emergency and saved your passenger.',
         probability: 0.6
       }
     ]
@@ -399,7 +558,8 @@ export const guidelineData: Guideline[] = [
         ],
         breakingSafer: true,
         description: "Some passengers genuinely need air or sunlight protection",
-        probability: 0.15
+        probability: 0.15,
+        requiredStage: 'critical'
       }
     ],
     followConsequences: [
@@ -416,6 +576,20 @@ export const guidelineData: Guideline[] = [
         value: 1,
         description: "Spirits entered through open window",
         probability: 0.5
+      }
+    ],
+    exceptionRewards: [
+      {
+        type: 'reputation',
+        value: 9,
+        description: 'Spared a passenger from suffocating in the sealed cab.',
+        probability: 0.7
+      },
+      {
+        type: 'item',
+        value: 1,
+        description: 'Received a sunlight talisman for your empathy.',
+        probability: 0.4
       }
     ]
   },

@@ -5,6 +5,18 @@ export interface Rule {
   difficulty: 'easy' | 'medium' | 'hard' | 'expert' | 'nightmare';
   type: 'basic' | 'conditional' | 'conflicting' | 'hidden' | 'weather';
   visible: boolean;
+  actionKey?: string;
+  actionType?: 'forbidden' | 'required';
+  relatedGuidelineId?: number;
+  defaultSafety?: 'safe' | 'risky' | 'dangerous';
+  defaultOutcome?: string;
+  exceptions?: GuidelineException[];
+  followConsequences?: GuidelineConsequence[];
+  breakConsequences?: GuidelineConsequence[];
+  exceptionRewards?: GuidelineConsequence[];
+  exceptionNeedAdjustment?: number;
+  followNeedAdjustment?: number;
+  breakNeedAdjustment?: number;
   conflictsWith?: number[];
   trigger?: string;
   violationMessage?: string;
@@ -21,6 +33,7 @@ export interface Guideline extends Rule {
   defaultSafety: 'safe' | 'risky' | 'dangerous';
   breakConsequences: GuidelineConsequence[];
   followConsequences: GuidelineConsequence[];
+  exceptionRewards?: GuidelineConsequence[];
 }
 
 export interface GuidelineException {
@@ -32,6 +45,7 @@ export interface GuidelineException {
   breakingSafer: boolean;
   description: string;
   probability: number;
+  requiredStage?: PassengerNeedStage;
 }
 
 export interface ExceptionCondition {
@@ -56,6 +70,53 @@ export interface GuidelineConsequence {
   value: number;
   description: string;
   probability: number;
+}
+
+export type PassengerNeedStage = 'calm' | 'warning' | 'critical' | 'meltdown';
+
+export interface NeedChangeProfile {
+  passive: number;
+  obey: number;
+  break: number;
+  exceptionRelief: number;
+}
+
+export interface PassengerStateProfile {
+  needType: 'hunger' | 'fear' | 'wrath' | 'decay' | 'loneliness' | 'unknown';
+  initialLevel: number; // 0-100 scale
+  thresholds: {
+    warning: number;
+    critical: number;
+    meltdown: number;
+  };
+  needChange: NeedChangeProfile;
+  exceptionId?: string;
+  tellIntensities?: Partial<Record<PassengerNeedStage, Array<'subtle' | 'moderate' | 'obvious'>>>;
+  dialogueByStage?: Partial<Record<PassengerNeedStage, string[]>>;
+  trustImpact?: Partial<Record<PassengerNeedStage, number>>;
+  confidenceImpact?: Partial<Record<PassengerNeedStage, number>>;
+}
+
+export interface PassengerNeedState {
+  passengerId: number;
+  needType: PassengerStateProfile['needType'];
+  level: number;
+  stage: PassengerNeedStage;
+  stability: number; // 0-1 scale
+  lastUpdated: number;
+  revealedStages: Partial<Record<PassengerNeedStage, boolean>>;
+  profile: PassengerStateProfile;
+}
+
+export interface RuleEvaluationResult {
+  rule: Rule;
+  action: string;
+  violation: boolean;
+  triggeredException?: GuidelineException;
+  consequences: GuidelineConsequence[];
+  confidenceDelta: number;
+  needAdjustment: number;
+  message?: string;
 }
 
 export interface RoutePreference {
@@ -103,6 +164,7 @@ export interface Passenger {
       duration: number;
     };
   };
+  stateProfile?: PassengerStateProfile;
 }
 
 export interface Location {
@@ -171,6 +233,8 @@ export interface GameState {
   detectedTells?: DetectedTell[];
   playerTrust?: number; // 0-1, player's accumulated trust level
   decisionHistory?: GuidelineDecision[];
+  ruleConfidence: number;
+  currentPassengerNeedState?: PassengerNeedState | null;
 }
 
 export interface InventoryItem {
