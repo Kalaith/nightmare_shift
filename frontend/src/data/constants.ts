@@ -13,17 +13,17 @@ export const GAME_CONSTANTS: GameConstants = {
   SURVIVAL_BONUS: 50,
   BACKSTORY_UNLOCK_FIRST: 0.2,
   BACKSTORY_UNLOCK_REPEAT: 0.5,
-  MINIMUM_EARNINGS: 100, // Reduced from 120 - strategic play should reliably hit this
-  // Route fuel costs
-  FUEL_COST_NORMAL: 15,
-  FUEL_COST_SHORTCUT: 8,
-  FUEL_COST_SCENIC: 25,
-  FUEL_COST_POLICE: 20,
-  // Route time costs  
-  TIME_COST_NORMAL: 20,
-  TIME_COST_SHORTCUT: 12,
-  TIME_COST_SCENIC: 35,
-  TIME_COST_POLICE: 25,
+  MINIMUM_EARNINGS: 80, // Reduced to make game winnable
+  // Route fuel costs - REDUCED by ~30% to allow more rides
+  FUEL_COST_NORMAL: 10,
+  FUEL_COST_SHORTCUT: 6,
+  FUEL_COST_SCENIC: 18,
+  FUEL_COST_POLICE: 14,
+  // Route time costs - REDUCED by ~30% to allow more rides
+  TIME_COST_NORMAL: 14,
+  TIME_COST_SHORTCUT: 8,
+  TIME_COST_SCENIC: 25,
+  TIME_COST_POLICE: 18,
   // Route risk levels
   RISK_NORMAL: 1,
   RISK_SHORTCUT: 3,

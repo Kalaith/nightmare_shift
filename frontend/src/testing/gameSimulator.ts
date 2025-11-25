@@ -53,7 +53,7 @@ export class GameSimulator {
             if (consecutiveRouteStreak?.type === routeChoice) {
                 consecutiveRouteStreak.count++;
                 if (routeChoice === 'shortcut' && consecutiveRouteStreak.count >= GAME_BALANCE.CONSECUTIVE_ROUTE.VIOLATION_THRESHOLD) {
-                    gameOverReason = 'Consecutive shortcut violation';
+                    gameOverReason = `Consecutive shortcut violation (${consecutiveRouteStreak.count} shortcuts)`;
                     break;
                 }
             } else {
@@ -65,10 +65,13 @@ export class GameSimulator {
             );
 
             if (fuel < routeCosts.fuelCost) {
-                gameOverReason = 'Ran out of fuel';
+                gameOverReason = `Ran out of fuel (needed ${routeCosts.fuelCost}, had ${Math.round(fuel)})`;
                 break;
             }
-            if (timeRemaining < routeCosts.timeCost) break;
+            if (timeRemaining < routeCosts.timeCost) {
+                gameOverReason = `Ran out of time (needed ${routeCosts.timeCost}min, had ${Math.round(timeRemaining)}min)`;
+                break;
+            }
 
             fuel -= routeCosts.fuelCost;
             timeRemaining -= routeCosts.timeCost;
@@ -76,14 +79,20 @@ export class GameSimulator {
             earnings += fare;
             ridesCompleted++;
             routeDistribution[routeChoice]++;
+        }
 
-            if (verbose && ridesCompleted % 5 === 0) {
-                console.log(`Ride ${ridesCompleted}: ${routeChoice}, $${fare}, Fuel: ${fuel}%, Time: ${timeRemaining}min`);
-            }
+        const success = !gameOverReason && earnings >= GAME_CONSTANTS.MINIMUM_EARNINGS;
+
+        if (!success && verbose) {
+            console.log(`\n${strategy} FAILED:`);
+            console.log(`  Rides: ${ridesCompleted}, Earnings: $${Math.round(earnings)}`);
+            console.log(`  Fuel: ${Math.round(fuel)}, Time: ${Math.round(timeRemaining)}min`);
+            if (gameOverReason) console.log(`  Reason: ${gameOverReason}`);
+            else console.log(`  Reason: Insufficient earnings ($${Math.round(earnings)} < $${GAME_CONSTANTS.MINIMUM_EARNINGS})`);
         }
 
         return {
-            strategy, success: !gameOverReason && earnings >= GAME_CONSTANTS.MINIMUM_EARNINGS,
+            strategy, success,
             finalEarnings: Math.round(earnings), ridesCompleted, fuelRemaining: fuel, timeRemaining,
             gameOverReason, routeDistribution,
             averageFarePerRide: ridesCompleted > 0 ? earnings / ridesCompleted : 0,
@@ -141,7 +150,7 @@ export class GameSimulator {
 
                 for (const pref of prefs) {
                     const route = pref.route as RouteChoice;
-                    let routeMult = route === 'shortcut' ? 0.8 : route === 'scenic' ? 1.15 : 1.0;
+                    let routeMult = route === 'shortcut' ? 0.85 : route === 'scenic' ? 1.25 : route === 'police' ? 1.05 : 1.0;
                     const passengerMult = pref.fareModifier || 1.0;
                     let score = routeMult * passengerMult;
 
@@ -198,36 +207,52 @@ export class GameSimulator {
         Object.entries(stats.strategyResults).forEach(([strategy, result]) => {
             if (result.runs > 0) {
                 const successRate = (result.successes / result.runs) * 100;
+                const avgFarePerRide = result.avgRides > 0 ? Math.round(result.avgEarnings / result.avgRides) : 0;
                 console.log(`\n${strategy.toUpperCase().replace('_', ' ')}:`);
                 console.log(`  Runs: ${result.runs}`);
                 console.log(`  Success Rate: ${successRate.toFixed(1)}%`);
                 console.log(`  Avg Earnings: $${result.avgEarnings}`);
                 console.log(`  Avg Rides: ${result.avgRides}`);
+                console.log(`  Avg Fare/Ride: $${avgFarePerRide}`);
                 console.log(`  ${result.avgEarnings >= GAME_CONSTANTS.MINIMUM_EARNINGS ? '✅ PASS' : '❌ FAIL'}`);
             }
         });
+
+        console.log('\n' + '='.repeat(80));
+        console.log('ROUTE ECONOMICS');
+        console.log('='.repeat(80));
+
+        console.log('\nBase Costs (no modifiers):');
+        console.log(`  Shortcut: ${GAME_CONSTANTS.FUEL_COST_SHORTCUT}f, ${GAME_CONSTANTS.TIME_COST_SHORTCUT}m → 0.85x fare`);
+        console.log(`  Normal:   ${GAME_CONSTANTS.FUEL_COST_NORMAL}f, ${GAME_CONSTANTS.TIME_COST_NORMAL}m → 1.0x fare`);
+        console.log(`  Scenic:   ${GAME_CONSTANTS.FUEL_COST_SCENIC}f, ${GAME_CONSTANTS.TIME_COST_SCENIC}m → 1.25x fare`);
+        console.log(`  Police:   ${GAME_CONSTANTS.FUEL_COST_POLICE}f, ${GAME_CONSTANTS.TIME_COST_POLICE}m → 1.05x fare`);
 
         console.log('\n' + '='.repeat(80));
         console.log('BALANCE ANALYSIS');
         console.log('='.repeat(80));
 
         const perfect = stats.strategyResults.perfect;
+        const strategic = stats.strategyResults.strategic;
         const shortcut = stats.strategyResults.shortcut_spam;
+        const scenic = stats.strategyResults.scenic_only;
 
-        if (perfect && shortcut) {
-            console.log(`\n✓ Perfect strategy: ${(perfect.successes / perfect.runs * 100).toFixed(1)}%`);
+        if (perfect && strategic && shortcut && scenic) {
+            console.log(`\n✓ Perfect: ${(perfect.successes / perfect.runs * 100).toFixed(1)}%`);
+            console.log(`✓ Strategic: ${(strategic.successes / strategic.runs * 100).toFixed(1)}%`);
             console.log(`✓ Shortcut spam: ${(shortcut.successes / shortcut.runs * 100).toFixed(1)}%`);
+            console.log(`✓ Scenic only: ${(scenic.successes / scenic.runs * 100).toFixed(1)}%`);
 
-            if (perfect.successes / perfect.runs >= 0.85) {
-                console.log('\n✅ BALANCE GOOD: Perfect play is highly successful');
+            if (strategic.successes / strategic.runs >= 0.75) {
+                console.log('\n✅ BALANCE GOOD: Strategic play is highly successful (75%+)');
             } else {
-                console.log('\n⚠️  BALANCE ISSUE: Perfect play should be 85%+ successful');
+                console.log('\n⚠️  BALANCE ISSUE: Strategic play should be 75%+ successful');
             }
 
-            if (shortcut.avgEarnings < GAME_CONSTANTS.MINIMUM_EARNINGS) {
+            if (shortcut.successes / shortcut.runs <= 0.1) {
                 console.log('✅ BALANCE GOOD: Shortcut spam is not viable');
             } else {
-                console.log('⚠️  BALANCE ISSUE: Shortcut spam too profitable');
+                console.log('⚠️  BALANCE ISSUE: Shortcut spam too successful');
             }
         }
 

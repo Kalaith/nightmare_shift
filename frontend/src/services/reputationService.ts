@@ -182,10 +182,10 @@ export class RouteService {
         pref => pref.route === routeType && pref.preference === 'fears'
       );
       if (strongFear) {
-        // Passenger fear makes routes more stressful and expensive (but not impossible)
-        finalFuelCost += 3; // Reduced from 10 - moderate stress penalty
-        finalTimeCost += 5; // Reduced from 15 - some delay from complaints
-        finalRiskLevel = Math.min(5, finalRiskLevel + 1); // Reduced from 2 - slightly more dangerous
+        // Passenger fear makes routes slightly more expensive
+        finalFuelCost += 2; // Reduced from 3 - small penalty
+        finalTimeCost += 3; // Reduced from 5 - small delay
+        finalRiskLevel = Math.min(5, finalRiskLevel + 1); // Slightly more dangerous
       }
     }
 
@@ -385,7 +385,7 @@ export class RouteService {
         'likes': '😊 Passenger likes this route',
         'neutral': '😐 Passenger is indifferent',
         'dislikes': '😒 Passenger dislikes this route',
-        'fears': '😨 PASSENGER FEAR: +3 fuel, +5 min, +1 risk'
+        'fears': '😨 PASSENGER FEAR: +2 fuel, +3 min, +1 risk'
       }[passengerPreference.preference];
 
       if (reactionText && passengerPreference.preference !== 'neutral') {
