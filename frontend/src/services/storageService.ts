@@ -6,7 +6,7 @@ const LocalStorage = {
     try {
       localStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
-      console.warn('Failed to save to localStorage:', error);
+      // Silent fail - localStorage may be unavailable
     }
   },
 
@@ -15,7 +15,6 @@ const LocalStorage = {
       const stored = localStorage.getItem(key);
       return stored ? JSON.parse(stored) : defaultValue;
     } catch (error) {
-      console.warn('Failed to load from localStorage:', error);
       return defaultValue;
     }
   },
@@ -24,7 +23,7 @@ const LocalStorage = {
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.warn('Failed to remove from localStorage:', error);
+      // Silent fail
     }
   },
 
@@ -34,7 +33,7 @@ const LocalStorage = {
         localStorage.removeItem(key);
       });
     } catch (error) {
-      console.warn('Failed to clear localStorage:', error);
+      // Silent fail
     }
   }
 };

@@ -27,19 +27,19 @@ export const GAME_BALANCE = {
     // Ride request delays
     RIDE_REQUEST_BASE_DELAY: 2000,
     RIDE_REQUEST_RANDOM_DELAY: 3000,
-    
+
     // Passenger interaction delays
     PASSENGER_INTERACTION_DELAY: 1500,
     DIALOGUE_DISPLAY_DELAY: 1000,
-    
+
     // Game progression delays
     GAME_START_DELAY: 2000,
     SHIFT_END_DELAY: 3000,
     SHIFT_END_RANDOM_DELAY: 4000,
-    
+
     // Time conversion
     MINUTES_TO_MS: 60 * 1000,
-    
+
     // Time thresholds
     SHIFT_END_WARNING_THRESHOLD: 60, // minutes
     CRITICAL_TIME_THRESHOLD: 15, // minutes
@@ -50,16 +50,16 @@ export const GAME_BALANCE = {
     // Supernatural encounters
     SUPERNATURAL_ENCOUNTER: 0.3,
     HIGH_RISK_ENCOUNTER: 0.3,
-    
+
     // Item and backstory drops
     ITEM_DROP: 0.4,
     BACKSTORY_UNLOCK_FIRST: 0.2,
     BACKSTORY_UNLOCK_REPEAT: 0.5,
-    
+
     // Game events
     HIDDEN_RULE_VIOLATION: 0.3,
     ROUTE_VARIATION: 0.5, // For random route cost variations
-    
+
     // Passenger-related probabilities
     RELATED_PASSENGER_SPAWN: 0.3, // 30% chance to spawn related passenger
     RELATED_PASSENGER_SELECTION: 0.5, // 50% chance to select specific related passenger
@@ -84,14 +84,14 @@ export const GAME_BALANCE = {
       HOSTILE_RATIO: 0.3,
       MINIMUM_INTERACTIONS_FOR_TRUSTED: 3,
     },
-    
+
     MULTIPLIERS: {
       TRUSTED_FARE: 1.5,
       FRIENDLY_FARE: 1.2,
       HOSTILE_FARE: 0.7,
       DEFAULT_FARE: 1.0,
     },
-    
+
     RISK_MODIFIERS: {
       TRUSTED_MODIFIER: -1,
       FRIENDLY_MODIFIER: 0,
@@ -117,14 +117,14 @@ export const GAME_BALANCE = {
       SHIFTS_COMPLETED: 10,
       EXPERIENCE_LEGACY: 2, // For old calculation
     },
-    
+
     GAME_SCORE_BONUSES: {
       TIME_BONUS_MULTIPLIER: 2,
       RIDE_BONUS: 10,
       SURVIVAL_BONUS: 50,
       RULE_VIOLATION_PENALTY: 10,
     },
-    
+
     DIFFICULTY_SCALING: {
       MAX_DIFFICULTY: 4,
       EXPERIENCE_PER_LEVEL: 10,
@@ -139,6 +139,22 @@ export const GAME_BALANCE = {
       RARE: 30,
       LEGENDARY: 50,
     },
+  },
+
+  // ===== ROUTE FARE MULTIPLIERS =====
+  ROUTE_FARE_MULTIPLIERS: {
+    SHORTCUT: 0.8,    // Shortcuts pay less (80%) - efficient but risky, viable when passenger likes
+    NORMAL: 1.0,      // Normal routes pay standard fare - safe baseline
+    SCENIC: 1.15,     // Scenic routes pay small premium (115%) - high cost, only worth it when loved
+    POLICE: 1.0,      // Police routes pay standard fare - safest option
+  },
+
+  // ===== CONSECUTIVE ROUTE PENALTIES =====
+  CONSECUTIVE_ROUTE: {
+    WARNING_THRESHOLD: 4,     // Warn player after 4 consecutive same routes - increased from 3
+    VIOLATION_THRESHOLD: 6,   // Game over after 6 consecutive shortcuts - increased from 5
+    PENALTY_PER_REPEAT: 0.05, // -5% fare per consecutive same route - reduced from 0.1
+    RISK_INCREASE_PER_REPEAT: 1, // +1 risk level per consecutive shortcut
   },
 
   // ===== RULE GENERATION =====
@@ -190,8 +206,8 @@ export const BalanceHelpers = {
    * Calculate fuel cost with variation
    */
   getFuelCostWithVariation: (baseCost: number): number => {
-    const variation = Math.floor(Math.random() * GAME_BALANCE.ROUTE_VARIATIONS.FUEL_VARIATION_RANGE) 
-                     - GAME_BALANCE.ROUTE_VARIATIONS.FUEL_VARIATION_OFFSET;
+    const variation = Math.floor(Math.random() * GAME_BALANCE.ROUTE_VARIATIONS.FUEL_VARIATION_RANGE)
+      - GAME_BALANCE.ROUTE_VARIATIONS.FUEL_VARIATION_OFFSET;
     return Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST, baseCost + variation);
   },
 
@@ -199,8 +215,8 @@ export const BalanceHelpers = {
    * Calculate time cost with variation
    */
   getTimeCostWithVariation: (baseCost: number): number => {
-    const variation = Math.floor(Math.random() * GAME_BALANCE.ROUTE_VARIATIONS.TIME_VARIATION_RANGE) 
-                     - GAME_BALANCE.ROUTE_VARIATIONS.TIME_VARIATION_OFFSET;
+    const variation = Math.floor(Math.random() * GAME_BALANCE.ROUTE_VARIATIONS.TIME_VARIATION_RANGE)
+      - GAME_BALANCE.ROUTE_VARIATIONS.TIME_VARIATION_OFFSET;
     return Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST, baseCost + variation);
   },
 
@@ -229,8 +245,8 @@ export const BalanceHelpers = {
    * Calculate ride request delay with randomization
    */
   getRideRequestDelay: (): number => {
-    return GAME_BALANCE.TIMING.RIDE_REQUEST_BASE_DELAY + 
-           Math.random() * GAME_BALANCE.TIMING.RIDE_REQUEST_RANDOM_DELAY;
+    return GAME_BALANCE.TIMING.RIDE_REQUEST_BASE_DELAY +
+      Math.random() * GAME_BALANCE.TIMING.RIDE_REQUEST_RANDOM_DELAY;
   },
 
   /**
@@ -265,8 +281,8 @@ export const BalanceHelpers = {
    */
   calculateExperience: (ridesCompleted: number, shiftsCompleted: number): number => {
     const multipliers = GAME_BALANCE.SCORING.PLAYER_EXPERIENCE_MULTIPLIERS;
-    return ridesCompleted * multipliers.RIDES_COMPLETED + 
-           shiftsCompleted * multipliers.SHIFTS_COMPLETED;
+    return ridesCompleted * multipliers.RIDES_COMPLETED +
+      shiftsCompleted * multipliers.SHIFTS_COMPLETED;
   },
 };
 

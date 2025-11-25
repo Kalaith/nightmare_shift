@@ -45,7 +45,7 @@ export const useApp = () => {
   const handleEndShift = (successful: boolean) => {
     const shiftData = endShift(successful);
     const updateStats = createStatsUpdater(playerStats, updatePlayerStats, addToLeaderboard);
-    updateStats(shiftData.successful, shiftData);
+    updateStats(shiftData.survived, shiftData);
   };
 
   const screenProps = createScreenProps(

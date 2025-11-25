@@ -92,20 +92,8 @@ export class PassengerService {
       () => {
         if (Math.random() > GAME_BALANCE.PROBABILITIES.RELATED_PASSENGER_SPAWN) return null;
         
-        if (!completedRides || completedRides.length === 0) return null;
-        
-        for (const ride of completedRides) {
-          const passenger = ride.passenger;
-          if (passenger.relatedPassengers) {
-            for (const relatedId of passenger.relatedPassengers) {
-              const relatedPassenger = gameData.passengers.find(p => p.id === relatedId);
-              if (relatedPassenger && Math.random() < GAME_BALANCE.PROBABILITIES.RELATED_PASSENGER_SELECTION) {
-                return relatedPassenger;
-              }
-            }
-          }
-        }
-        
+        // TODO: Related passengers feature not yet implemented
+        // Requires relatedPassengers property to be added to Passenger type and data
         return null;
       },
       'related_passenger_spawn_failed',
@@ -159,9 +147,10 @@ export class PassengerService {
         const availablePassengers = gameData.passengers.filter(
           passenger => !usedPassengers.includes(passenger.id)
         );
-        
+
         if (availablePassengers.length === 0) {
-          return this.selectRandomPassenger(usedPassengers, difficultyLevel).data;
+          const fallbackResult = this.selectRandomPassenger(usedPassengers, difficultyLevel);
+          return fallbackResult.success ? fallbackResult.data : gameData.passengers[0];
         }
 
         // Apply weather, time, and seasonal modifiers to passenger weights
@@ -176,7 +165,7 @@ export class PassengerService {
         return this.selectFromWeightedPool(weightedPassengers);
       },
       'weather_aware_passenger_selection_failed',
-      this.selectRandomPassenger(usedPassengers, difficultyLevel).data
+      gameData.passengers[0] // Simple fallback to first passenger
     );
   }
 

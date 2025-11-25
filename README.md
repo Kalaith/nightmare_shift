@@ -221,7 +221,13 @@ Nightmare Shift combines psychological horror with strategic gameplay, emphasizi
 
 ## 🎮 **Ready to Drive?**
 
-*The city's dark streets await. Your shift starts now.*  
+*The city's dark streets await. Your shift starts now.*
 *Remember: The rules exist for a reason. Breaking them... has consequences.*
 
 **Can you survive until dawn?**
+
+## License
+
+This project is licensed under the MIT License - see the individual component README files for details.
+
+Part of the WebHatchery game collection.

@@ -34,7 +34,6 @@ export class PortraitService {
   static getPortraitPath(passengerName: string): string {
     const id = this.passengerIdMap[passengerName];
     if (!id) {
-      console.warn(`No portrait ID found for passenger: ${passengerName}`);
       return '';
     }
     return `/nightmare_shift/assets/${id}.png`;

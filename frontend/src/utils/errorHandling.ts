@@ -76,13 +76,11 @@ export const ErrorHandling = {
 
   /**
    * Logs errors consistently
+   * TODO: Replace with proper logging service in production
    */
   logError: (error: GameError, context?: string) => {
-    console.error(`[${error.name}] ${error.code}: ${error.message}`, {
-      context,
-      recoverable: error.recoverable,
-      timestamp: new Date().toISOString()
-    });
+    // Error logging disabled in production
+    // In development, would log: [${error.name}] ${error.code}: ${error.message}
   },
 
   /**

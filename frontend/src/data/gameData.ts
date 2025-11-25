@@ -737,6 +737,7 @@ export const gameData: GameData = {
       ruleModification: {
         canModify: true,
         type: "add_temporary",
+        description: "The Midnight Mayor can impose a new rule during your shift",
         newRule: {
           id: 99,
           title: "Mayor's Decree",

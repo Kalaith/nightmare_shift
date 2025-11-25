@@ -120,7 +120,7 @@ export const DropOffState: React.FC<DropOffStateProps> = ({
                 {itemsReceived.map((item, index) => (
                   <div key={index} className={styles.compactItemCard}>
                     <div className={styles.itemHeader}>
-                      <span className={styles.itemEmoji}>{item.emoji}</span>
+                      <span className={styles.itemEmoji}>📦</span>
                       <span className={styles.itemName}>{item.name}</span>
                     </div>
                     <p className={styles.itemDescription}>{item.description}</p>

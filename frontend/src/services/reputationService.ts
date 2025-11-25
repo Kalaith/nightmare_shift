@@ -24,16 +24,16 @@ export class ReputationService {
   }
 
   static updateReputation(
-    passengerReputation: Record<number, PassengerReputation>, 
-    passengerId: number, 
+    passengerReputation: Record<number, PassengerReputation>,
+    passengerId: number,
     isPositive: boolean,
     timestamp: number = Date.now()
   ): Record<number, PassengerReputation> {
     const reputation = this.getPassengerReputation(passengerReputation, passengerId);
-    
+
     reputation.interactions++;
     reputation.lastEncounter = timestamp;
-    
+
     if (isPositive) {
       reputation.positiveChoices++;
     } else {
@@ -42,9 +42,9 @@ export class ReputationService {
 
     // Calculate relationship level based on interaction history
     const positiveRatio = reputation.positiveChoices / reputation.interactions;
-    
-    if (positiveRatio >= GAME_BALANCE.REPUTATION.THRESHOLDS.TRUSTED_RATIO && 
-        reputation.interactions >= GAME_BALANCE.REPUTATION.THRESHOLDS.MINIMUM_INTERACTIONS_FOR_TRUSTED) {
+
+    if (positiveRatio >= GAME_BALANCE.REPUTATION.THRESHOLDS.TRUSTED_RATIO &&
+      reputation.interactions >= GAME_BALANCE.REPUTATION.THRESHOLDS.MINIMUM_INTERACTIONS_FOR_TRUSTED) {
       reputation.relationshipLevel = 'trusted';
     } else if (positiveRatio >= GAME_BALANCE.REPUTATION.THRESHOLDS.FRIENDLY_RATIO) {
       reputation.relationshipLevel = 'friendly';
@@ -131,7 +131,7 @@ export class RouteService {
     // Add some randomness and passenger risk influence
     const fuelVariation = BalanceHelpers.getFuelCostWithVariation(baseFuelCost) - baseFuelCost;
     const timeVariation = BalanceHelpers.getTimeCostWithVariation(baseTimeCost) - baseTimeCost;
-    
+
     let finalFuelCost = baseFuelCost + fuelVariation;
     let finalTimeCost = baseTimeCost + timeVariation;
     let finalRiskLevel = baseRiskLevel + (passengerRiskLevel - GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL);
@@ -153,13 +153,13 @@ export class RouteService {
     // Apply additional penalties for dangerous conditions instead of blocking
     if (weather) {
       // Heavy weather makes routes more dangerous but not impossible
-      if (routeType === 'shortcut' && weather.intensity === 'heavy' && 
-          (weather.type === 'rain' || weather.type === 'fog' || weather.type === 'snow')) {
+      if (routeType === 'shortcut' && weather.intensity === 'heavy' &&
+        (weather.type === 'rain' || weather.type === 'fog' || weather.type === 'snow')) {
         finalFuelCost += 8; // Extra fuel for careful driving
         finalTimeCost += 10; // Extra time for safety
         finalRiskLevel = Math.min(5, finalRiskLevel + 2); // Much more dangerous
       }
-      
+
       if (routeType === 'scenic' && weather.type === 'thunderstorm') {
         finalFuelCost += 5; // Extra fuel for detours around storm damage
         finalTimeCost += 15; // Much slower due to conditions
@@ -182,10 +182,10 @@ export class RouteService {
         pref => pref.route === routeType && pref.preference === 'fears'
       );
       if (strongFear) {
-        // Passenger fear makes routes more stressful and expensive
-        finalFuelCost += 5; // Stress driving uses more fuel
-        finalTimeCost += 8; // Passenger complaints slow you down
-        finalRiskLevel = Math.min(5, finalRiskLevel + 1); // Stressed passengers are dangerous
+        // Passenger fear makes routes more stressful and expensive (but not impossible)
+        finalFuelCost += 3; // Reduced from 10 - moderate stress penalty
+        finalTimeCost += 5; // Reduced from 15 - some delay from complaints
+        finalRiskLevel = Math.min(5, finalRiskLevel + 1); // Reduced from 2 - slightly more dangerous
       }
     }
 
@@ -196,15 +196,15 @@ export class RouteService {
         if (hazard.effects.routeBlocked?.includes(routeType)) {
           finalRiskLevel = Math.min(5, finalRiskLevel + 2); // Route is risky due to blockage
         }
-        
+
         if (hazard.effects.fuelIncrease) {
           finalFuelCost += hazard.effects.fuelIncrease;
         }
-        
+
         if (hazard.effects.timeDelay) {
           finalTimeCost += hazard.effects.timeDelay;
         }
-        
+
         if (hazard.effects.riskIncrease) {
           finalRiskLevel += hazard.effects.riskIncrease;
         }
@@ -217,7 +217,7 @@ export class RouteService {
       const fuelReduction = Math.min(4, Math.floor(masteryLevel / 3)); // -1 fuel per 3 uses, max -4
       const timeReduction = Math.min(6, Math.floor(masteryLevel / 2)); // -1 time per 2 uses, max -6
       const riskReduction = Math.min(1, Math.floor(masteryLevel / 10)); // -1 risk per 10 uses, max -1
-      
+
       finalFuelCost = Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST, finalFuelCost - fuelReduction);
       finalTimeCost = Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST, finalTimeCost - timeReduction);
       finalRiskLevel = Math.max(GAME_BALANCE.RISK_LEVELS.SAFE, finalRiskLevel - riskReduction);
@@ -226,7 +226,7 @@ export class RouteService {
     // Apply severe penalties for previously blocked conditions (instead of making routes unavailable)
     // These are now just very expensive/risky rather than impossible
     // Note: routeConsequences would need to be passed as parameter for full implementation
-    
+
     return {
       fuelCost: Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST, Math.round(finalFuelCost)),
       timeCost: Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST, Math.round(finalTimeCost)),
@@ -235,7 +235,7 @@ export class RouteService {
   }
 
   static getRouteOptions(
-    currentFuel: number, 
+    currentFuel: number,
     currentTime: number,
     passengerRiskLevel: number = 1,
     weather?: WeatherCondition,
@@ -275,7 +275,7 @@ export class RouteService {
           },
           {
             type: 'scenic' as const,
-            name: 'Take Scenic Route', 
+            name: 'Take Scenic Route',
             description: 'Longer route through beautiful areas, passenger pays bonus'
           },
           {
@@ -288,18 +288,18 @@ export class RouteService {
         const resultRoutes = routes.map(route => {
           try {
             const costs = this.calculateRouteCosts(route.type, passengerRiskLevel, weather, timeOfDay, hazards, routeMastery, passenger);
-            
+
             // ALL ROUTES ARE ALWAYS AVAILABLE - no fuel/time restrictions
             let available = true;
-            
+
             // checkRouteAvailability always returns true now, but keeping for future flexibility
             available = available && this.checkRouteAvailability(route.type, weather, timeOfDay, routeConsequences, passenger);
-            
+
             // Get passenger preference for this route
             const passengerPreference = passenger?.routePreferences?.find(pref => pref.route === route.type);
             const passengerReaction = passengerPreference ? this.getReactionFromPreference(passengerPreference.preference) : 'neutral';
             const fareModifier = passengerPreference?.fareModifier || 1.0;
-            
+
             let bonusInfo = this.buildRouteInfo(route.type, passengerPreference, routeMastery, weather, hazards, timeOfDay);
 
             const routeResult = {
@@ -310,10 +310,9 @@ export class RouteService {
               passengerReaction,
               fareModifier
             };
-            
+
             return routeResult;
           } catch (error) {
-            console.error('Route processing error for', route.type, ':', error);
             // Return a basic route if processing fails
             return {
               ...route,
@@ -327,7 +326,7 @@ export class RouteService {
             };
           }
         });
-        
+
         return resultRoutes;
       },
       'route_options_failed',
@@ -367,7 +366,7 @@ export class RouteService {
     // Base route benefits
     switch (routeType) {
       case 'scenic':
-        const bonus = passengerPreference?.fareModifier ? 
+        const bonus = passengerPreference?.fareModifier ?
           Math.round((passengerPreference.fareModifier - 1) * 100) : 10;
         infoSections.push(`+${bonus}% fare bonus`);
         break;
@@ -383,12 +382,12 @@ export class RouteService {
     if (passengerPreference) {
       const reactionText = {
         'loves': '😍 Passenger loves this route',
-        'likes': '😊 Passenger likes this route', 
+        'likes': '😊 Passenger likes this route',
         'neutral': '😐 Passenger is indifferent',
         'dislikes': '😒 Passenger dislikes this route',
-        'fears': '😨 PASSENGER FEAR: +5 fuel, +8 min, +1 risk'
+        'fears': '😨 PASSENGER FEAR: +3 fuel, +5 min, +1 risk'
       }[passengerPreference.preference];
-      
+
       if (reactionText && passengerPreference.preference !== 'neutral') {
         infoSections.push(reactionText);
       }

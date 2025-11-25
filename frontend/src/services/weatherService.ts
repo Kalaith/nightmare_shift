@@ -195,7 +195,10 @@ export class WeatherService {
           const changeChance = 0.3; // 30% chance weather changes
           
           if (Math.random() < changeChance) {
-            return this.generateInitialWeather(season).data;
+            const newWeatherResult = this.generateInitialWeather(season);
+            if (newWeatherResult.success) {
+              return newWeatherResult.data;
+            }
           }
         }
         
@@ -631,13 +634,13 @@ export class WeatherService {
     };
     
     const effects = baseEffects[type];
-    
+
     return {
-      routeBlocked: effects.routeBlocked,
-      timeDelay: effects.timeDelay ? effects.timeDelay * severityMultiplier : undefined,
-      fuelIncrease: effects.fuelIncrease ? effects.fuelIncrease * severityMultiplier : undefined,
-      riskIncrease: effects.riskIncrease ? effects.riskIncrease * severityMultiplier : undefined,
-      forcedChoice: effects.forcedChoice
+      routeBlocked: 'routeBlocked' in effects ? effects.routeBlocked : undefined,
+      timeDelay: 'timeDelay' in effects && effects.timeDelay ? effects.timeDelay * severityMultiplier : undefined,
+      fuelIncrease: 'fuelIncrease' in effects && effects.fuelIncrease ? effects.fuelIncrease * severityMultiplier : undefined,
+      riskIncrease: 'riskIncrease' in effects && effects.riskIncrease ? effects.riskIncrease * severityMultiplier : undefined,
+      forcedChoice: 'forcedChoice' in effects ? effects.forcedChoice : undefined
     };
   }
 

@@ -22,7 +22,7 @@ export const useGameActions = ({
   gameOver,
   endShift
 }: UseGameActionsProps) => {
-  
+
   const acceptRide = useCallback(() => {
     if (gameState.fuel < 5) {
       gameOver("You ran out of fuel with a passenger in the car. They were not pleased...");
@@ -38,14 +38,14 @@ export const useGameActions = ({
       gamePhase: GAME_PHASES.WAITING,
       currentPassenger: null
     }));
-    
+
     setTimeout(() => {
       showRideRequest();
     }, 2000 + Math.random() * 3000);
   }, [showRideRequest, setGameState]);
 
   const startDriving = useCallback((phase: 'pickup' | 'destination') => {
-    const location = phase === 'pickup' 
+    const location = phase === 'pickup'
       ? gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)
       : gameData.locations.find(loc => loc.name === gameState.currentPassenger?.destination);
 
@@ -59,28 +59,46 @@ export const useGameActions = ({
 
   const handleDrivingChoice = useCallback((choice: string, phase: string) => {
     const routeChoice = choice as 'normal' | 'shortcut' | 'scenic' | 'police';
-    const passengerRiskLevel = gameState.currentPassenger ? 
+    const passengerRiskLevel = gameState.currentPassenger ?
       gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)?.riskLevel || 1 : 1;
-    
+
     const routeCosts = RouteService.calculateRouteCosts(
-      routeChoice, 
-      passengerRiskLevel, 
+      routeChoice,
+      passengerRiskLevel,
       gameState.currentWeather,
       gameState.timeOfDay,
       gameState.environmentalHazards,
       gameState.routeMastery,
       gameState.currentPassenger || undefined
     );
-    
+
     // Check if player has enough resources
     if (gameState.fuel < routeCosts.fuelCost) {
       gameOver("You don't have enough fuel for this route. Your car sputtered to a stop...");
       return;
     }
-    
+
     if (gameState.timeRemaining < routeCosts.timeCost) {
       gameOver("This route would take too long. Time ran out before you could reach your destination...");
       return;
+    }
+
+    // Check for consecutive route violations (shortcut spam)
+    const consecutiveStreak = gameState.consecutiveRouteStreak;
+    if (consecutiveStreak && consecutiveStreak.type === routeChoice) {
+      const streakCount = consecutiveStreak.count + 1; // +1 because we're about to take this route again
+
+      // Warn at threshold
+      if (streakCount === GAME_BALANCE.CONSECUTIVE_ROUTE.WARNING_THRESHOLD) {
+        // Show warning but allow (could add UI notification here)
+        console.warn(`Warning: ${streakCount} consecutive ${routeChoice} routes taken`);
+      }
+
+      // Game over at violation threshold for shortcuts
+      if (routeChoice === 'shortcut' && streakCount >= GAME_BALANCE.CONSECUTIVE_ROUTE.VIOLATION_THRESHOLD) {
+        gameOver(`You've taken too many shortcuts. The supernatural entities have noticed your pattern and are waiting for you...`);
+        return;
+      }
     }
 
     // Check rule violations
@@ -96,7 +114,7 @@ export const useGameActions = ({
     const passengerPreference = gameState.currentPassenger?.routePreferences?.find(
       pref => pref.route === routeChoice
     );
-    
+
     let routeDialogue: string | null = null;
     if (passengerPreference && Math.random() < (passengerPreference.triggerChance || 0.5)) {
       routeDialogue = passengerPreference.specialDialogue || null;
@@ -116,8 +134,8 @@ export const useGameActions = ({
       timestamp: Date.now()
     };
 
-    setGameState(prev => ({ 
-      ...prev, 
+    setGameState(prev => ({
+      ...prev,
       fuel: prev.fuel - routeCosts.fuelCost,
       timeRemaining: prev.timeRemaining - routeCosts.timeCost,
       earnings: prev.earnings + bonusEarnings,
@@ -128,7 +146,7 @@ export const useGameActions = ({
         [routeChoice]: (prev.routeMastery?.[routeChoice] || 0) + 1
       },
       // Track route streaks for consequences
-      consecutiveRouteStreak: prev.consecutiveRouteStreak?.type === routeChoice 
+      consecutiveRouteStreak: prev.consecutiveRouteStreak?.type === routeChoice
         ? { type: routeChoice, count: prev.consecutiveRouteStreak.count + 1 }
         : { type: routeChoice, count: 1 },
       // Store route dialogue for interaction phase
@@ -136,9 +154,9 @@ export const useGameActions = ({
     }));
 
     // Handle supernatural encounters based on risk level
-    if (routeCosts.riskLevel > GAME_BALANCE.RISK_LEVELS.SUPERNATURAL_THRESHOLD && 
-        Math.random() < GAME_BALANCE.PROBABILITIES.HIGH_RISK_ENCOUNTER) {
-      console.log(`High risk route taken (${routeCosts.riskLevel}), supernatural encounter possible...`);
+    if (routeCosts.riskLevel > GAME_BALANCE.RISK_LEVELS.SUPERNATURAL_THRESHOLD &&
+      Math.random() < GAME_BALANCE.PROBABILITIES.HIGH_RISK_ENCOUNTER) {
+      // High risk route taken, supernatural encounter possible
     }
 
     if (phase === 'pickup') {
@@ -153,13 +171,18 @@ export const useGameActions = ({
     if (!passenger) return;
 
     // Use route dialogue if available, otherwise use random dialogue
-    const dialogue = gameState.pendingRouteDialogue || 
+    const dialogue = gameState.pendingRouteDialogue ||
       passenger.dialogue[Math.floor(Math.random() * passenger.dialogue.length)];
 
-    setGameState(prev => ({ 
-      ...prev, 
+    setGameState(prev => ({
+      ...prev,
       gamePhase: GAME_PHASES.INTERACTION,
-      currentDialogue: dialogue,
+      currentDialogue: {
+        text: dialogue,
+        speaker: 'passenger',
+        timestamp: Date.now(),
+        type: 'normal'
+      },
       pendingRouteDialogue: null // Clear after use
     }));
   }, [gameState.currentPassenger, gameState.pendingRouteDialogue, setGameState]);
@@ -175,25 +198,55 @@ export const useGameActions = ({
     // Get the route choice from recent history
     const recentRoute = gameState.routeHistory?.[gameState.routeHistory.length - 1];
     const routeChoice = recentRoute?.choice;
-    
+
+    // Calculate route-based fare multiplier
+    let routeFareMultiplier = 1.0;
+    switch (routeChoice) {
+      case 'shortcut':
+        routeFareMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SHORTCUT;
+        break;
+      case 'normal':
+        routeFareMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.NORMAL;
+        break;
+      case 'scenic':
+        routeFareMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SCENIC;
+        break;
+      case 'police':
+        routeFareMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.POLICE;
+        break;
+    }
+
+    // Apply consecutive route penalty
+    const consecutiveStreak = gameState.consecutiveRouteStreak;
+    let consecutivePenalty = 0;
+    if (consecutiveStreak && consecutiveStreak.count >= 2) {
+      // -10% per consecutive same route after the first
+      consecutivePenalty = (consecutiveStreak.count - 1) * GAME_BALANCE.CONSECUTIVE_ROUTE.PENALTY_PER_REPEAT;
+      routeFareMultiplier *= (1 - consecutivePenalty);
+    }
+
     // Find passenger's preference for the chosen route
     const passengerPreference = passenger.routePreferences?.find(
       pref => pref.route === routeChoice
     );
-    
-    // Apply fare modifier based on passenger preference
-    const fareModifier = passengerPreference?.fareModifier || 1.0;
+
+    // Apply passenger preference modifier (stacks with route multiplier)
+    const passengerFareModifier = passengerPreference?.fareModifier || 1.0;
+
+    // Calculate final fare: base fare × route multiplier × passenger preference
     const baseFare = passenger.fare;
-    const modifiedFare = Math.floor(baseFare * fareModifier);
+    const modifiedFare = Math.floor(baseFare * routeFareMultiplier * passengerFareModifier);
+
+    // Add small random variation (±$5)
     const earnedFare = Math.floor(modifiedFare + (Math.random() * 10) - 5);
-    const actualEarnings = Math.max(earnedFare, 5);
-    
+    const actualEarnings = Math.max(earnedFare, 5); // Minimum $5
+
     // Collect items that might be received
     const itemsReceived: import('../types/game').InventoryItem[] = [];
     if (passenger.items && Math.random() < GAME_BALANCE.PROBABILITIES.ITEM_DROP) {
       const randomItem = passenger.items[Math.floor(Math.random() * passenger.items.length)];
       const newItemResult = ItemService.createInventoryItem(randomItem, passenger.name, false);
-      
+
       if (newItemResult.success) {
         itemsReceived.push(newItemResult.data);
       }
@@ -210,8 +263,8 @@ export const useGameActions = ({
     }
 
     // Update game state with earnings and completion data
-    setGameState(prev => ({ 
-      ...prev, 
+    setGameState(prev => ({
+      ...prev,
       earnings: prev.earnings + actualEarnings,
       ridesCompleted: prev.ridesCompleted + 1,
       gamePhase: GAME_PHASES.DROP_OFF,
@@ -222,7 +275,7 @@ export const useGameActions = ({
         itemsReceived,
         backstoryUnlocked
       },
-      currentDialogue: null
+      currentDialogue: undefined
     }));
 
     // Add backstory to unlocked collection if applicable
@@ -231,7 +284,7 @@ export const useGameActions = ({
         ...prev,
         passengerBackstories: {
           ...prev.passengerBackstories,
-          [passenger.id]: (prev.passengerBackstories?.[passenger.id] || 0) + 1
+          [passenger.id]: true
         }
       }));
     }
@@ -246,7 +299,7 @@ export const useGameActions = ({
     if (newGameStateResult.success) {
       setGameState(prev => {
         let newState = newGameStateResult.data;
-        
+
         // Update item uses if it has limited uses
         if (item.protectiveProperties?.usesRemaining) {
           const updatedItem = {
@@ -258,12 +311,12 @@ export const useGameActions = ({
           };
           newState = {
             ...newState,
-            inventory: prev.inventory.map(i => 
+            inventory: prev.inventory.map(i =>
               i.id === itemId ? updatedItem : i
             ).filter(i => !i.protectiveProperties || (i.protectiveProperties.usesRemaining && i.protectiveProperties.usesRemaining > 0))
           };
         }
-        
+
         return newState;
       });
     }
@@ -278,18 +331,18 @@ export const useGameActions = ({
 
     // Execute the first available trade
     const trade = tradeOptions[0];
-    
+
     setGameState(prev => {
       let newInventory = prev.inventory.filter(i => i.id !== itemId);
-      
+
       // Add received item if any
       if (trade.receive) {
         newInventory.push(trade.receive);
       }
-      
+
       // Handle special consequences
       let newState = { ...prev, inventory: newInventory };
-      
+
       if (passenger.id === 11 && !trade.receive) {
         // Madame Zelda reveals hidden rule
         if (prev.hiddenRules && prev.hiddenRules.length > 0) {
@@ -301,7 +354,7 @@ export const useGameActions = ({
           };
         }
       }
-      
+
       return newState;
     });
   }, [gameState, setGameState]);
@@ -311,13 +364,13 @@ export const useGameActions = ({
     setGameState(prev => {
       // Apply deterioration
       const deterioratedInventory = ItemService.processItemDeterioration(prev.inventory);
-      
+
       // Apply cursed effects
       const cursedEffectsResult = ItemService.applyCursedEffects({
         ...prev,
         inventory: deterioratedInventory
       });
-      
+
       return cursedEffectsResult.success ? cursedEffectsResult.data : prev;
     });
   }, [setGameState]);
@@ -325,7 +378,7 @@ export const useGameActions = ({
   const refuelFull = useCallback(() => {
     const fuelNeeded = 100 - gameState.fuel;
     const cost = Math.ceil(fuelNeeded * GAME_BALANCE.FUEL_COSTS.PER_PERCENT);
-    
+
     if (gameState.earnings >= cost && gameState.fuel < 100) {
       setGameState(prev => ({
         ...prev,
@@ -338,7 +391,7 @@ export const useGameActions = ({
   const refuelPartial = useCallback(() => {
     const fuelToAdd = Math.min(25, 100 - gameState.fuel);
     const cost = Math.ceil(fuelToAdd * GAME_BALANCE.FUEL_COSTS.PER_PERCENT);
-    
+
     if (gameState.earnings >= cost && gameState.fuel < 75) {
       setGameState(prev => ({
         ...prev,
@@ -349,14 +402,8 @@ export const useGameActions = ({
   }, [gameState.fuel, gameState.earnings, setGameState]);
 
   const continueFromDropOff = useCallback(() => {
-    console.log('continueFromDropOff called - current state:', {
-      currentPassenger: gameState.currentPassenger?.name,
-      gamePhase: gameState.gamePhase
-    });
-    
     // Clear the completed ride data and return to waiting phase
     setGameState(prev => {
-      console.log('continueFromDropOff setState - clearing passenger and setting to waiting');
       return {
         ...prev,
         gamePhase: GAME_PHASES.WAITING,
@@ -367,17 +414,10 @@ export const useGameActions = ({
 
     // Schedule next ride request based on current state
     setTimeout(() => {
-      console.log('continueFromDropOff timeout - checking state for next action:', {
-        timeRemaining: gameState.timeRemaining,
-        fuel: gameState.fuel
-      });
-      
       // Check current game state values to decide whether to continue or end
       if (gameState.timeRemaining <= 60 || gameState.fuel <= 5) {
-        console.log('Ending shift due to low resources');
         endShift(true);
       } else {
-        console.log('Calling showRideRequest from continueFromDropOff timeout');
         showRideRequest();
       }
     }, 2500 + Math.random() * 2500); // Single timeout with random delay

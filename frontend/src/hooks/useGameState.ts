@@ -32,7 +32,16 @@ const getInitialGameState = (): GameState => {
     minimumEarnings: GAME_CONSTANTS.MINIMUM_EARNINGS,
     routeHistory: [],
     // Weather and environmental properties
-    currentWeather: initialWeather.success ? initialWeather.data : WeatherService.generateInitialWeather(season).data,
+    currentWeather: initialWeather.success ? initialWeather.data : {
+      type: 'clear',
+      intensity: 'light',
+      description: 'A calm night with clear skies',
+      visibility: 100,
+      icon: '🌙',
+      effects: [],
+      duration: 120,
+      startTime: Date.now()
+    },
     timeOfDay: WeatherService.updateTimeOfDay(Date.now(), Date.now()),
     season,
     environmentalHazards: [],
@@ -72,7 +81,7 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const generateShiftRules = () => {
-    const engineResult = GameEngine.generateShiftRules(gameData.shift_rules);
+    const engineResult = GameEngine.generateShiftRules(playerStats.totalShiftsCompleted || 0);
     setGameState(prev => ({
       ...prev,
       currentRules: engineResult.visibleRules,
@@ -135,20 +144,11 @@ export const useGameState = (playerStats: PlayerStats) => {
 
   const showRideRequest = () => {
     // Don't show new ride request if in active phases (but allow if transitioning from dropOff)
-    if (gameState.currentPassenger && 
-        gameState.gamePhase !== GAME_PHASES.DROP_OFF && 
+    if (gameState.currentPassenger &&
+        gameState.gamePhase !== GAME_PHASES.DROP_OFF &&
         gameState.gamePhase !== GAME_PHASES.WAITING) {
-      console.log('showRideRequest blocked - active passenger:', {
-        hasPassenger: !!gameState.currentPassenger,
-        gamePhase: gameState.gamePhase
-      });
       return;
     }
-    
-    console.log('showRideRequest proceeding - current state:', {
-      gamePhase: gameState.gamePhase,
-      hasPassenger: !!gameState.currentPassenger
-    });
     
     // Update weather and environmental conditions
     updateWeatherAndEnvironment();
@@ -192,7 +192,6 @@ export const useGameState = (playerStats: PlayerStats) => {
     
     // Only end shift if there are truly no passengers available (should never happen)
     if (!passenger) {
-      console.warn('No passengers available - this should never happen');
       endShift(false);
       return;
     }

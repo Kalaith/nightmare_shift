@@ -88,14 +88,14 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(func: T, del
 };
 
 export const isDevelopment = (): boolean => {
-  return process.env.NODE_ENV === 'development';
+  return import.meta.env.MODE === 'development';
 };
 
 export const safeJsonParse = <T>(jsonString: string, fallback: T): T => {
   try {
     return JSON.parse(jsonString);
   } catch (error) {
-    console.warn('Failed to parse JSON:', error);
+    // JSON parse failed, returning fallback
     return fallback;
   }
 };

@@ -354,7 +354,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
             <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-6 text-center">
               <h2 className="text-2xl font-bold text-teal-300 mb-4">💬 Passenger Interaction</h2>
               <div className="bg-gray-700/50 p-4 rounded-lg mb-6">
-                <p className="text-gray-200 italic text-lg">"{gameState.currentDialogue}"</p>
+                <p className="text-gray-200 italic text-lg">"{gameState.currentDialogue?.text}"</p>
               </div>
               <button 
                 onClick={onContinueToDestination}

@@ -19,15 +19,15 @@ export class ItemService {
           name: itemName,
           source: passengerSource,
           backstoryItem: isBackstory,
-          type: itemData.type,
-          rarity: itemData.rarity,
-          description: itemData.description,
+          type: itemData.type || 'story',
+          rarity: itemData.rarity || 'common',
+          description: itemData.description || 'A mysterious item',
           effects: itemData.effects,
           durability: itemData.maxDurability,
           maxDurability: itemData.maxDurability,
           acquiredAt: Date.now(),
-          canUse: itemData.canUse,
-          canTrade: itemData.canTrade,
+          canUse: itemData.canUse ?? false,
+          canTrade: itemData.canTrade ?? false,
           cursedProperties: itemData.cursedProperties,
           protectiveProperties: itemData.protectiveProperties
         };
@@ -191,14 +191,18 @@ export class ItemService {
     const options = [];
 
     switch (passenger.id) {
-      case 5: // The Collector
-        options.push({
-          give: item,
-          receive: this.createInventoryItem('soul protection ward', 'The Collector').data,
-          description: 'Trade for supernatural protection',
-          consequence: 'The Collector remembers your deal'
-        });
+      case 5: { // The Collector
+        const wardResult = this.createInventoryItem('soul protection ward', 'The Collector');
+        if (wardResult.success) {
+          options.push({
+            give: item,
+            receive: wardResult.data,
+            description: 'Trade for supernatural protection',
+            consequence: 'The Collector remembers your deal'
+          });
+        }
         break;
+      }
         
       case 11: // Madame Zelda
         if (item.type === 'story') {
@@ -211,16 +215,20 @@ export class ItemService {
         }
         break;
         
-      case 13: // Sister Agnes
+      case 13: { // Sister Agnes
         if (item.type === 'cursed') {
-          options.push({
-            give: item,
-            receive: this.createInventoryItem('blessed medallion', 'Sister Agnes').data,
-            description: 'Purify cursed object for protection',
-            consequence: 'Removes curse and grants protection'
-          });
+          const medallionResult = this.createInventoryItem('blessed medallion', 'Sister Agnes');
+          if (medallionResult.success) {
+            options.push({
+              give: item,
+              receive: medallionResult.data,
+              description: 'Purify cursed object for protection',
+              consequence: 'Removes curse and grants protection'
+            });
+          }
         }
         break;
+      }
     }
 
     return options;
