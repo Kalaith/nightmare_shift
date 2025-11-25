@@ -1,4 +1,32 @@
-import type { GameData } from '../types/game';
+import type {
+  GameData,
+  GuidelineException
+} from '../types/game';
+import { guidelineData } from './guidelineData';
+
+const guidelineExceptionIndex = new Map<string, GuidelineException>();
+
+guidelineData.forEach(guideline => {
+  guideline.exceptions.forEach(exception => {
+    guidelineExceptionIndex.set(exception.id, exception);
+  });
+});
+
+const cloneGuidelineException = (exceptionId: string): GuidelineException | null => {
+  const exception = guidelineExceptionIndex.get(exceptionId);
+  if (!exception) return null;
+
+  return {
+    ...exception,
+    conditions: exception.conditions.map(condition => ({ ...condition })),
+    tells: exception.tells.map(tell => ({ ...tell }))
+  };
+};
+
+const getExceptions = (exceptionIds: string[]): GuidelineException[] =>
+  exceptionIds
+    .map(id => cloneGuidelineException(id))
+    .filter((exception): exception is GuidelineException => exception !== null);
 
 // Complete game data including rules, passengers, and locations
 export const gameData: GameData = {
@@ -10,15 +38,101 @@ export const gameData: GameData = {
       description: "Do not look directly at passengers tonight",
       difficulty: "medium",
       type: "basic",
-      visible: true
+      visible: true,
+      actionKey: 'eye_contact',
+      actionType: 'forbidden',
+      relatedGuidelineId: 1001,
+      defaultSafety: 'safe',
+      defaultOutcome: 'Averting your gaze keeps predatory spirits at bay and maintains cab stability.',
+      exceptions: getExceptions(['eye_contact_lonely']),
+      followConsequences: [
+        {
+          type: 'survival',
+          value: 1,
+          description: 'You resisted the passenger\'s pull and finished the ride unharmed.',
+          probability: 0.85
+        }
+      ],
+      breakConsequences: [
+        {
+          type: 'death',
+          value: 1,
+          description: 'Staring into a void-touched passenger shredded your sense of self.',
+          probability: 0.7
+        }
+      ],
+      exceptionRewards: [
+        {
+          type: 'reputation',
+          value: 8,
+          description: 'Acknowledged a lonely spirit and earned supernatural goodwill.',
+          probability: 0.75
+        },
+        {
+          type: 'story_unlock',
+          value: 1,
+          description: 'Unlocked a heartfelt confession that opens a new narrative thread.',
+          probability: 0.5
+        }
+      ],
+      exceptionNeedAdjustment: -25,
+      followNeedAdjustment: 5,
+      breakNeedAdjustment: 15,
+      violationMessage: 'You locked eyes when you were warned not to. Something inside you unraveled.'
     },
     {
-      id: 2, 
+      id: 2,
       title: "Silent Night",
       description: "No radio or music allowed during rides",
       difficulty: "easy",
       type: "basic",
-      visible: true
+      visible: true,
+      actionKey: 'play_music',
+      actionType: 'forbidden',
+      relatedGuidelineId: 1011,
+      defaultSafety: 'safe',
+      defaultOutcome: 'Maintaining silence prevents the radio frequencies from attracting spirits.',
+      exceptions: getExceptions(['silent_soothing_song']),
+      followConsequences: [
+        {
+          type: 'survival',
+          value: 1,
+          description: 'Kept the cab quiet and avoided spectral interference.',
+          probability: 0.8
+        }
+      ],
+      breakConsequences: [
+        {
+          type: 'death',
+          value: 1,
+          description: 'The song acted as a beacon for the wrong audience.',
+          probability: 0.4
+        },
+        {
+          type: 'fuel',
+          value: -5,
+          description: 'Equipment interference drained your cab\'s power.',
+          probability: 0.5
+        }
+      ],
+      exceptionRewards: [
+        {
+          type: 'reputation',
+          value: 6,
+          description: 'Calmed a trembling passenger with the perfect track.',
+          probability: 0.7
+        },
+        {
+          type: 'item',
+          value: 1,
+          description: 'Received a protective mixtape for future rides.',
+          probability: 0.35
+        }
+      ],
+      exceptionNeedAdjustment: -18,
+      followNeedAdjustment: 8,
+      breakNeedAdjustment: 12,
+      violationMessage: 'Breaking the silence invited a chorus of voices you cannot silence.'
     },
     {
       id: 3,
@@ -26,7 +140,53 @@ export const gameData: GameData = {
       description: "Do not accept tips of any kind tonight",
       difficulty: "hard",
       type: "basic",
-      visible: true
+      visible: true,
+      actionKey: 'accept_tip',
+      actionType: 'forbidden',
+      relatedGuidelineId: 1003,
+      defaultSafety: 'safe',
+      defaultOutcome: 'Hard currency keeps cursed favors from binding to you.',
+      exceptions: getExceptions(['cash_intangible_beings']),
+      followConsequences: [
+        {
+          type: 'money',
+          value: 15,
+          description: 'Collected predictable, clean payments.',
+          probability: 0.9
+        }
+      ],
+      breakConsequences: [
+        {
+          type: 'death',
+          value: 1,
+          description: 'A cursed coin latched onto your lifeline.',
+          probability: 0.5
+        },
+        {
+          type: 'reputation',
+          value: -10,
+          description: 'Word spread that you accept forbidden currency.',
+          probability: 0.6
+        }
+      ],
+      exceptionRewards: [
+        {
+          type: 'reputation',
+          value: 7,
+          description: 'Offered charity to a soul who could not pay otherwise.',
+          probability: 0.65
+        },
+        {
+          type: 'story_unlock',
+          value: 1,
+          description: 'Unlocked a spectral favor redeemable later in the night.',
+          probability: 0.45
+        }
+      ],
+      exceptionNeedAdjustment: -12,
+      followNeedAdjustment: 4,
+      breakNeedAdjustment: 14,
+      violationMessage: 'That payment was never meant for mortal hands. It stains everything it touches.'
     },
     {
       id: 4,
@@ -34,7 +194,53 @@ export const gameData: GameData = {
       description: "Keep all windows closed at all times",
       difficulty: "medium",
       type: "basic",
-      visible: true
+      visible: true,
+      actionKey: 'open_window',
+      actionType: 'forbidden',
+      relatedGuidelineId: 1009,
+      defaultSafety: 'safe',
+      defaultOutcome: 'Closed windows keep whispers, ash, and hungry winds outside the cab.',
+      exceptions: getExceptions(['windows_suffocation']),
+      followConsequences: [
+        {
+          type: 'survival',
+          value: 1,
+          description: 'Protected the cabin from invasive spirits.',
+          probability: 0.75
+        }
+      ],
+      breakConsequences: [
+        {
+          type: 'death',
+          value: 1,
+          description: 'The gale carried something inside that never left.',
+          probability: 0.5
+        },
+        {
+          type: 'fuel',
+          value: -3,
+          description: 'Air drag cut into your efficiency.',
+          probability: 0.6
+        }
+      ],
+      exceptionRewards: [
+        {
+          type: 'reputation',
+          value: 9,
+          description: 'Saved a suffocating passenger by cracking the seal just in time.',
+          probability: 0.7
+        },
+        {
+          type: 'item',
+          value: 1,
+          description: 'Received a sunlight talisman for your compassion.',
+          probability: 0.4
+        }
+      ],
+      exceptionNeedAdjustment: -20,
+      followNeedAdjustment: 6,
+      breakNeedAdjustment: 16,
+      violationMessage: 'You opened the cab to the storm and something new rode with you.'
     },
     {
       id: 5,
@@ -42,7 +248,53 @@ export const gameData: GameData = {
       description: "Do not deviate from GPS route for any reason",
       difficulty: "hard",
       type: "basic",
-      visible: true
+      visible: true,
+      actionKey: 'take_shortcut',
+      actionType: 'forbidden',
+      relatedGuidelineId: 1010,
+      defaultSafety: 'safe',
+      defaultOutcome: 'Following dispatch routes minimizes ambush chances and keeps dispatch happy.',
+      exceptions: getExceptions(['shortcut_time_critical']),
+      followConsequences: [
+        {
+          type: 'time',
+          value: -5,
+          description: 'Arrived on schedule without raising suspicion.',
+          probability: 0.8
+        }
+      ],
+      breakConsequences: [
+        {
+          type: 'death',
+          value: 1,
+          description: 'The shortcut led you straight into a supernatural trap.',
+          probability: 0.3
+        },
+        {
+          type: 'fuel',
+          value: -10,
+          description: 'You burned fuel retracing your route through cursed alleys.',
+          probability: 0.6
+        }
+      ],
+      exceptionRewards: [
+        {
+          type: 'money',
+          value: 25,
+          description: 'Passenger tipped big for getting them to safety in time.',
+          probability: 0.7
+        },
+        {
+          type: 'reputation',
+          value: 10,
+          description: 'Earned trust among nocturnal regulars for decisive driving.',
+          probability: 0.65
+        }
+      ],
+      exceptionNeedAdjustment: -30,
+      followNeedAdjustment: 12,
+      breakNeedAdjustment: 18,
+      violationMessage: 'Dispatch routes exist for a reason. The shadows were waiting off-grid.'
     },
     
     // Conditional rules (only apply in certain situations)
@@ -230,6 +482,47 @@ export const gameData: GameData = {
       deceptionLevel: 0.1,
       stressLevel: 0.7,
       trustRequired: 0.3,
+      stateProfile: {
+        needType: 'loneliness',
+        initialLevel: 45,
+        thresholds: {
+          warning: 60,
+          critical: 80,
+          meltdown: 92
+        },
+        needChange: {
+          passive: 4,
+          obey: 8,
+          break: 2,
+          exceptionRelief: 28
+        },
+        exceptionId: 'eye_contact_lonely',
+        tellIntensities: {
+          warning: ['moderate'],
+          critical: ['obvious']
+        },
+        dialogueByStage: {
+          warning: [
+            'Please... could you just look at me for a moment?',
+            'It gets so cold when no one sees me.'
+          ],
+          critical: [
+            'Why won\'t you acknowledge me? I\'m right here!',
+            'If you keep ignoring me I might fade entirely.'
+          ],
+          meltdown: [
+            'Look at me! I refuse to disappear again!'
+          ]
+        },
+        confidenceImpact: {
+          warning: -0.05,
+          critical: -0.1
+        },
+        trustImpact: {
+          warning: 0.05,
+          critical: 0.1
+        }
+      },
       routePreferences: [
         {
           route: 'normal',
@@ -285,6 +578,64 @@ export const gameData: GameData = {
       relationships: [4],
       backstoryUnlocked: false,
       backstoryDetails: "Jake works the night shift at a blood bank, though his employment records don't seem to exist...",
+      tells: [
+        {
+          type: 'behavioral',
+          intensity: 'moderate',
+          description: 'Checks his watch every minute as hunger builds',
+          animationCue: 'frantic_watch_check',
+          reliability: 0.7
+        },
+        {
+          type: 'verbal',
+          intensity: 'obvious',
+          description: 'Mutters about needing to feed soon',
+          triggerPhrase: 'I need to feed',
+          reliability: 0.85
+        }
+      ],
+      guidelineExceptions: ['shortcut_time_critical'],
+      stateProfile: {
+        needType: 'hunger',
+        initialLevel: 55,
+        thresholds: {
+          warning: 65,
+          critical: 82,
+          meltdown: 96
+        },
+        needChange: {
+          passive: 5,
+          obey: 11,
+          break: 3,
+          exceptionRelief: 35
+        },
+        exceptionId: 'shortcut_time_critical',
+        tellIntensities: {
+          warning: ['moderate'],
+          critical: ['obvious']
+        },
+        dialogueByStage: {
+          warning: [
+            'We really should pick up the pace... daylight is unforgiving.',
+            'I can feel the hunger gnawing. Please, a faster route.'
+          ],
+          critical: [
+            'If we don\'t hurry I might lose control.',
+            'The thirst is unbearable. Take the alleys—now.'
+          ],
+          meltdown: [
+            'Too late. I can\'t promise your safety any longer!'
+          ]
+        },
+        confidenceImpact: {
+          warning: -0.08,
+          critical: -0.12
+        },
+        trustImpact: {
+          warning: 0.05,
+          critical: 0.1
+        }
+      },
       routePreferences: [
         {
           route: 'police',
@@ -359,7 +710,40 @@ export const gameData: GameData = {
       guidelineExceptions: ["gps_passenger_warning"],
       deceptionLevel: 0.2,
       stressLevel: 0.8,
-      trustRequired: 0.4
+      trustRequired: 0.4,
+      stateProfile: {
+        needType: 'fear',
+        initialLevel: 50,
+        thresholds: {
+          warning: 65,
+          critical: 83,
+          meltdown: 94
+        },
+        needChange: {
+          passive: 6,
+          obey: 9,
+          break: 4,
+          exceptionRelief: 24
+        },
+        exceptionId: 'gps_passenger_warning',
+        tellIntensities: {
+          warning: ['moderate'],
+          critical: ['obvious']
+        },
+        dialogueByStage: {
+          warning: [
+            'Please, avoid the main roads—they know those paths.',
+            'They watch the highways. Take the back roads, I beg you.'
+          ],
+          critical: [
+            'If you follow the GPS we are dead. Turn now!',
+            'I can hear them in the wires. We have to change course!'
+          ],
+          meltdown: [
+            'Too late—they found us through the lights!'
+          ]
+        }
+      }
     },
     {
       id: 4,

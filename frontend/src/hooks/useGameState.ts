@@ -5,6 +5,7 @@ import { STORAGE_KEYS, GAME_CONSTANTS, SCREENS, GAME_PHASES } from '../data/cons
 import { ReputationService } from '../services/reputationService';
 import { GameEngine } from '../services/gameEngine';
 import { PassengerService } from '../services/passengerService';
+import { PassengerStateMachine } from '../services/passengerStateMachine';
 import { SaveGameService } from '../services/storageService';
 import { WeatherService } from '../services/weatherService';
 import { gameData } from '../data/gameData';
@@ -49,7 +50,10 @@ const getInitialGameState = (): GameState => {
     // Route mastery and consequence tracking
     routeMastery: { normal: 0, shortcut: 0, scenic: 0, police: 0 },
     routeConsequences: [],
-    consecutiveRouteStreak: { type: '', count: 0 }
+    consecutiveRouteStreak: { type: '', count: 0 },
+    detectedTells: [],
+    ruleConfidence: 0.5,
+    currentPassengerNeedState: null
   };
 };
 
@@ -202,6 +206,8 @@ export const useGameState = (playerStats: PlayerStats) => {
       gameState.timeOfDay
     );
     
+    const passengerNeedState = PassengerStateMachine.initialize(passenger);
+
     setGameState(prev => ({
       ...prev,
       currentPassenger: passenger,
@@ -211,7 +217,9 @@ export const useGameState = (playerStats: PlayerStats) => {
       currentRules: [
         ...prev.currentRules,
         ...gameData.shift_rules.filter(rule => weatherTriggeredRules.includes(rule.id))
-      ]
+      ],
+      currentPassengerNeedState: passengerNeedState,
+      detectedTells: prev.detectedTells || []
     }));
   };
 

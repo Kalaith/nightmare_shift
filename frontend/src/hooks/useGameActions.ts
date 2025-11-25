@@ -2,10 +2,15 @@ import { useCallback } from 'react';
 import type { GameState, Passenger } from '../types/game';
 import { GAME_PHASES } from '../data/constants';
 import { GAME_BALANCE } from '../constants/gameBalance';
+import type { PassengerNeedState, RuleEvaluationResult } from '../types/game';
 import { RouteService } from '../services/reputationService';
 import { PassengerService } from '../services/passengerService';
+import { PassengerStateMachine } from '../services/passengerStateMachine';
+import { RuleEngine } from '../services/ruleEngine';
 import { ItemService } from '../services/itemService';
 import { gameData } from '../data/gameData';
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 interface UseGameActionsProps {
   gameState: GameState;
@@ -102,13 +107,28 @@ export const useGameActions = ({
     }
 
     // Check rule violations
+    let ruleOutcome: RuleEvaluationResult | null = null;
     if (routeChoice === 'shortcut') {
-      const routeRestriction = gameState.currentRules.find(rule => rule.id === 5);
-      if (routeRestriction) {
-        gameOver("You deviated from the GPS route. Your passenger noticed... and they were not forgiving.");
+      ruleOutcome = RuleEngine.evaluateAction(
+        'take_shortcut',
+        gameState.currentRules,
+        gameState.currentPassenger,
+        gameState.currentPassengerNeedState || null,
+        gameState.ruleConfidence
+      );
+
+      if (ruleOutcome?.violation) {
+        gameOver(ruleOutcome.message || "You deviated from the GPS route. Your passenger noticed... and they were not forgiving.");
         return;
       }
     }
+
+    const needResult = PassengerStateMachine.applyRouteChoice(
+      gameState.currentPassengerNeedState || null,
+      gameState.currentPassenger || null,
+      routeChoice,
+      ruleOutcome
+    );
 
     // Get passenger preference and calculate dialogue trigger
     const passengerPreference = gameState.currentPassenger?.routePreferences?.find(
@@ -150,7 +170,14 @@ export const useGameActions = ({
         ? { type: routeChoice, count: prev.consecutiveRouteStreak.count + 1 }
         : { type: routeChoice, count: 1 },
       // Store route dialogue for interaction phase
-      pendingRouteDialogue: routeDialogue
+      pendingRouteDialogue: routeDialogue,
+      ruleConfidence: clamp((prev.ruleConfidence ?? 0.5) + (ruleOutcome?.confidenceDelta ?? 0), 0, 1),
+      currentPassengerNeedState: needResult.state ?? prev.currentPassengerNeedState ?? null,
+      detectedTells: PassengerStateMachine.mergeDetectedTells(
+        prev.detectedTells || [],
+        needResult.triggeredTells,
+        prev.currentPassenger?.id || gameState.currentPassenger?.id || 0
+      )
     }));
 
     // Handle supernatural encounters based on risk level
@@ -160,13 +187,13 @@ export const useGameActions = ({
     }
 
     if (phase === 'pickup') {
-      startPassengerInteraction();
+      startPassengerInteraction(needResult.state ?? gameState.currentPassengerNeedState ?? null);
     } else {
       completeRide();
     }
   }, [gameState, setGameState, gameOver]);
 
-  const startPassengerInteraction = useCallback(() => {
+  const startPassengerInteraction = useCallback((nextNeedState?: PassengerNeedState | null) => {
     const passenger = gameState.currentPassenger;
     if (!passenger) return;
 
@@ -185,7 +212,7 @@ export const useGameActions = ({
       },
       pendingRouteDialogue: null // Clear after use
     }));
-  }, [gameState.currentPassenger, gameState.pendingRouteDialogue, setGameState]);
+  }, [gameState.currentPassenger, gameState.currentPassengerNeedState, gameState.pendingRouteDialogue, setGameState]);
 
   const continueToDestination = useCallback(() => {
     startDriving('destination');
