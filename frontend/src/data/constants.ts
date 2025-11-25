@@ -14,16 +14,17 @@ export const GAME_CONSTANTS: GameConstants = {
   BACKSTORY_UNLOCK_FIRST: 0.2,
   BACKSTORY_UNLOCK_REPEAT: 0.5,
   MINIMUM_EARNINGS: 80, // Reduced to make game winnable
-  // Route fuel costs - REDUCED by ~30% to allow more rides
-  FUEL_COST_NORMAL: 10,
-  FUEL_COST_SHORTCUT: 6,
-  FUEL_COST_SCENIC: 18,
-  FUEL_COST_POLICE: 14,
-  // Route time costs - REDUCED by ~30% to allow more rides
-  TIME_COST_NORMAL: 14,
-  TIME_COST_SHORTCUT: 8,
-  TIME_COST_SCENIC: 25,
-  TIME_COST_POLICE: 18,
+  // Route costs (fuel in liters, time in minutes)
+  // Reduced by 40% total from original values to make game winnable
+  FUEL_COST_SHORTCUT: 5,    // Was 6 (originally 8)
+  FUEL_COST_NORMAL: 9,       // Was 10 (originally 15)
+  FUEL_COST_SCENIC: 15,      // Was 18 (originally 25)
+  FUEL_COST_POLICE: 12,      // Was 14 (originally 20)
+
+  TIME_COST_SHORTCUT: 7,     // Was 8 (originally 12)
+  TIME_COST_NORMAL: 12,      // Was 14 (originally 20)
+  TIME_COST_SCENIC: 21,      // Was 25 (originally 35)
+  TIME_COST_POLICE: 15,      // Was 18 (originally 25)
   // Route risk levels
   RISK_NORMAL: 1,
   RISK_SHORTCUT: 3,

@@ -151,9 +151,9 @@ export const GAME_BALANCE = {
 
   // ===== CONSECUTIVE ROUTE PENALTIES =====
   CONSECUTIVE_ROUTE: {
-    WARNING_THRESHOLD: 4,     // Warn player after 4 consecutive same routes - increased from 3
-    VIOLATION_THRESHOLD: 6,   // Game over after 6 consecutive shortcuts - increased from 5
-    PENALTY_PER_REPEAT: 0.05, // -5% fare per consecutive same route - reduced from 0.1
+    WARNING_THRESHOLD: 4,      // Show warning after 4 consecutive shortcuts
+    VIOLATION_THRESHOLD: 999,  // Effectively disabled - rely on passenger preferences
+    PENALTY_PER_REPEAT: 0.10,  // 10% fare reduction per repeat (balanced with passenger modifiers)
     RISK_INCREASE_PER_REPEAT: 1, // +1 risk level per consecutive shortcut
   },
 

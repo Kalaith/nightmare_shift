@@ -45,6 +45,8 @@ export class GameSimulator {
         };
         let consecutiveRouteStreak: { type: RouteChoice; count: number } | null = null;
         let gameOverReason: string | undefined;
+        const REFUEL_THRESHOLD = 30; // Refuel when below 30%
+        const FUEL_COST_PER_PERCENT = 0.5; // $0.50 per percent
 
         while (timeRemaining > 0 && fuel > 5) {
             const passenger = this.selectRandomPassenger();
@@ -79,6 +81,20 @@ export class GameSimulator {
             earnings += fare;
             ridesCompleted++;
             routeDistribution[routeChoice]++;
+
+            // Auto-refuel when fuel drops below threshold
+            if (fuel < REFUEL_THRESHOLD) {
+                const fuelNeeded = 100 - fuel;
+                const refuelCost = Math.ceil(fuelNeeded * FUEL_COST_PER_PERCENT);
+
+                if (earnings >= refuelCost) {
+                    earnings -= refuelCost;
+                    fuel = 100;
+                } else {
+                    // Can't afford to refuel, continue with low fuel
+                    // Will likely run out soon
+                }
+            }
         }
 
         const success = !gameOverReason && earnings >= GAME_CONSTANTS.MINIMUM_EARNINGS;
@@ -148,14 +164,24 @@ export class GameSimulator {
                 let bestRoute: RouteChoice = 'normal';
                 let bestScore = 0;
 
+                // Get fuel costs for each route type
+                const fuelCosts = {
+                    shortcut: 5,
+                    normal: 9,
+                    scenic: 15,
+                    police: 12
+                };
+
                 for (const pref of prefs) {
                     const route = pref.route as RouteChoice;
-                    let routeMult = route === 'shortcut' ? 0.85 : route === 'scenic' ? 1.25 : route === 'police' ? 1.05 : 1.0;
+                    const routeMult = route === 'shortcut' ? 0.85 : route === 'scenic' ? 1.25 : route === 'police' ? 1.05 : 1.0;
                     const passengerMult = pref.fareModifier || 1.0;
-                    let score = routeMult * passengerMult;
+                    const fareMultiplier = routeMult * passengerMult;
 
-                    if (pref.preference === 'fears') score *= 0.2;
-                    else if (pref.preference === 'dislikes') score *= 0.6;
+                    // Calculate profit per fuel: (fare multiplier) / (fuel cost)
+                    // This ensures we choose routes that are both profitable AND fuel-efficient
+                    const fuelCost = fuelCosts[route];
+                    const score = fareMultiplier / fuelCost;
 
                     if (score > bestScore) {
                         bestScore = score;

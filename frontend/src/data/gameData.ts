@@ -296,7 +296,7 @@ export const gameData: GameData = {
       breakNeedAdjustment: 18,
       violationMessage: 'Dispatch routes exist for a reason. The shadows were waiting off-grid.'
     },
-    
+
     // Conditional rules (only apply in certain situations)
     {
       id: 6,
@@ -322,7 +322,7 @@ export const gameData: GameData = {
       type: "conditional",
       visible: true
     },
-    
+
     // Conflicting rules (create impossible situations)
     {
       id: 9,
@@ -351,7 +351,7 @@ export const gameData: GameData = {
       conflictsWith: [1], // Conflicts with No Eye Contact
       visible: true
     },
-    
+
     // Hidden rules (not shown until violated)
     {
       id: 12,
@@ -528,7 +528,7 @@ export const gameData: GameData = {
           route: 'normal',
           preference: 'fears',
           reason: 'Too many memories on the main roads...',
-          fareModifier: 0.7,
+          fareModifier: 0.3,
           stressModifier: 0.3,
           specialDialogue: 'Please... not the main road. Too many memories there.',
           triggerChance: 0.8
@@ -564,7 +564,7 @@ export const gameData: GameData = {
     },
     {
       id: 2,
-      name: "Jake Morrison", 
+      name: "Jake Morrison",
       emoji: "👨‍💼",
       description: "Young professional, unusual pale complexion",
       pickup: "Office District",
@@ -641,7 +641,7 @@ export const gameData: GameData = {
           route: 'police',
           preference: 'fears',
           reason: 'Police attention is... problematic for my kind',
-          fareModifier: 0.6,
+          fareModifier: 0.3,
           stressModifier: 0.4,
           specialDialogue: 'Not the police route! They ask too many questions...',
           triggerChance: 0.9
@@ -678,7 +678,7 @@ export const gameData: GameData = {
     {
       id: 3,
       name: "Sarah Woods",
-      emoji: "👩‍🦰", 
+      emoji: "👩‍🦰",
       description: "Young woman with dirt under her fingernails",
       pickup: "Forest Road",
       destination: "Downtown Hotel",
@@ -790,7 +790,7 @@ export const gameData: GameData = {
       pickup: "Antique Shop",
       destination: "Private Residence",
       personalRule: "Will try to buy things from your car - don't sell anything",
-      supernatural: "Trades in supernatural artifacts and souls", 
+      supernatural: "Trades in supernatural artifacts and souls",
       fare: 50,
       rarity: "rare",
       items: ["crystal pendant", "ancient coin", "contract paper"],
@@ -845,7 +845,7 @@ export const gameData: GameData = {
           route: 'shortcut',
           preference: 'fears',
           reason: 'Dark alleys scare children',
-          fareModifier: 0.5,
+          fareModifier: 0.3,
           stressModifier: 0.4,
           specialDialogue: 'I don\'t like this way! It\'s too scary and dark!',
           triggerChance: 0.9
@@ -1159,7 +1159,7 @@ export const gameData: GameData = {
       riskLevel: 2
     },
     {
-      name: "Riverside Cemetery", 
+      name: "Riverside Cemetery",
       description: "Ancient tombstones shrouded in fog",
       atmosphere: "Haunted",
       riskLevel: 4

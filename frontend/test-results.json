@@ -1,0 +1,2176 @@
+{
+  "timestamp": "2025-11-25T13:21:05.363Z",
+  "summary": {
+    "totalRuns": 120,
+    "successRate": 68.33333333333333,
+    "averageEarnings": 236,
+    "averageRides": 11.1,
+    "strategyResults": {
+      "shortcut_spam": {
+        "runs": 20,
+        "successes": 19,
+        "avgEarnings": 169,
+        "avgRides": 17.4
+      },
+      "balanced": {
+        "runs": 20,
+        "successes": 12,
+        "avgEarnings": 289,
+        "avgRides": 10.3
+      },
+      "strategic": {
+        "runs": 20,
+        "successes": 13,
+        "avgEarnings": 237,
+        "avgRides": 10.8
+      },
+      "perfect": {
+        "runs": 20,
+        "successes": 18,
+        "avgEarnings": 278,
+        "avgRides": 12.1
+      },
+      "scenic_only": {
+        "runs": 20,
+        "successes": 10,
+        "avgEarnings": 167,
+        "avgRides": 6.4
+      },
+      "random": {
+        "runs": 20,
+        "successes": 10,
+        "avgEarnings": 275,
+        "avgRides": 9.7
+      }
+    }
+  },
+  "failureReasons": {
+    "shortcut_spam": {
+      "Ran out of fuel (needed 7, had 6)": 1
+    },
+    "balanced": {
+      "Ran out of fuel (needed 8, had 6)": 2,
+      "Ran out of fuel (needed 9, had 7)": 1,
+      "Ran out of fuel (needed 9, had 6)": 1,
+      "Ran out of fuel (needed 15, had 7)": 1,
+      "Ran out of fuel (needed 15, had 14)": 1,
+      "Ran out of fuel (needed 11, had 7)": 1,
+      "Ran out of fuel (needed 11, had 6)": 1
+    },
+    "strategic": {
+      "Ran out of fuel (needed 10, had 6)": 1,
+      "Ran out of fuel (needed 11, had 7)": 1,
+      "Ran out of fuel (needed 8, had 7)": 2,
+      "Ran out of fuel (needed 14, had 13)": 1,
+      "Ran out of fuel (needed 7, had 6)": 1,
+      "Ran out of fuel (needed 10, had 8)": 1
+    },
+    "perfect": {
+      "Ran out of fuel (needed 10, had 9)": 1,
+      "Ran out of fuel (needed 11, had 9)": 1
+    },
+    "scenic_only": {
+      "Ran out of fuel (needed 15, had 13)": 1,
+      "Ran out of fuel (needed 12, had 6)": 1,
+      "Ran out of fuel (needed 13, had 10)": 1,
+      "Ran out of fuel (needed 14, had 12)": 1,
+      "Ran out of fuel (needed 17, had 16)": 1,
+      "Ran out of fuel (needed 16, had 13)": 2,
+      "Ran out of fuel (needed 13, had 9)": 1,
+      "Ran out of fuel (needed 16, had 11)": 1,
+      "Ran out of fuel (needed 17, had 12)": 1
+    },
+    "random": {
+      "Ran out of fuel (needed 17, had 8)": 1,
+      "Ran out of fuel (needed 15, had 8)": 1,
+      "Ran out of fuel (needed 14, had 7)": 1,
+      "Ran out of fuel (needed 16, had 12)": 1,
+      "Ran out of fuel (needed 13, had 12)": 1,
+      "Ran out of fuel (needed 14, had 10)": 1,
+      "Ran out of fuel (needed 14, had 6)": 1,
+      "Ran out of fuel (needed 9, had 6)": 1,
+      "Ran out of fuel (needed 10, had 8)": 1,
+      "Ran out of fuel (needed 11, had 8)": 1
+    }
+  },
+  "allResults": [
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 138,
+      "ridesCompleted": 17,
+      "fuelRemaining": 5,
+      "timeRemaining": 372,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 8.117647058823529,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 108
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 200,
+      "ridesCompleted": 10,
+      "fuelRemaining": 0,
+      "timeRemaining": 354,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 7,
+        "scenic": 2,
+        "police": 1
+      },
+      "averageFarePerRide": 20,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 126
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 304,
+      "ridesCompleted": 10,
+      "fuelRemaining": 5,
+      "timeRemaining": 366,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 9,
+        "scenic": 1,
+        "police": 0
+      },
+      "averageFarePerRide": 30.4,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 114
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 285,
+      "ridesCompleted": 13,
+      "fuelRemaining": 0,
+      "timeRemaining": 345,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 21.923076923076923,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 135
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 149,
+      "ridesCompleted": 6,
+      "fuelRemaining": 13,
+      "timeRemaining": 351,
+      "gameOverReason": "Ran out of fuel (needed 15, had 13)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 24.833333333333332,
+      "totalFuelUsed": 87,
+      "totalTimeUsed": 129
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 312,
+      "ridesCompleted": 10,
+      "fuelRemaining": 8,
+      "timeRemaining": 360,
+      "gameOverReason": "Ran out of fuel (needed 17, had 8)",
+      "routeDistribution": {
+        "shortcut": 3,
+        "normal": 2,
+        "scenic": 1,
+        "police": 4
+      },
+      "averageFarePerRide": 31.2,
+      "totalFuelUsed": 92,
+      "totalTimeUsed": 120
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 188,
+      "ridesCompleted": 18,
+      "fuelRemaining": 2,
+      "timeRemaining": 356,
+      "routeDistribution": {
+        "shortcut": 18,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 10.444444444444445,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 124
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 326,
+      "ridesCompleted": 10,
+      "fuelRemaining": 5,
+      "timeRemaining": 355,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 7,
+        "scenic": 0,
+        "police": 3
+      },
+      "averageFarePerRide": 32.6,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 125
+    },
+    {
+      "strategy": "strategic",
+      "success": false,
+      "finalEarnings": 236,
+      "ridesCompleted": 11,
+      "fuelRemaining": 6,
+      "timeRemaining": 333,
+      "gameOverReason": "Ran out of fuel (needed 10, had 6)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 9,
+        "scenic": 0,
+        "police": 1
+      },
+      "averageFarePerRide": 21.454545454545453,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 147
+    },
+    {
+      "strategy": "perfect",
+      "success": false,
+      "finalEarnings": 341,
+      "ridesCompleted": 11,
+      "fuelRemaining": 9,
+      "timeRemaining": 363,
+      "gameOverReason": "Ran out of fuel (needed 10, had 9)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 10,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 31,
+      "totalFuelUsed": 91,
+      "totalTimeUsed": 117
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 116,
+      "ridesCompleted": 6,
+      "fuelRemaining": 5,
+      "timeRemaining": 361,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 19.333333333333332,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 119
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 278,
+      "ridesCompleted": 11,
+      "fuelRemaining": 4,
+      "timeRemaining": 334,
+      "routeDistribution": {
+        "shortcut": 3,
+        "normal": 3,
+        "scenic": 1,
+        "police": 4
+      },
+      "averageFarePerRide": 25.272727272727273,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 146
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 257,
+      "ridesCompleted": 17,
+      "fuelRemaining": 2,
+      "timeRemaining": 354,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 15.117647058823529,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 126
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 351,
+      "ridesCompleted": 10,
+      "fuelRemaining": 1,
+      "timeRemaining": 357,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 7,
+        "scenic": 2,
+        "police": 0
+      },
+      "averageFarePerRide": 35.1,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 123
+    },
+    {
+      "strategy": "strategic",
+      "success": false,
+      "finalEarnings": 156,
+      "ridesCompleted": 10,
+      "fuelRemaining": 7,
+      "timeRemaining": 359,
+      "gameOverReason": "Ran out of fuel (needed 11, had 7)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 9,
+        "scenic": 0,
+        "police": 1
+      },
+      "averageFarePerRide": 15.6,
+      "totalFuelUsed": 93,
+      "totalTimeUsed": 121
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 290,
+      "ridesCompleted": 13,
+      "fuelRemaining": 5,
+      "timeRemaining": 351,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 22.307692307692307,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 129
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 173,
+      "ridesCompleted": 6,
+      "fuelRemaining": 6,
+      "timeRemaining": 359,
+      "gameOverReason": "Ran out of fuel (needed 12, had 6)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 28.833333333333332,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 121
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 252,
+      "ridesCompleted": 9,
+      "fuelRemaining": 8,
+      "timeRemaining": 372,
+      "gameOverReason": "Ran out of fuel (needed 15, had 8)",
+      "routeDistribution": {
+        "shortcut": 3,
+        "normal": 2,
+        "scenic": 2,
+        "police": 2
+      },
+      "averageFarePerRide": 28,
+      "totalFuelUsed": 92,
+      "totalTimeUsed": 108
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 157,
+      "ridesCompleted": 18,
+      "fuelRemaining": 5,
+      "timeRemaining": 353,
+      "routeDistribution": {
+        "shortcut": 18,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 8.722222222222221,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 127
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 271,
+      "ridesCompleted": 10,
+      "fuelRemaining": 1,
+      "timeRemaining": 344,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 7,
+        "scenic": 2,
+        "police": 0
+      },
+      "averageFarePerRide": 27.1,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 136
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 212,
+      "ridesCompleted": 11,
+      "fuelRemaining": 0,
+      "timeRemaining": 359,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 10,
+        "scenic": 1,
+        "police": 0
+      },
+      "averageFarePerRide": 19.272727272727273,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 121
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 286,
+      "ridesCompleted": 11,
+      "fuelRemaining": 4,
+      "timeRemaining": 352,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 9,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 26,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 128
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 226,
+      "ridesCompleted": 7,
+      "fuelRemaining": 3,
+      "timeRemaining": 335,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 7,
+        "police": 0
+      },
+      "averageFarePerRide": 32.285714285714285,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 145
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 285,
+      "ridesCompleted": 8,
+      "fuelRemaining": 7,
+      "timeRemaining": 354,
+      "gameOverReason": "Ran out of fuel (needed 14, had 7)",
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 0,
+        "scenic": 3,
+        "police": 3
+      },
+      "averageFarePerRide": 35.625,
+      "totalFuelUsed": 93,
+      "totalTimeUsed": 126
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 171,
+      "ridesCompleted": 18,
+      "fuelRemaining": 3,
+      "timeRemaining": 330,
+      "routeDistribution": {
+        "shortcut": 18,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 9.5,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 150
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 310,
+      "ridesCompleted": 10,
+      "fuelRemaining": 2,
+      "timeRemaining": 364,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 7,
+        "scenic": 0,
+        "police": 2
+      },
+      "averageFarePerRide": 31,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 116
+    },
+    {
+      "strategy": "strategic",
+      "success": false,
+      "finalEarnings": 263,
+      "ridesCompleted": 10,
+      "fuelRemaining": 7,
+      "timeRemaining": 351,
+      "gameOverReason": "Ran out of fuel (needed 8, had 7)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 9,
+        "scenic": 0,
+        "police": 1
+      },
+      "averageFarePerRide": 26.3,
+      "totalFuelUsed": 93,
+      "totalTimeUsed": 129
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 311,
+      "ridesCompleted": 12,
+      "fuelRemaining": 5,
+      "timeRemaining": 354,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 25.916666666666668,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 126
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 298,
+      "ridesCompleted": 6,
+      "fuelRemaining": 10,
+      "timeRemaining": 361,
+      "gameOverReason": "Ran out of fuel (needed 13, had 10)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 49.666666666666664,
+      "totalFuelUsed": 90,
+      "totalTimeUsed": 119
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 316,
+      "ridesCompleted": 8,
+      "fuelRemaining": 12,
+      "timeRemaining": 371,
+      "gameOverReason": "Ran out of fuel (needed 16, had 12)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 2,
+        "scenic": 3,
+        "police": 2
+      },
+      "averageFarePerRide": 39.5,
+      "totalFuelUsed": 88,
+      "totalTimeUsed": 109
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": false,
+      "finalEarnings": 131,
+      "ridesCompleted": 16,
+      "fuelRemaining": 6,
+      "timeRemaining": 361,
+      "gameOverReason": "Ran out of fuel (needed 7, had 6)",
+      "routeDistribution": {
+        "shortcut": 16,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 8.1875,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 119
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 302,
+      "ridesCompleted": 10,
+      "fuelRemaining": 5,
+      "timeRemaining": 331,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 7,
+        "scenic": 2,
+        "police": 0
+      },
+      "averageFarePerRide": 30.2,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 149
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 142,
+      "ridesCompleted": 11,
+      "fuelRemaining": 1,
+      "timeRemaining": 354,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 12.909090909090908,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 126
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 377,
+      "ridesCompleted": 13,
+      "fuelRemaining": 0,
+      "timeRemaining": 350,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 29,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 130
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 114,
+      "ridesCompleted": 6,
+      "fuelRemaining": 12,
+      "timeRemaining": 346,
+      "gameOverReason": "Ran out of fuel (needed 14, had 12)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 19,
+      "totalFuelUsed": 88,
+      "totalTimeUsed": 134
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 177,
+      "ridesCompleted": 8,
+      "fuelRemaining": 12,
+      "timeRemaining": 369,
+      "gameOverReason": "Ran out of fuel (needed 13, had 12)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 2,
+        "scenic": 1,
+        "police": 4
+      },
+      "averageFarePerRide": 22.125,
+      "totalFuelUsed": 88,
+      "totalTimeUsed": 111
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 152,
+      "ridesCompleted": 18,
+      "fuelRemaining": 2,
+      "timeRemaining": 354,
+      "routeDistribution": {
+        "shortcut": 18,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 8.444444444444445,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 126
+    },
+    {
+      "strategy": "balanced",
+      "success": false,
+      "finalEarnings": 514,
+      "ridesCompleted": 9,
+      "fuelRemaining": 6,
+      "timeRemaining": 360,
+      "gameOverReason": "Ran out of fuel (needed 8, had 6)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 6,
+        "scenic": 2,
+        "police": 0
+      },
+      "averageFarePerRide": 57.111111111111114,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 120
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 190,
+      "ridesCompleted": 11,
+      "fuelRemaining": 5,
+      "timeRemaining": 330,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 9,
+        "scenic": 2,
+        "police": 0
+      },
+      "averageFarePerRide": 17.272727272727273,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 150
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 187,
+      "ridesCompleted": 13,
+      "fuelRemaining": 0,
+      "timeRemaining": 337,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 12,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 14.384615384615385,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 143
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 225,
+      "ridesCompleted": 6,
+      "fuelRemaining": 16,
+      "timeRemaining": 350,
+      "gameOverReason": "Ran out of fuel (needed 17, had 16)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 37.5,
+      "totalFuelUsed": 84,
+      "totalTimeUsed": 130
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 309,
+      "ridesCompleted": 10,
+      "fuelRemaining": 4,
+      "timeRemaining": 329,
+      "routeDistribution": {
+        "shortcut": 3,
+        "normal": 2,
+        "scenic": 5,
+        "police": 0
+      },
+      "averageFarePerRide": 30.9,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 151
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 174,
+      "ridesCompleted": 17,
+      "fuelRemaining": 2,
+      "timeRemaining": 364,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 10.235294117647058,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 116
+    },
+    {
+      "strategy": "balanced",
+      "success": false,
+      "finalEarnings": 220,
+      "ridesCompleted": 10,
+      "fuelRemaining": 7,
+      "timeRemaining": 368,
+      "gameOverReason": "Ran out of fuel (needed 9, had 7)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 7,
+        "scenic": 0,
+        "police": 2
+      },
+      "averageFarePerRide": 22,
+      "totalFuelUsed": 93,
+      "totalTimeUsed": 112
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 247,
+      "ridesCompleted": 11,
+      "fuelRemaining": 5,
+      "timeRemaining": 335,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 8,
+        "scenic": 2,
+        "police": 0
+      },
+      "averageFarePerRide": 22.454545454545453,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 145
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 350,
+      "ridesCompleted": 13,
+      "fuelRemaining": 0,
+      "timeRemaining": 334,
+      "routeDistribution": {
+        "shortcut": 3,
+        "normal": 10,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 26.923076923076923,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 146
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 192,
+      "ridesCompleted": 7,
+      "fuelRemaining": 2,
+      "timeRemaining": 330,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 7,
+        "police": 0
+      },
+      "averageFarePerRide": 27.428571428571427,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 150
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 436,
+      "ridesCompleted": 13,
+      "fuelRemaining": 3,
+      "timeRemaining": 331,
+      "routeDistribution": {
+        "shortcut": 5,
+        "normal": 5,
+        "scenic": 1,
+        "police": 2
+      },
+      "averageFarePerRide": 33.53846153846154,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 149
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 195,
+      "ridesCompleted": 17,
+      "fuelRemaining": 1,
+      "timeRemaining": 354,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 11.470588235294118,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 126
+    },
+    {
+      "strategy": "balanced",
+      "success": false,
+      "finalEarnings": 300,
+      "ridesCompleted": 12,
+      "fuelRemaining": 6,
+      "timeRemaining": 343,
+      "gameOverReason": "Ran out of fuel (needed 8, had 6)",
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 8,
+        "scenic": 0,
+        "police": 2
+      },
+      "averageFarePerRide": 25,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 137
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 302,
+      "ridesCompleted": 11,
+      "fuelRemaining": 1,
+      "timeRemaining": 345,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 9,
+        "scenic": 1,
+        "police": 0
+      },
+      "averageFarePerRide": 27.454545454545453,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 135
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 284,
+      "ridesCompleted": 13,
+      "fuelRemaining": 0,
+      "timeRemaining": 322,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 21.846153846153847,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 158
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 140,
+      "ridesCompleted": 7,
+      "fuelRemaining": 2,
+      "timeRemaining": 335,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 7,
+        "police": 0
+      },
+      "averageFarePerRide": 20,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 145
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 256,
+      "ridesCompleted": 9,
+      "fuelRemaining": 3,
+      "timeRemaining": 341,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 0,
+        "scenic": 2,
+        "police": 5
+      },
+      "averageFarePerRide": 28.444444444444443,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 139
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 154,
+      "ridesCompleted": 18,
+      "fuelRemaining": 1,
+      "timeRemaining": 352,
+      "routeDistribution": {
+        "shortcut": 18,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 8.555555555555555,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 128
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 271,
+      "ridesCompleted": 10,
+      "fuelRemaining": 3,
+      "timeRemaining": 357,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 7,
+        "scenic": 1,
+        "police": 1
+      },
+      "averageFarePerRide": 27.1,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 123
+    },
+    {
+      "strategy": "strategic",
+      "success": false,
+      "finalEarnings": 265,
+      "ridesCompleted": 11,
+      "fuelRemaining": 13,
+      "timeRemaining": 361,
+      "gameOverReason": "Ran out of fuel (needed 14, had 13)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 24.09090909090909,
+      "totalFuelUsed": 87,
+      "totalTimeUsed": 119
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 372,
+      "ridesCompleted": 13,
+      "fuelRemaining": 0,
+      "timeRemaining": 346,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 28.615384615384617,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 134
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 122,
+      "ridesCompleted": 7,
+      "fuelRemaining": 1,
+      "timeRemaining": 334,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 7,
+        "police": 0
+      },
+      "averageFarePerRide": 17.428571428571427,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 146
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 337,
+      "ridesCompleted": 12,
+      "fuelRemaining": 4,
+      "timeRemaining": 333,
+      "routeDistribution": {
+        "shortcut": 5,
+        "normal": 4,
+        "scenic": 1,
+        "police": 2
+      },
+      "averageFarePerRide": 28.083333333333332,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 147
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 145,
+      "ridesCompleted": 17,
+      "fuelRemaining": 2,
+      "timeRemaining": 347,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 8.529411764705882,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 133
+    },
+    {
+      "strategy": "balanced",
+      "success": false,
+      "finalEarnings": 188,
+      "ridesCompleted": 10,
+      "fuelRemaining": 6,
+      "timeRemaining": 348,
+      "gameOverReason": "Ran out of fuel (needed 9, had 6)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 7,
+        "scenic": 0,
+        "police": 2
+      },
+      "averageFarePerRide": 18.8,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 132
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 189,
+      "ridesCompleted": 13,
+      "fuelRemaining": 4,
+      "timeRemaining": 346,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 13,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 14.538461538461538,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 134
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 329,
+      "ridesCompleted": 12,
+      "fuelRemaining": 3,
+      "timeRemaining": 344,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 10,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 27.416666666666668,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 136
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 158,
+      "ridesCompleted": 7,
+      "fuelRemaining": 0,
+      "timeRemaining": 323,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 7,
+        "police": 0
+      },
+      "averageFarePerRide": 22.571428571428573,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 157
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 274,
+      "ridesCompleted": 8,
+      "fuelRemaining": 10,
+      "timeRemaining": 352,
+      "gameOverReason": "Ran out of fuel (needed 14, had 10)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 2,
+        "scenic": 2,
+        "police": 3
+      },
+      "averageFarePerRide": 34.25,
+      "totalFuelUsed": 90,
+      "totalTimeUsed": 128
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 191,
+      "ridesCompleted": 18,
+      "fuelRemaining": 2,
+      "timeRemaining": 362,
+      "routeDistribution": {
+        "shortcut": 18,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 10.61111111111111,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 118
+    },
+    {
+      "strategy": "balanced",
+      "success": false,
+      "finalEarnings": 213,
+      "ridesCompleted": 11,
+      "fuelRemaining": 7,
+      "timeRemaining": 335,
+      "gameOverReason": "Ran out of fuel (needed 15, had 7)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 8,
+        "scenic": 1,
+        "police": 1
+      },
+      "averageFarePerRide": 19.363636363636363,
+      "totalFuelUsed": 93,
+      "totalTimeUsed": 145
+    },
+    {
+      "strategy": "strategic",
+      "success": false,
+      "finalEarnings": 292,
+      "ridesCompleted": 10,
+      "fuelRemaining": 6,
+      "timeRemaining": 359,
+      "gameOverReason": "Ran out of fuel (needed 7, had 6)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 7,
+        "scenic": 0,
+        "police": 2
+      },
+      "averageFarePerRide": 29.2,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 121
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 304,
+      "ridesCompleted": 13,
+      "fuelRemaining": 0,
+      "timeRemaining": 333,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 12,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 23.384615384615383,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 147
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 227,
+      "ridesCompleted": 7,
+      "fuelRemaining": 4,
+      "timeRemaining": 332,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 7,
+        "police": 0
+      },
+      "averageFarePerRide": 32.42857142857143,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 148
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 287,
+      "ridesCompleted": 11,
+      "fuelRemaining": 6,
+      "timeRemaining": 355,
+      "gameOverReason": "Ran out of fuel (needed 14, had 6)",
+      "routeDistribution": {
+        "shortcut": 6,
+        "normal": 1,
+        "scenic": 3,
+        "police": 1
+      },
+      "averageFarePerRide": 26.09090909090909,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 125
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 177,
+      "ridesCompleted": 18,
+      "fuelRemaining": 3,
+      "timeRemaining": 347,
+      "routeDistribution": {
+        "shortcut": 18,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 9.833333333333334,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 133
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 385,
+      "ridesCompleted": 10,
+      "fuelRemaining": 1,
+      "timeRemaining": 352,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 7,
+        "scenic": 2,
+        "police": 1
+      },
+      "averageFarePerRide": 38.5,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 128
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 308,
+      "ridesCompleted": 10,
+      "fuelRemaining": 2,
+      "timeRemaining": 352,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 7,
+        "scenic": 2,
+        "police": 1
+      },
+      "averageFarePerRide": 30.8,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 128
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 277,
+      "ridesCompleted": 12,
+      "fuelRemaining": 4,
+      "timeRemaining": 343,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 10,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 23.083333333333332,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 137
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 106,
+      "ridesCompleted": 6,
+      "fuelRemaining": 13,
+      "timeRemaining": 360,
+      "gameOverReason": "Ran out of fuel (needed 16, had 13)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 17.666666666666668,
+      "totalFuelUsed": 87,
+      "totalTimeUsed": 120
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 191,
+      "ridesCompleted": 9,
+      "fuelRemaining": 5,
+      "timeRemaining": 356,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 5,
+        "scenic": 2,
+        "police": 1
+      },
+      "averageFarePerRide": 21.22222222222222,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 124
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 174,
+      "ridesCompleted": 17,
+      "fuelRemaining": 4,
+      "timeRemaining": 373,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 10.235294117647058,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 107
+    },
+    {
+      "strategy": "balanced",
+      "success": false,
+      "finalEarnings": 301,
+      "ridesCompleted": 11,
+      "fuelRemaining": 14,
+      "timeRemaining": 364,
+      "gameOverReason": "Ran out of fuel (needed 15, had 14)",
+      "routeDistribution": {
+        "shortcut": 3,
+        "normal": 8,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 27.363636363636363,
+      "totalFuelUsed": 86,
+      "totalTimeUsed": 116
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 267,
+      "ridesCompleted": 11,
+      "fuelRemaining": 0,
+      "timeRemaining": 336,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 7,
+        "scenic": 2,
+        "police": 1
+      },
+      "averageFarePerRide": 24.272727272727273,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 144
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 142,
+      "ridesCompleted": 11,
+      "fuelRemaining": 3,
+      "timeRemaining": 348,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 12.909090909090908,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 132
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 163,
+      "ridesCompleted": 7,
+      "fuelRemaining": 0,
+      "timeRemaining": 332,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 7,
+        "police": 0
+      },
+      "averageFarePerRide": 23.285714285714285,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 148
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 312,
+      "ridesCompleted": 9,
+      "fuelRemaining": 6,
+      "timeRemaining": 350,
+      "gameOverReason": "Ran out of fuel (needed 9, had 6)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 3,
+        "scenic": 1,
+        "police": 5
+      },
+      "averageFarePerRide": 34.666666666666664,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 130
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 145,
+      "ridesCompleted": 17,
+      "fuelRemaining": 1,
+      "timeRemaining": 340,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 8.529411764705882,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 140
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 257,
+      "ridesCompleted": 11,
+      "fuelRemaining": 0,
+      "timeRemaining": 346,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 8,
+        "scenic": 0,
+        "police": 2
+      },
+      "averageFarePerRide": 23.363636363636363,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 134
+    },
+    {
+      "strategy": "strategic",
+      "success": false,
+      "finalEarnings": 167,
+      "ridesCompleted": 10,
+      "fuelRemaining": 8,
+      "timeRemaining": 359,
+      "gameOverReason": "Ran out of fuel (needed 10, had 8)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 8,
+        "scenic": 0,
+        "police": 2
+      },
+      "averageFarePerRide": 16.7,
+      "totalFuelUsed": 92,
+      "totalTimeUsed": 121
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 189,
+      "ridesCompleted": 10,
+      "fuelRemaining": 5,
+      "timeRemaining": 353,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 10,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 18.9,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 127
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 168,
+      "ridesCompleted": 6,
+      "fuelRemaining": 9,
+      "timeRemaining": 369,
+      "gameOverReason": "Ran out of fuel (needed 13, had 9)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 28,
+      "totalFuelUsed": 91,
+      "totalTimeUsed": 111
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 244,
+      "ridesCompleted": 8,
+      "fuelRemaining": 0,
+      "timeRemaining": 349,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 0,
+        "scenic": 5,
+        "police": 2
+      },
+      "averageFarePerRide": 30.5,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 131
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 174,
+      "ridesCompleted": 17,
+      "fuelRemaining": 5,
+      "timeRemaining": 366,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 10.235294117647058,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 114
+    },
+    {
+      "strategy": "balanced",
+      "success": false,
+      "finalEarnings": 221,
+      "ridesCompleted": 9,
+      "fuelRemaining": 7,
+      "timeRemaining": 364,
+      "gameOverReason": "Ran out of fuel (needed 11, had 7)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 6,
+        "scenic": 1,
+        "police": 2
+      },
+      "averageFarePerRide": 24.555555555555557,
+      "totalFuelUsed": 93,
+      "totalTimeUsed": 116
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 164,
+      "ridesCompleted": 11,
+      "fuelRemaining": 4,
+      "timeRemaining": 359,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 14.909090909090908,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 121
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 364,
+      "ridesCompleted": 11,
+      "fuelRemaining": 1,
+      "timeRemaining": 355,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 10,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 33.09090909090909,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 125
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 135,
+      "ridesCompleted": 6,
+      "fuelRemaining": 13,
+      "timeRemaining": 372,
+      "gameOverReason": "Ran out of fuel (needed 16, had 13)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 22.5,
+      "totalFuelUsed": 87,
+      "totalTimeUsed": 108
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 286,
+      "ridesCompleted": 11,
+      "fuelRemaining": 0,
+      "timeRemaining": 344,
+      "routeDistribution": {
+        "shortcut": 4,
+        "normal": 3,
+        "scenic": 2,
+        "police": 2
+      },
+      "averageFarePerRide": 26,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 136
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 137,
+      "ridesCompleted": 17,
+      "fuelRemaining": 1,
+      "timeRemaining": 350,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 8.058823529411764,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 130
+    },
+    {
+      "strategy": "balanced",
+      "success": false,
+      "finalEarnings": 227,
+      "ridesCompleted": 9,
+      "fuelRemaining": 6,
+      "timeRemaining": 365,
+      "gameOverReason": "Ran out of fuel (needed 11, had 6)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 6,
+        "scenic": 1,
+        "police": 2
+      },
+      "averageFarePerRide": 25.22222222222222,
+      "totalFuelUsed": 94,
+      "totalTimeUsed": 115
+    },
+    {
+      "strategy": "strategic",
+      "success": false,
+      "finalEarnings": 235,
+      "ridesCompleted": 11,
+      "fuelRemaining": 7,
+      "timeRemaining": 350,
+      "gameOverReason": "Ran out of fuel (needed 8, had 7)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 9,
+        "scenic": 1,
+        "police": 1
+      },
+      "averageFarePerRide": 21.363636363636363,
+      "totalFuelUsed": 93,
+      "totalTimeUsed": 130
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 196,
+      "ridesCompleted": 12,
+      "fuelRemaining": 5,
+      "timeRemaining": 348,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 16.333333333333332,
+      "totalFuelUsed": 95,
+      "totalTimeUsed": 132
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 191,
+      "ridesCompleted": 6,
+      "fuelRemaining": 11,
+      "timeRemaining": 353,
+      "gameOverReason": "Ran out of fuel (needed 16, had 11)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 31.833333333333332,
+      "totalFuelUsed": 89,
+      "totalTimeUsed": 127
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 187,
+      "ridesCompleted": 9,
+      "fuelRemaining": 8,
+      "timeRemaining": 369,
+      "gameOverReason": "Ran out of fuel (needed 10, had 8)",
+      "routeDistribution": {
+        "shortcut": 3,
+        "normal": 2,
+        "scenic": 3,
+        "police": 1
+      },
+      "averageFarePerRide": 20.77777777777778,
+      "totalFuelUsed": 92,
+      "totalTimeUsed": 111
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 157,
+      "ridesCompleted": 18,
+      "fuelRemaining": 1,
+      "timeRemaining": 357,
+      "routeDistribution": {
+        "shortcut": 18,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 8.722222222222221,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 123
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 268,
+      "ridesCompleted": 9,
+      "fuelRemaining": 3,
+      "timeRemaining": 360,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 6,
+        "scenic": 1,
+        "police": 2
+      },
+      "averageFarePerRide": 29.77777777777778,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 120
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 358,
+      "ridesCompleted": 11,
+      "fuelRemaining": 3,
+      "timeRemaining": 342,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 10,
+        "scenic": 1,
+        "police": 0
+      },
+      "averageFarePerRide": 32.54545454545455,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 138
+    },
+    {
+      "strategy": "perfect",
+      "success": false,
+      "finalEarnings": 227,
+      "ridesCompleted": 10,
+      "fuelRemaining": 9,
+      "timeRemaining": 378,
+      "gameOverReason": "Ran out of fuel (needed 11, had 9)",
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 9,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 22.7,
+      "totalFuelUsed": 91,
+      "totalTimeUsed": 102
+    },
+    {
+      "strategy": "scenic_only",
+      "success": false,
+      "finalEarnings": 168,
+      "ridesCompleted": 6,
+      "fuelRemaining": 12,
+      "timeRemaining": 352,
+      "gameOverReason": "Ran out of fuel (needed 17, had 12)",
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 28,
+      "totalFuelUsed": 88,
+      "totalTimeUsed": 128
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 268,
+      "ridesCompleted": 9,
+      "fuelRemaining": 2,
+      "timeRemaining": 360,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 5,
+        "scenic": 2,
+        "police": 1
+      },
+      "averageFarePerRide": 29.77777777777778,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 120
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 196,
+      "ridesCompleted": 18,
+      "fuelRemaining": 2,
+      "timeRemaining": 356,
+      "routeDistribution": {
+        "shortcut": 18,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 10.88888888888889,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 124
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 375,
+      "ridesCompleted": 12,
+      "fuelRemaining": 0,
+      "timeRemaining": 351,
+      "routeDistribution": {
+        "shortcut": 3,
+        "normal": 8,
+        "scenic": 1,
+        "police": 0
+      },
+      "averageFarePerRide": 31.25,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 129
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 280,
+      "ridesCompleted": 11,
+      "fuelRemaining": 3,
+      "timeRemaining": 350,
+      "routeDistribution": {
+        "shortcut": 1,
+        "normal": 8,
+        "scenic": 2,
+        "police": 0
+      },
+      "averageFarePerRide": 25.454545454545453,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 130
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 155,
+      "ridesCompleted": 12,
+      "fuelRemaining": 4,
+      "timeRemaining": 359,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 12,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 12.916666666666666,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 121
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 138,
+      "ridesCompleted": 6,
+      "fuelRemaining": 3,
+      "timeRemaining": 360,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 6,
+        "police": 0
+      },
+      "averageFarePerRide": 23,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 120
+    },
+    {
+      "strategy": "random",
+      "success": true,
+      "finalEarnings": 277,
+      "ridesCompleted": 12,
+      "fuelRemaining": 1,
+      "timeRemaining": 346,
+      "routeDistribution": {
+        "shortcut": 6,
+        "normal": 4,
+        "scenic": 1,
+        "police": 1
+      },
+      "averageFarePerRide": 23.083333333333332,
+      "totalFuelUsed": 99,
+      "totalTimeUsed": 134
+    },
+    {
+      "strategy": "shortcut_spam",
+      "success": true,
+      "finalEarnings": 169,
+      "ridesCompleted": 17,
+      "fuelRemaining": 3,
+      "timeRemaining": 359,
+      "routeDistribution": {
+        "shortcut": 17,
+        "normal": 0,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 9.941176470588236,
+      "totalFuelUsed": 97,
+      "totalTimeUsed": 121
+    },
+    {
+      "strategy": "balanced",
+      "success": true,
+      "finalEarnings": 286,
+      "ridesCompleted": 12,
+      "fuelRemaining": 0,
+      "timeRemaining": 351,
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 8,
+        "scenic": 0,
+        "police": 2
+      },
+      "averageFarePerRide": 23.833333333333332,
+      "totalFuelUsed": 100,
+      "totalTimeUsed": 129
+    },
+    {
+      "strategy": "strategic",
+      "success": true,
+      "finalEarnings": 171,
+      "ridesCompleted": 11,
+      "fuelRemaining": 4,
+      "timeRemaining": 359,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 11,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 15.545454545454545,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 121
+    },
+    {
+      "strategy": "perfect",
+      "success": true,
+      "finalEarnings": 287,
+      "ridesCompleted": 13,
+      "fuelRemaining": 2,
+      "timeRemaining": 343,
+      "routeDistribution": {
+        "shortcut": 4,
+        "normal": 9,
+        "scenic": 0,
+        "police": 0
+      },
+      "averageFarePerRide": 22.076923076923077,
+      "totalFuelUsed": 98,
+      "totalTimeUsed": 137
+    },
+    {
+      "strategy": "scenic_only",
+      "success": true,
+      "finalEarnings": 124,
+      "ridesCompleted": 7,
+      "fuelRemaining": 4,
+      "timeRemaining": 330,
+      "routeDistribution": {
+        "shortcut": 0,
+        "normal": 0,
+        "scenic": 7,
+        "police": 0
+      },
+      "averageFarePerRide": 17.714285714285715,
+      "totalFuelUsed": 96,
+      "totalTimeUsed": 150
+    },
+    {
+      "strategy": "random",
+      "success": false,
+      "finalEarnings": 222,
+      "ridesCompleted": 9,
+      "fuelRemaining": 8,
+      "timeRemaining": 348,
+      "gameOverReason": "Ran out of fuel (needed 11, had 8)",
+      "routeDistribution": {
+        "shortcut": 2,
+        "normal": 2,
+        "scenic": 2,
+        "police": 3
+      },
+      "averageFarePerRide": 24.666666666666668,
+      "totalFuelUsed": 92,
+      "totalTimeUsed": 132
+    }
+  ]
+}
