@@ -9,13 +9,13 @@ import { PassengerStateMachine } from '../services/passengerStateMachine';
 import { SaveGameService } from '../services/storageService';
 import { WeatherService } from '../services/weatherService';
 import { gameData } from '../data/gameData';
+import { useUIContext } from '../context/UIContext';
 
-const getInitialGameState = (): GameState => {
+const getInitialGameState = (): Omit<GameState, 'currentScreen'> => {
   const season = WeatherService.getCurrentSeason();
   const initialWeather = WeatherService.generateInitialWeather(season);
 
   return {
-    currentScreen: SCREENS.LOADING,
     fuel: GAME_CONSTANTS.INITIAL_FUEL,
     earnings: 0,
     timeRemaining: GAME_CONSTANTS.INITIAL_TIME,
@@ -58,17 +58,30 @@ const getInitialGameState = (): GameState => {
 };
 
 export const useGameState = (playerStats: PlayerStats) => {
-  const [gameState, setGameState] = useState<GameState>(getInitialGameState);
-  const [showInventory, setShowInventory] = useState(false);
+  // We cast the initial state to GameState internally, but we'll override currentScreen
+  const [localGameState, setLocalGameState] = useState<Omit<GameState, 'currentScreen'>>(getInitialGameState);
+
+  const {
+    currentScreen,
+    showScreen,
+    showInventory,
+    setShowInventory
+  } = useUIContext();
+
+  // Construct the full GameState object by merging local state with UI context state
+  const gameState: GameState = {
+    ...localGameState,
+    currentScreen
+  } as GameState;
 
   // Game timer effect
   useEffect(() => {
-    if (gameState.currentScreen !== SCREENS.GAME || gameState.gamePhase === GAME_PHASES.WAITING) {
+    if (currentScreen !== SCREENS.GAME || gameState.gamePhase === GAME_PHASES.WAITING) {
       return;
     }
 
     const timer = setInterval(() => {
-      setGameState(prev => {
+      setLocalGameState(prev => {
         const newTime = prev.timeRemaining - 1;
         if (newTime <= 0) {
           setTimeout(() => endShift(false), 100);
@@ -78,15 +91,11 @@ export const useGameState = (playerStats: PlayerStats) => {
     }, 30000);
 
     return () => clearInterval(timer);
-  }, [gameState.currentScreen, gameState.timeRemaining]);
-
-  const showScreen = (screenName: string) => {
-    setGameState(prev => ({ ...prev, currentScreen: screenName }));
-  };
+  }, [currentScreen, gameState.timeRemaining, gameState.gamePhase]);
 
   const generateShiftRules = () => {
     const engineResult = GameEngine.generateShiftRules(playerStats.totalShiftsCompleted || 0);
-    setGameState(prev => ({
+    setLocalGameState(prev => ({
       ...prev,
       currentRules: engineResult.visibleRules,
       hiddenRules: engineResult.hiddenRules,
@@ -100,7 +109,7 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const startShift = () => {
-    setGameState(prev => ({
+    setLocalGameState(prev => ({
       ...prev,
       shiftStartTime: Date.now(),
       fuel: GAME_CONSTANTS.INITIAL_FUEL // Reset fuel to 100% at start of each shift
@@ -110,7 +119,8 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const resetGame = () => {
-    setGameState(getInitialGameState());
+    setLocalGameState(getInitialGameState());
+    // Note: We don't reset screen here as that might be handled by the caller or UI context
   };
 
   const saveGame = () => {
@@ -120,17 +130,24 @@ export const useGameState = (playerStats: PlayerStats) => {
       timestamp: Date.now(),
       version: '1.0.0'
     });
-    setGameState(prev => ({ ...prev, showSaveNotification: true }));
+    setLocalGameState(prev => ({ ...prev, showSaveNotification: true }));
     setTimeout(() => {
-      setGameState(prev => ({ ...prev, showSaveNotification: false }));
+      setLocalGameState(prev => ({ ...prev, showSaveNotification: false }));
     }, 2000);
   };
 
   const loadGame = () => {
     const savedData = SaveGameService.loadGame();
     if (savedData) {
-      setGameState(savedData.gameState);
-      showScreen(SCREENS.GAME);
+      // We need to separate currentScreen from the saved state if it exists
+      const { currentScreen: savedScreen, ...rest } = savedData.gameState;
+      setLocalGameState(rest);
+      if (savedScreen) {
+        showScreen(SCREENS.GAME); // Always go to game on load? Or savedScreen?
+        // Original code: showScreen(SCREENS.GAME);
+      } else {
+        showScreen(SCREENS.GAME);
+      }
     }
   };
 
@@ -208,7 +225,7 @@ export const useGameState = (playerStats: PlayerStats) => {
 
     const passengerNeedState = PassengerStateMachine.initialize(passenger);
 
-    setGameState(prev => ({
+    setLocalGameState(prev => ({
       ...prev,
       currentPassenger: passenger,
       gamePhase: GAME_PHASES.RIDE_REQUEST,
@@ -226,7 +243,7 @@ export const useGameState = (playerStats: PlayerStats) => {
   const updateWeatherAndEnvironment = () => {
     const currentTime = Date.now();
 
-    setGameState(prev => {
+    setLocalGameState(prev => {
       // Update time of day
       const newTimeOfDay = prev.shiftStartTime
         ? WeatherService.updateTimeOfDay(prev.shiftStartTime, currentTime)
@@ -265,7 +282,7 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const gameOver = (reason: string) => {
-    setGameState(prev => ({
+    setLocalGameState(prev => ({
       ...prev,
       rulesViolated: prev.rulesViolated + 1,
       gameOverReason: reason
@@ -286,7 +303,7 @@ export const useGameState = (playerStats: PlayerStats) => {
       const survivalBonus = GAME_CONSTANTS.SURVIVAL_BONUS;
       const finalEarnings = gameState.earnings + survivalBonus;
 
-      setGameState(prev => ({
+      setLocalGameState(prev => ({
         ...prev,
         earnings: finalEarnings,
         survivalBonus
@@ -326,8 +343,18 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   // Expose setGameState for game actions
+  // We need to be careful here. If updater tries to set currentScreen, it will be ignored by local state
+  // But since we are merging it back in the return, it should be fine as long as we don't expect setGameState to update screen
   const updateGameState = (updater: React.SetStateAction<GameState>) => {
-    setGameState(updater);
+    setLocalGameState(prev => {
+      // If updater is a function, call it with the FULL state (including screen)
+      // but only use the result to update local state (excluding screen)
+      const fullPrev: GameState = { ...prev, currentScreen } as GameState;
+      const result = typeof updater === 'function' ? updater(fullPrev) : updater;
+
+      const { currentScreen: _, ...rest } = result;
+      return rest;
+    });
   };
 
   return {

@@ -1,7 +1,11 @@
 import React from 'react';
-import type { GameState, PlayerStats, Passenger } from '../types/game';
 import { SCREENS } from '../data/constants';
 import { LeaderboardService } from '../services/storageService';
+import { gameData } from '../data/gameData';
+import { useGameContext } from '../context/GameContext';
+import { usePlayerContext } from '../context/PlayerContext';
+import { useUIContext } from '../context/UIContext';
+
 import LoadingScreen from './screens/LoadingScreen/LoadingScreen';
 import LeaderboardScreen from './screens/LeaderboardScreen/LeaderboardScreen';
 import BriefingScreen from './screens/BriefingScreen/BriefingScreen';
@@ -12,78 +16,50 @@ import AlmanacScreen from './screens/AlmanacScreen/AlmanacScreen';
 import SkillTreeScreen from './screens/SkillTreeScreen/SkillTreeScreen';
 import ErrorBoundary from './ErrorBoundary';
 
-interface ScreenRouterProps {
-  gameState: GameState;
-  playerStats: PlayerStats;
-  showInventory: boolean;
-  setShowInventory: (show: boolean) => void;
-  onStartGame: () => void;
-  onLoadGame: () => void;
-  onShowLeaderboard: () => void;
-  onShowLoading: () => void;
-  onShowSkillTree: () => void;
-  onShowAlmanac: () => void;
-  onStartShift: () => void;
-  onSaveGame: () => void;
-  onEndShift: (successful: boolean) => void;
-  onAcceptRide: () => void;
-  onDeclineRide: () => void;
-  onHandleDrivingChoice: (choice: string, phase: string) => void;
-  onContinueToDestination: () => void;
-  onGameOver: (reason: string) => void;
-  onResetAndStart: () => void;
-  onResetAndShow: (screen: string) => void;
-  onUseItem?: (itemId: string) => void;
-  onTradeItem?: (itemId: string, passenger: Passenger) => void;
-  onRefuelFull?: () => void;
-  onRefuelPartial?: () => void;
-  onContinueFromDropOff?: () => void;
-  // Almanac & Skill Tree
-  onUpgradeKnowledge?: (passengerId: number) => void;
-  onPurchaseSkill?: (skillId: string) => void;
-  allPassengers?: Passenger[];
-}
+const ScreenRouter: React.FC = () => {
+  const {
+    gameState,
+    startGame,
+    loadGame,
+    startShift,
+    resetGame
+  } = useGameContext();
 
-const ScreenRouter: React.FC<ScreenRouterProps> = ({
-  gameState,
-  playerStats,
-  showInventory,
-  setShowInventory,
-  onStartGame,
-  onLoadGame,
-  onShowLeaderboard,
-  onShowLoading,
-  onShowSkillTree,
-  onShowAlmanac,
-  onStartShift,
-  onSaveGame,
-  onEndShift,
-  onAcceptRide,
-  onDeclineRide,
-  onHandleDrivingChoice,
-  onContinueToDestination,
-  onGameOver,
-  onResetAndStart,
-  onResetAndShow,
-  onUseItem,
-  onTradeItem,
-  onRefuelFull,
-  onRefuelPartial,
-  onContinueFromDropOff,
-  onUpgradeKnowledge,
-  onPurchaseSkill,
-  allPassengers
-}) => {
-  switch (gameState.currentScreen) {
+  const {
+    playerStats,
+    upgradeKnowledge,
+    purchaseSkill
+  } = usePlayerContext();
+
+  const {
+    currentScreen,
+    showScreen
+  } = useUIContext();
+
+  const handleResetAndShow = (screen: string) => {
+    resetGame();
+    showScreen(screen);
+  };
+
+  const handleStartNextShift = () => {
+    // For next shift, we usually just start shift, maybe retaining some state?
+    // If it's a roguelike run, we don't reset everything.
+    // But original code mapped onResetAndStart.
+    // Let's assume startShift is enough for now, or resetGame if it's a new run.
+    // If SuccessScreen implies "Next Level", startShift is appropriate.
+    startShift();
+  };
+
+  switch (currentScreen) {
     case SCREENS.LOADING:
       return (
         <LoadingScreen
           playerStats={playerStats}
-          onStartGame={onStartGame}
-          onLoadGame={onLoadGame}
-          onShowLeaderboard={onShowLeaderboard}
-          onShowSkillTree={onShowSkillTree}
-          onShowAlmanac={onShowAlmanac}
+          onStartGame={startGame}
+          onLoadGame={loadGame}
+          onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}
+          onShowSkillTree={() => showScreen(SCREENS.SKILL_TREE)}
+          onShowAlmanac={() => showScreen(SCREENS.ALMANAC)}
         />
       );
 
@@ -92,7 +68,7 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
         <ErrorBoundary>
           <LeaderboardScreen
             leaderboard={LeaderboardService.getLeaderboard()}
-            onBack={onShowLoading}
+            onBack={() => showScreen(SCREENS.LOADING)}
           />
         </ErrorBoundary>
       );
@@ -101,39 +77,22 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
       return (
         <BriefingScreen
           gameState={gameState}
-          onStartShift={onStartShift}
+          onStartShift={startShift}
         />
       );
 
     case SCREENS.GAME:
       return (
-        <GameScreen
-          gameState={gameState}
-          playerStats={playerStats}
-          onSaveGame={onSaveGame}
-          onEndShift={onEndShift}
-          showInventory={showInventory}
-          setShowInventory={setShowInventory}
-          onAcceptRide={onAcceptRide}
-          onDeclineRide={onDeclineRide}
-          onHandleDrivingChoice={onHandleDrivingChoice}
-          onContinueToDestination={onContinueToDestination}
-          onGameOver={onGameOver}
-          onUseItem={onUseItem}
-          onTradeItem={onTradeItem}
-          onRefuelFull={onRefuelFull}
-          onRefuelPartial={onRefuelPartial}
-          onContinueFromDropOff={onContinueFromDropOff}
-        />
+        <GameScreen />
       );
 
     case SCREENS.GAME_OVER:
       return (
         <GameOverScreen
           gameState={gameState}
-          onTryAgain={() => onResetAndShow(SCREENS.LOADING)}
-          onShowLeaderboard={onShowLeaderboard}
-          onShowMainMenu={onShowLoading}
+          onTryAgain={() => handleResetAndShow(SCREENS.LOADING)}
+          onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}
+          onShowMainMenu={() => showScreen(SCREENS.LOADING)}
         />
       );
 
@@ -141,9 +100,9 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
       return (
         <SuccessScreen
           gameState={gameState}
-          onStartNextShift={onResetAndStart}
-          onShowLeaderboard={onShowLeaderboard}
-          onShowMainMenu={onShowLoading}
+          onStartNextShift={handleStartNextShift}
+          onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}
+          onShowMainMenu={() => showScreen(SCREENS.LOADING)}
         />
       );
 
@@ -152,9 +111,9 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
         <ErrorBoundary>
           <AlmanacScreen
             playerStats={playerStats}
-            allPassengers={allPassengers || []}
-            onUpgradeKnowledge={onUpgradeKnowledge || (() => { })}
-            onBack={onShowLoading}
+            allPassengers={gameData.passengers || []}
+            onUpgradeKnowledge={upgradeKnowledge}
+            onBack={() => showScreen(SCREENS.LOADING)}
           />
         </ErrorBoundary>
       );
@@ -164,8 +123,8 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
         <ErrorBoundary>
           <SkillTreeScreen
             playerStats={playerStats}
-            onPurchaseSkill={onPurchaseSkill || (() => { })}
-            onBack={onShowLoading}
+            onPurchaseSkill={purchaseSkill}
+            onBack={() => showScreen(SCREENS.LOADING)}
           />
         </ErrorBoundary>
       );
@@ -174,11 +133,11 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
       return (
         <LoadingScreen
           playerStats={playerStats}
-          onStartGame={onStartGame}
-          onLoadGame={onLoadGame}
-          onShowLeaderboard={onShowLeaderboard}
-          onShowSkillTree={onShowSkillTree}
-          onShowAlmanac={onShowAlmanac}
+          onStartGame={startGame}
+          onLoadGame={loadGame}
+          onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}
+          onShowSkillTree={() => showScreen(SCREENS.SKILL_TREE)}
+          onShowAlmanac={() => showScreen(SCREENS.ALMANAC)}
         />
       );
   }

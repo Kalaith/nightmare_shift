@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
-import type { GameState, Passenger } from '../types/game';
+import { useGameContext } from '../context/GameContext';
 import { GAME_PHASES } from '../data/constants';
 import { GAME_BALANCE } from '../constants/gameBalance';
-import type { PassengerNeedState, RuleEvaluationResult } from '../types/game';
+import type { PassengerNeedState, RuleEvaluationResult, Passenger } from '../types/game';
 import { RouteService } from '../services/reputationService';
 import { PassengerService } from '../services/passengerService';
 import { PassengerStateMachine } from '../services/passengerStateMachine';
@@ -12,19 +12,13 @@ import { gameData } from '../data/gameData';
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
-interface UseGameActionsProps {
-  gameState: GameState;
-  setGameState: (value: GameState | ((prev: GameState) => GameState)) => void;
-  showRideRequest: () => void;
-  endShift: (successful: boolean, overrideReason?: string) => unknown;
-}
-
-export const useGameActions = ({
-  gameState,
-  setGameState,
-  showRideRequest,
-  endShift
-}: UseGameActionsProps) => {
+export const useGameActions = () => {
+  const {
+    gameState,
+    updateGameState: setGameState,
+    showRideRequest,
+    endShift
+  } = useGameContext();
 
   const acceptRide = useCallback(() => {
     if (gameState.fuel < 5) {

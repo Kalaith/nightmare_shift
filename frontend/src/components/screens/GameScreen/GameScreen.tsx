@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import type { GameState, Passenger, PlayerStats } from '../../../types/game';
+import { useGameContext } from '../../../context/GameContext';
+import { usePlayerContext } from '../../../context/PlayerContext';
+import { useGameActions } from '../../../hooks/useGameActions';
 import { RouteService } from '../../../services/reputationService';
 import { gameData } from '../../../data/gameData';
 import { GAME_BALANCE } from '../../../constants/gameBalance';
@@ -11,43 +13,30 @@ import WaitingState from '../../game/WaitingState/WaitingState';
 import DropOffState from '../../game/DropOffState/DropOffState';
 import Portrait from '../../common/Portrait/Portrait';
 
-interface GameScreenProps {
-  gameState: GameState;
-  playerStats: PlayerStats;
-  onSaveGame: () => void;
-  onEndShift: (successful: boolean) => void;
-  showInventory: boolean;
-  setShowInventory: (show: boolean) => void;
-  onAcceptRide: () => void;
-  onDeclineRide: () => void;
-  onHandleDrivingChoice: (choice: string, phase: string) => void;
-  onContinueToDestination: () => void;
-  onGameOver: (reason: string) => void;
-  onUseItem?: (itemId: string) => void;
-  onTradeItem?: (itemId: string, passenger: Passenger) => void;
-  onRefuelFull?: () => void;
-  onRefuelPartial?: () => void;
-  onContinueFromDropOff?: () => void;
-}
+const GameScreen: React.FC = () => {
+  const {
+    gameState,
+    saveGame: onSaveGame,
+    endShift: onEndShift,
+    showInventory,
+    setShowInventory,
+    gameOver: onGameOver
+  } = useGameContext();
 
-const GameScreen: React.FC<GameScreenProps> = ({
-  gameState,
-  playerStats,
-  onSaveGame,
-  onEndShift,
-  showInventory,
-  setShowInventory,
-  onAcceptRide,
-  onDeclineRide,
-  onHandleDrivingChoice,
-  onContinueToDestination,
-  onGameOver,
-  onUseItem,
-  onTradeItem,
-  onRefuelFull,
-  onRefuelPartial,
-  onContinueFromDropOff
-}) => {
+  const { playerStats } = usePlayerContext();
+
+  const {
+    acceptRide: onAcceptRide,
+    declineRide: onDeclineRide,
+    handleDrivingChoice: onHandleDrivingChoice,
+    continueToDestination: onContinueToDestination,
+    useItem: onUseItem,
+    tradeItem: onTradeItem,
+    refuelFull: onRefuelFull,
+    refuelPartial: onRefuelPartial,
+    continueFromDropOff: onContinueFromDropOff
+  } = useGameActions();
+
   const [showQuickRules, setShowQuickRules] = useState(false);
 
   const formatTime = (minutes: number) => {
@@ -138,8 +127,8 @@ const GameScreen: React.FC<GameScreenProps> = ({
               gameState={gameState}
               showInventory={showInventory}
               onToggleInventory={() => setShowInventory(!showInventory)}
-              onRefuelFull={onRefuelFull || (() => { })}
-              onRefuelPartial={onRefuelPartial || (() => { })}
+              onRefuelFull={onRefuelFull}
+              onRefuelPartial={onRefuelPartial}
             />
           )}
 
@@ -383,7 +372,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
               fareEarned={gameState.lastRideCompletion.fareEarned}
               itemsReceived={gameState.lastRideCompletion.itemsReceived}
               backstoryUnlocked={gameState.lastRideCompletion.backstoryUnlocked}
-              onContinue={onContinueFromDropOff || (() => { })}
+              onContinue={onContinueFromDropOff}
             />
           )}
         </div>

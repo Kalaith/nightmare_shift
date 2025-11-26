@@ -1,15 +1,21 @@
 import React from 'react';
 import './App.css';
-import { useApp } from './hooks/useApp';
 import ScreenRouter from './components/ScreenRouter';
+import { PlayerProvider } from './context/PlayerContext';
+import { GameProvider } from './context/GameContext';
+import { UIProvider } from './context/UIContext';
 
 const App: React.FC = () => {
-  const { screenProps } = useApp();
-  
   return (
-    <div>
-      <ScreenRouter {...screenProps} />
-    </div>
+    <PlayerProvider>
+      <UIProvider>
+        <GameProvider>
+          <div>
+            <ScreenRouter />
+          </div>
+        </GameProvider>
+      </UIProvider>
+    </PlayerProvider>
   );
 };
 
