@@ -33,27 +33,8 @@ export const useApp = () => {
     endShift
   } = useGameState(playerStats);
 
-  const {
-    acceptRide,
-    declineRide,
-    handleDrivingChoice,
-    continueToDestination,
-    useItem,
-    tradeItem,
-    processItemEffects: _processItemEffects,
-    refuelFull,
-    refuelPartial,
-    continueFromDropOff
-  } = useGameActions({
-    gameState,
-    setGameState: updateGameState,
-    showRideRequest,
-    gameOver,
-    endShift
-  });
-
-  const handleEndShift = (successful: boolean) => {
-    const shiftData = endShift(successful);
+  const handleEndShift = (successful: boolean, overrideReason?: string) => {
+    const shiftData = endShift(successful, overrideReason);
     const updateStats = createStatsUpdater(playerStats, updatePlayerStats, addToLeaderboard);
     updateStats(shiftData.survived, shiftData);
 
@@ -89,6 +70,24 @@ export const useApp = () => {
       }
     }
   };
+
+  const {
+    acceptRide,
+    declineRide,
+    handleDrivingChoice,
+    continueToDestination,
+    useItem,
+    tradeItem,
+    processItemEffects: _processItemEffects,
+    refuelFull,
+    refuelPartial,
+    continueFromDropOff
+  } = useGameActions({
+    gameState,
+    setGameState: updateGameState,
+    showRideRequest,
+    endShift: handleEndShift
+  });
 
   const screenProps = createScreenProps(
     gameState,

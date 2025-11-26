@@ -4,6 +4,7 @@ import { RouteService } from '../../../services/reputationService';
 import { gameData } from '../../../data/gameData';
 import { GAME_BALANCE } from '../../../constants/gameBalance';
 import { GameResultHelpers } from '../../../utils/errorHandling';
+import { AlmanacHelper } from '../../../utils/almanacHelper';
 import InventoryModal from '../../game/InventoryModal/InventoryModal';
 import WeatherDisplay from '../../game/WeatherDisplay/WeatherDisplay';
 import WaitingState from '../../game/WaitingState/WaitingState';
@@ -310,14 +311,16 @@ const GameScreen: React.FC<GameScreenProps> = ({
                         <div>
                           <div className="text-lg font-bold flex items-center gap-2">
                             {route.name}
-                            {route.fareModifier && route.fareModifier !== 1.0 && (
-                              <span className={`text-xs px-2 py-1 rounded-md backdrop-blur-sm ${route.fareModifier > 1.0
-                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                                }`}>
-                                {route.fareModifier > 1.0 ? '+' : ''}{Math.round((route.fareModifier - 1) * 100)}% fare
-                              </span>
-                            )}
+                            {route.fareModifier && route.fareModifier !== 1.0 &&
+                              gameState.currentPassenger &&
+                              AlmanacHelper.canSeeFareModifiers(playerStats, gameState.currentPassenger.id) && (
+                                <span className={`text-xs px-2 py-1 rounded-md backdrop-blur-sm ${route.fareModifier > 1.0
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                                  }`}>
+                                  {route.fareModifier > 1.0 ? '+' : ''}{Math.round((route.fareModifier - 1) * 100)}% fare
+                                </span>
+                              )}
                           </div>
                           <div className="text-sm opacity-90">{route.description}</div>
                           {route.bonusInfo && (
@@ -333,10 +336,18 @@ const GameScreen: React.FC<GameScreenProps> = ({
                             <span className="text-cyan-300">⏰</span>
                             <span className="text-cyan-200">-{route.timeCost} min</span>
                           </div>
-                          <div className="flex items-center gap-1 justify-end">
-                            <span className={route.riskLevel >= 4 ? "text-amber-400" : route.riskLevel >= 3 ? "text-yellow-400" : "text-gray-400"}>⚠️</span>
-                            <span className={route.riskLevel >= 4 ? "text-amber-300" : route.riskLevel >= 3 ? "text-yellow-300" : "text-gray-300"}>Risk: {route.riskLevel}</span>
-                          </div>
+                          {gameState.currentPassenger &&
+                            AlmanacHelper.canSeeRiskLevels(playerStats, gameState.currentPassenger.id) ? (
+                            <div className="flex items-center gap-1 justify-end">
+                              <span className={route.riskLevel >= 4 ? "text-amber-400" : route.riskLevel >= 3 ? "text-yellow-400" : "text-gray-400"}>⚠️</span>
+                              <span className={route.riskLevel >= 4 ? "text-amber-300" : route.riskLevel >= 3 ? "text-yellow-300" : "text-gray-300"}>Risk: {route.riskLevel}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 justify-end">
+                              <span className="text-gray-500">❓</span>
+                              <span className="text-gray-400">Risk: ???</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </button>

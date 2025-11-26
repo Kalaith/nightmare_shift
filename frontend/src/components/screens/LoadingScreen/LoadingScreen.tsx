@@ -104,6 +104,20 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         >
           📊 View Leaderboard
         </button>
+
+        <div className="pt-4 border-t border-gray-700 mt-4">
+          <button
+            onClick={() => {
+              if (window.confirm("⚠️ ARE YOU SURE? ⚠️\n\nThis will wipe ALL progress including:\n- Bank Balance\n- Lore Fragments\n- Unlocked Skills\n- Almanac Data\n\nThis cannot be undone!")) {
+                localStorage.clear();
+                window.location.reload();
+              }
+            }}
+            className="w-full bg-red-900/50 text-red-400 py-2 px-5 rounded-lg text-xs hover:bg-red-900 hover:text-red-300 transition-colors border border-red-800/50"
+          >
+            🗑️ Clear Cache (Reset All Progress)
+          </button>
+        </div>
       </div>
     </div>
   )

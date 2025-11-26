@@ -16,25 +16,23 @@ interface UseGameActionsProps {
   gameState: GameState;
   setGameState: (value: GameState | ((prev: GameState) => GameState)) => void;
   showRideRequest: () => void;
-  gameOver: (reason: string) => void;
-  endShift: (successful: boolean) => unknown;
+  endShift: (successful: boolean, overrideReason?: string) => unknown;
 }
 
 export const useGameActions = ({
   gameState,
   setGameState,
   showRideRequest,
-  gameOver,
   endShift
 }: UseGameActionsProps) => {
 
   const acceptRide = useCallback(() => {
     if (gameState.fuel < 5) {
-      gameOver("You ran out of fuel with a passenger in the car. They were not pleased...");
+      endShift(false, "You ran out of fuel with a passenger in the car. They were not pleased...");
       return;
     }
     startDriving('pickup');
-  }, [gameState.fuel, gameOver]);
+  }, [gameState.fuel, endShift]);
 
   const declineRide = useCallback(() => {
     // Reset to waiting state after declining
@@ -79,12 +77,12 @@ export const useGameActions = ({
 
     // Check if player has enough resources
     if (gameState.fuel < routeCosts.fuelCost) {
-      gameOver("You don't have enough fuel for this route. Your car sputtered to a stop...");
+      endShift(false, "You don't have enough fuel for this route. Your car sputtered to a stop...");
       return;
     }
 
     if (gameState.timeRemaining < routeCosts.timeCost) {
-      gameOver("This route would take too long. Time ran out before you could reach your destination...");
+      endShift(false, "This route would take too long. Time ran out before you could reach your destination...");
       return;
     }
 
@@ -101,7 +99,7 @@ export const useGameActions = ({
 
       // Game over at violation threshold for shortcuts
       if (routeChoice === 'shortcut' && streakCount >= GAME_BALANCE.CONSECUTIVE_ROUTE.VIOLATION_THRESHOLD) {
-        gameOver(`You've taken too many shortcuts. The supernatural entities have noticed your pattern and are waiting for you...`);
+        endShift(false, `You've taken too many shortcuts. The supernatural entities have noticed your pattern and are waiting for you...`);
         return;
       }
     }
@@ -118,7 +116,7 @@ export const useGameActions = ({
       );
 
       if (ruleOutcome?.violation) {
-        gameOver(ruleOutcome.message || "You deviated from the GPS route. Your passenger noticed... and they were not forgiving.");
+        endShift(false, ruleOutcome.message || "You deviated from the GPS route. Your passenger noticed... and they were not forgiving.");
         return;
       }
     }
@@ -191,7 +189,7 @@ export const useGameActions = ({
     } else {
       completeRide();
     }
-  }, [gameState, setGameState, gameOver]);
+  }, [gameState, setGameState, endShift]);
 
   const startPassengerInteraction = useCallback((nextNeedState?: PassengerNeedState | null) => {
     const passenger = gameState.currentPassenger;

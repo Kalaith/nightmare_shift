@@ -13,7 +13,7 @@ import { gameData } from '../data/gameData';
 const getInitialGameState = (): GameState => {
   const season = WeatherService.getCurrentSeason();
   const initialWeather = WeatherService.generateInitialWeather(season);
-  
+
   return {
     currentScreen: SCREENS.LOADING,
     fuel: GAME_CONSTANTS.INITIAL_FUEL,
@@ -100,8 +100,8 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const startShift = () => {
-    setGameState(prev => ({ 
-      ...prev, 
+    setGameState(prev => ({
+      ...prev,
       shiftStartTime: Date.now(),
       fuel: GAME_CONSTANTS.INITIAL_FUEL // Reset fuel to 100% at start of each shift
     }));
@@ -149,26 +149,26 @@ export const useGameState = (playerStats: PlayerStats) => {
   const showRideRequest = () => {
     // Don't show new ride request if in active phases (but allow if transitioning from dropOff)
     if (gameState.currentPassenger &&
-        gameState.gamePhase !== GAME_PHASES.DROP_OFF &&
-        gameState.gamePhase !== GAME_PHASES.WAITING) {
+      gameState.gamePhase !== GAME_PHASES.DROP_OFF &&
+      gameState.gamePhase !== GAME_PHASES.WAITING) {
       return;
     }
-    
+
     // Update weather and environmental conditions
     updateWeatherAndEnvironment();
-    
+
     // Check if all passengers have been used and reset if necessary
     const availablePassengers = gameData.passengers.filter(
       passenger => !gameState.usedPassengers.includes(passenger.id)
     );
-    
+
     // If no passengers available, either reset the used passenger list or select from all
     let currentUsedPassengers = gameState.usedPassengers;
     if (availablePassengers.length === 0) {
       // Allow passengers to repeat after all have been used once
       currentUsedPassengers = [];
     }
-    
+
     // Use weather-aware passenger selection
     const passengerResult = PassengerService.selectWeatherAwarePassenger(
       currentUsedPassengers,
@@ -177,9 +177,9 @@ export const useGameState = (playerStats: PlayerStats) => {
       gameState.timeOfDay,
       gameState.season
     );
-    
+
     let passenger = passengerResult.success ? passengerResult.data : null;
-    
+
     // If weather-aware selection fails, use fallback selection
     if (!passenger) {
       passenger = PassengerService.getRandomPassenger(
@@ -188,12 +188,12 @@ export const useGameState = (playerStats: PlayerStats) => {
         gameState.difficultyLevel || 1
       );
     }
-    
+
     // If we still don't have a passenger, force select one from all available
     if (!passenger && gameData.passengers.length > 0) {
       passenger = gameData.passengers[Math.floor(Math.random() * gameData.passengers.length)];
     }
-    
+
     // Only end shift if there are truly no passengers available (should never happen)
     if (!passenger) {
       endShift(false);
@@ -202,10 +202,10 @@ export const useGameState = (playerStats: PlayerStats) => {
 
     // Apply weather-triggered rules
     const weatherTriggeredRules = WeatherService.getWeatherTriggeredRules(
-      gameState.currentWeather, 
+      gameState.currentWeather,
       gameState.timeOfDay
     );
-    
+
     const passengerNeedState = PassengerStateMachine.initialize(passenger);
 
     setGameState(prev => ({
@@ -225,13 +225,13 @@ export const useGameState = (playerStats: PlayerStats) => {
 
   const updateWeatherAndEnvironment = () => {
     const currentTime = Date.now();
-    
+
     setGameState(prev => {
       // Update time of day
-      const newTimeOfDay = prev.shiftStartTime 
+      const newTimeOfDay = prev.shiftStartTime
         ? WeatherService.updateTimeOfDay(prev.shiftStartTime, currentTime)
         : prev.timeOfDay;
-      
+
       // Update weather
       const weatherUpdateResult = WeatherService.updateWeather(
         prev.currentWeather,
@@ -239,7 +239,7 @@ export const useGameState = (playerStats: PlayerStats) => {
         prev.season
       );
       const newWeather = weatherUpdateResult.success ? weatherUpdateResult.data : prev.currentWeather;
-      
+
       // Generate environmental hazards
       const hazardsResult = WeatherService.generateEnvironmentalHazards(
         newWeather,
@@ -247,13 +247,13 @@ export const useGameState = (playerStats: PlayerStats) => {
         prev.season
       );
       const newHazards = hazardsResult.success ? hazardsResult.data : [];
-      
+
       // Filter out expired hazards
       const activeHazards = prev.environmentalHazards.filter(hazard => {
         const elapsed = (currentTime - hazard.startTime) / (60 * 1000); // minutes
         return elapsed < hazard.duration;
       });
-      
+
       return {
         ...prev,
         timeOfDay: newTimeOfDay,
@@ -265,17 +265,17 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const gameOver = (reason: string) => {
-    setGameState(prev => ({ 
-      ...prev, 
+    setGameState(prev => ({
+      ...prev,
       rulesViolated: prev.rulesViolated + 1,
       gameOverReason: reason
     }));
     showScreen(SCREENS.GAME_OVER);
   };
 
-  const endShift = (successful: boolean): ShiftData => {
+  const endShift = (successful: boolean, overrideReason?: string): ShiftData => {
     const shiftEndTime = Date.now();
-    const shiftDuration = gameState.shiftStartTime ? 
+    const shiftDuration = gameState.shiftStartTime ?
       Math.round((shiftEndTime - gameState.shiftStartTime) / (1000 * 60)) : 0;
 
     // Check if minimum earnings requirement was met
@@ -286,8 +286,8 @@ export const useGameState = (playerStats: PlayerStats) => {
       const survivalBonus = GAME_CONSTANTS.SURVIVAL_BONUS;
       const finalEarnings = gameState.earnings + survivalBonus;
 
-      setGameState(prev => ({ 
-        ...prev, 
+      setGameState(prev => ({
+        ...prev,
         earnings: finalEarnings,
         survivalBonus
       }));
@@ -297,14 +297,16 @@ export const useGameState = (playerStats: PlayerStats) => {
     } else {
       // Determine failure reason
       let failureReason: string;
-      if (!successful) {
+      if (overrideReason) {
+        failureReason = overrideReason;
+      } else if (!successful) {
         failureReason = "Time ran out or you ran out of fuel. The night shift waits for no one...";
       } else if (!earnedEnough) {
         failureReason = `Shift failed: You only earned $${gameState.earnings} but needed $${gameState.minimumEarnings}. The company expects better performance.`;
       } else {
         failureReason = "The night shift has ended in failure...";
       }
-      
+
       gameOver(failureReason);
     }
 
