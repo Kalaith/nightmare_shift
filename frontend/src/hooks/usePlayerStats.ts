@@ -34,12 +34,18 @@ export const usePlayerStats = () => {
     return { ...getDefaultPlayerStats(), ...loaded };
   });
 
-  const updatePlayerStats = (updates: Partial<PlayerStats>) => {
-    const newStats = { ...playerStats, ...updates, lastPlayDate: Date.now() };
-    setPlayerStats(newStats);
-    // Save the complete stats, not just updates
-    LocalStorage.save(STORAGE_KEYS.PLAYER_STATS, newStats);
-  };
+  const updatePlayerStats = useCallback((updates: Partial<PlayerStats> | ((prev: PlayerStats) => Partial<PlayerStats>)) => {
+    setPlayerStats(prev => {
+      const derivedUpdates = typeof updates === 'function' ? updates(prev) : updates;
+      // If no updates, return prev to avoid unnecessary re-renders
+      if (Object.keys(derivedUpdates).length === 0) return prev;
+
+      const newStats = { ...prev, ...derivedUpdates, lastPlayDate: Date.now() };
+      // Save the complete stats, not just updates
+      LocalStorage.save(STORAGE_KEYS.PLAYER_STATS, newStats);
+      return newStats;
+    });
+  }, []);
 
   const addToLeaderboard = (entry: {
     earnings: number;
@@ -65,82 +71,90 @@ export const usePlayerStats = () => {
 
   // Almanac functions
   const trackPassengerEncounter = useCallback((passengerId: number) => {
-    const currentProgress = playerStats.almanacProgress[passengerId] || {
-      passengerId,
-      encountered: false,
-      knowledgeLevel: 0,
-      unlockedSecrets: []
-    };
+    updatePlayerStats(prev => {
+      const currentProgress = prev.almanacProgress[passengerId] || {
+        passengerId,
+        encountered: false,
+        knowledgeLevel: 0,
+        unlockedSecrets: []
+      };
 
-    if (!currentProgress.encountered) {
-      updatePlayerStats({
+      if (currentProgress.encountered) return {};
+
+      return {
         almanacProgress: {
-          ...playerStats.almanacProgress,
+          ...prev.almanacProgress,
           [passengerId]: {
             ...currentProgress,
             encountered: true,
             knowledgeLevel: 1 // Auto-upgrade to level 1 on first encounter
           }
         }
-      });
-    }
-  }, [playerStats.almanacProgress, updatePlayerStats]);
+      };
+    });
+  }, [updatePlayerStats]);
 
   const upgradeKnowledge = useCallback((passengerId: number) => {
-    const currentProgress = playerStats.almanacProgress[passengerId];
-    if (!currentProgress || currentProgress.knowledgeLevel >= 3) return;
+    updatePlayerStats(prev => {
+      const currentProgress = prev.almanacProgress[passengerId];
+      if (!currentProgress || currentProgress.knowledgeLevel >= 3) return {};
 
-    const costs = { 0: 1, 1: 3, 2: 5 };
-    const cost = costs[currentProgress.knowledgeLevel as 0 | 1 | 2] || 0;
+      const costs = { 0: 1, 1: 3, 2: 5 };
+      const cost = costs[currentProgress.knowledgeLevel as 0 | 1 | 2] || 0;
 
-    if (playerStats.loreFragments >= cost) {
-      updatePlayerStats({
-        loreFragments: playerStats.loreFragments - cost,
-        almanacProgress: {
-          ...playerStats.almanacProgress,
-          [passengerId]: {
-            ...currentProgress,
-            knowledgeLevel: (currentProgress.knowledgeLevel + 1) as 0 | 1 | 2 | 3
+      if (prev.loreFragments >= cost) {
+        return {
+          loreFragments: prev.loreFragments - cost,
+          almanacProgress: {
+            ...prev.almanacProgress,
+            [passengerId]: {
+              ...currentProgress,
+              knowledgeLevel: (currentProgress.knowledgeLevel + 1) as 0 | 1 | 2 | 3
+            }
           }
-        }
-      });
-    }
-  }, [playerStats.almanacProgress, playerStats.loreFragments, updatePlayerStats]);
+        };
+      }
+      return {};
+    });
+  }, [updatePlayerStats]);
 
   const awardLoreFragments = useCallback((amount: number) => {
-    updatePlayerStats({
-      loreFragments: playerStats.loreFragments + amount
-    });
-  }, [playerStats.loreFragments, updatePlayerStats]);
+    updatePlayerStats(prev => ({
+      loreFragments: prev.loreFragments + amount
+    }));
+  }, [updatePlayerStats]);
 
   // Skill Tree functions
   const purchaseSkill = useCallback((skillId: string) => {
-    if (playerStats.unlockedSkills.includes(skillId)) return;
-
     // Import skill data to get cost
     import('../data/skillTreeData').then(({ SKILL_TREE }) => {
-      const skill = SKILL_TREE.find(s => s.id === skillId);
-      if (!skill) return;
+      updatePlayerStats(prev => {
+        if (prev.unlockedSkills.includes(skillId)) return {};
 
-      // Check prerequisites
-      const hasPrereqs = skill.prerequisites.every(prereqId =>
-        playerStats.unlockedSkills.includes(prereqId)
-      );
+        const skill = SKILL_TREE.find(s => s.id === skillId);
+        if (!skill) return {};
 
-      if (hasPrereqs && playerStats.bankBalance >= skill.cost) {
-        updatePlayerStats({
-          bankBalance: playerStats.bankBalance - skill.cost,
-          unlockedSkills: [...playerStats.unlockedSkills, skillId]
-        });
-      }
+        // Check prerequisites
+        const hasPrereqs = skill.prerequisites.every(prereqId =>
+          prev.unlockedSkills.includes(prereqId)
+        );
+
+        if (hasPrereqs && prev.bankBalance >= skill.cost) {
+          return {
+            bankBalance: prev.bankBalance - skill.cost,
+            unlockedSkills: [...prev.unlockedSkills, skillId]
+          };
+        }
+        return {};
+      });
     });
-  }, [playerStats.unlockedSkills, playerStats.bankBalance, updatePlayerStats]);
+  }, [updatePlayerStats]);
 
   const addToBankBalance = useCallback((amount: number) => {
-    updatePlayerStats({
-      bankBalance: playerStats.bankBalance + amount
-    });
-  }, [playerStats.bankBalance, updatePlayerStats]);
+    updatePlayerStats(prev => ({
+      bankBalance: prev.bankBalance + amount
+    }));
+  }, [updatePlayerStats]);
 
   return {
     playerStats,
