@@ -33,15 +33,15 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
 
   useEffect(() => {
     if (!isVisible) return;
-    
+
     // Build character database from game state and passenger data
     const characterMap = new Map<number, CharacterEntry>();
-    
-    gameData.passengers.forEach(passenger => {
+
+    gameData.passengers.forEach((passenger: Passenger) => {
       const reputation = gameState.passengerReputation?.[passenger.id];
       const isUnlocked = (gameState.usedPassengers || []).includes(passenger.id);
       const backstoryUnlocked = gameState.passengerBackstories?.[passenger.id] || false;
-      
+
       characterMap.set(passenger.id, {
         passenger,
         isUnlocked,
@@ -53,13 +53,13 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
         trustLevel: reputation?.relationshipLevel || 'unknown'
       });
     });
-    
+
     setCharacters(characterMap);
   }, [gameState, isVisible]);
 
   const getFilteredCharacters = (): CharacterEntry[] => {
     const allCharacters = Array.from(characters.values());
-    
+
     switch (filterType) {
       case 'encountered':
         return allCharacters.filter(entry => entry.isUnlocked);
@@ -136,23 +136,23 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
             ✕
           </button>
         </div>
-        
+
         <div className={styles.progressBar}>
           <div className={styles.progressSection}>
             <span className={styles.progressLabel}>Encountered:</span>
             <div className={styles.progressTrack}>
-              <div 
+              <div
                 className={styles.progressFill}
                 style={{ width: `${(progress.unlocked / progress.total) * 100}%` }}
               />
             </div>
             <span className={styles.progressText}>{progress.unlocked}/{progress.total}</span>
           </div>
-          
+
           <div className={styles.progressSection}>
             <span className={styles.progressLabel}>Backstories:</span>
             <div className={styles.progressTrack}>
-              <div 
+              <div
                 className={`${styles.progressFill} ${styles.backstoryProgress}`}
                 style={{ width: `${(progress.backstories / progress.unlocked) * 100}%` }}
               />
@@ -173,10 +173,10 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
             >
               {filter.charAt(0).toUpperCase() + filter.slice(1)}
               <span className={styles.filterCount}>
-                ({filter === 'all' ? progress.total : 
+                ({filter === 'all' ? progress.total :
                   filter === 'encountered' ? progress.unlocked :
-                  filter === 'backstory' ? progress.backstories :
-                  progress.unlocked - progress.backstories})
+                    filter === 'backstory' ? progress.backstories :
+                      progress.unlocked - progress.backstories})
               </span>
             </button>
           ))}
@@ -184,8 +184,8 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
 
         <div className={styles.sorting}>
           <span className={styles.sortLabel}>Sort by:</span>
-          <select 
-            value={sortBy} 
+          <select
+            value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
             className={styles.sortSelect}
           >
@@ -211,7 +211,7 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
             >
               <div className={styles.cardHeader}>
                 {entry.isUnlocked ? (
-                  <Portrait 
+                  <Portrait
                     passengerName={entry.passenger.name}
                     emoji={entry.passenger.emoji}
                     size="medium"
@@ -234,7 +234,7 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
                   </div>
                 </div>
               </div>
-              
+
               {entry.isUnlocked && (
                 <div className={styles.cardStats}>
                   <div className={styles.stat}>
@@ -258,7 +258,7 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
             {selectedEntry.isUnlocked ? (
               <>
                 <div className={styles.detailsHeader}>
-                  <Portrait 
+                  <Portrait
                     passengerName={selectedEntry.passenger.name}
                     emoji={selectedEntry.passenger.emoji}
                     size="large"

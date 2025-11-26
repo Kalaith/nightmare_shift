@@ -19,11 +19,16 @@ const getDefaultPlayerStats = (): PlayerStats => ({
   legendaryPassengersEncountered: new Set(),
   achievementsUnlocked: new Set(),
   firstPlayDate: Date.now(),
-  lastPlayDate: Date.now()
+  lastPlayDate: Date.now(),
+  // Roguelike progression
+  bankBalance: 0,
+  loreFragments: 0,
+  unlockedSkills: [],
+  almanacProgress: {}
 });
 
 export const usePlayerStats = () => {
-  const [playerStats, setPlayerStats] = useState<PlayerStats>(() => 
+  const [playerStats, setPlayerStats] = useState<PlayerStats>(() =>
     LocalStorage.load(STORAGE_KEYS.PLAYER_STATS, getDefaultPlayerStats())
   );
 

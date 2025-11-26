@@ -102,12 +102,12 @@ export const GAME_BALANCE = {
 
   // ===== ROUTE COST VARIATIONS =====
   ROUTE_VARIATIONS: {
-    FUEL_VARIATION_RANGE: 6, // ±3 fuel
-    FUEL_VARIATION_OFFSET: 3,
-    TIME_VARIATION_RANGE: 10, // ±5 minutes
-    TIME_VARIATION_OFFSET: 5,
-    MINIMUM_FUEL_COST: 5,
-    MINIMUM_TIME_COST: 5,
+    FUEL_VARIATION_RANGE: 0, // Was 6 (±3 fuel) - DISABLED for consistent gameplay
+    FUEL_VARIATION_OFFSET: 0, // Was 3
+    TIME_VARIATION_RANGE: 0, // Was 10 (±5 minutes) - DISABLED for consistent gameplay
+    TIME_VARIATION_OFFSET: 0, // Was 5
+    MINIMUM_FUEL_COST: 3,    // Reduced from 5 to allow lower costs
+    MINIMUM_TIME_COST: 3,    // Reduced from 5 to allow lower costs
   },
 
   // ===== SCORING SYSTEM =====
@@ -143,10 +143,10 @@ export const GAME_BALANCE = {
 
   // ===== ROUTE FARE MULTIPLIERS =====
   ROUTE_FARE_MULTIPLIERS: {
-    SHORTCUT: 0.8,    // Shortcuts pay less (80%) - efficient but risky, viable when passenger likes
-    NORMAL: 1.0,      // Normal routes pay standard fare - safe baseline
-    SCENIC: 1.15,     // Scenic routes pay small premium (115%) - high cost, only worth it when loved
-    POLICE: 1.0,      // Police routes pay standard fare - safest option
+    SHORTCUT: 0.85,   // Was 0.8 - Reduced penalty from -20% to -15%
+    NORMAL: 1.0,      // Unchanged - Safe baseline
+    SCENIC: 1.30,     // Was 1.15 - Increased bonus from +15% to +30%
+    POLICE: 1.10,     // Was 1.0 - Added +10% safety bonus
   },
 
   // ===== CONSECUTIVE ROUTE PENALTIES =====

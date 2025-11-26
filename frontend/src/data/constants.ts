@@ -13,18 +13,18 @@ export const GAME_CONSTANTS: GameConstants = {
   SURVIVAL_BONUS: 50,
   BACKSTORY_UNLOCK_FIRST: 0.2,
   BACKSTORY_UNLOCK_REPEAT: 0.5,
-  MINIMUM_EARNINGS: 80, // Reduced to make game winnable
+  MINIMUM_EARNINGS: 200, // Increased from 80 - requires strategic play to succeed
   // Route costs (fuel in liters, time in minutes)
-  // Reduced by 40% total from original values to make game winnable
-  FUEL_COST_SHORTCUT: 5,    // Was 6 (originally 8)
-  FUEL_COST_NORMAL: 9,       // Was 10 (originally 15)
-  FUEL_COST_SCENIC: 15,      // Was 18 (originally 25)
-  FUEL_COST_POLICE: 12,      // Was 14 (originally 20)
+  // Reduced by 50% total from original values to make game winnable
+  FUEL_COST_SHORTCUT: 4,    // Was 5 (originally 8) - 20% reduction
+  FUEL_COST_NORMAL: 7,       // Was 9 (originally 15) - 22% reduction
+  FUEL_COST_SCENIC: 12,      // Was 15 (originally 25) - 20% reduction
+  FUEL_COST_POLICE: 10,      // Was 12 (originally 20) - 17% reduction
 
-  TIME_COST_SHORTCUT: 7,     // Was 8 (originally 12)
-  TIME_COST_NORMAL: 12,      // Was 14 (originally 20)
-  TIME_COST_SCENIC: 21,      // Was 25 (originally 35)
-  TIME_COST_POLICE: 15,      // Was 18 (originally 25)
+  TIME_COST_SHORTCUT: 22,    // Was 20 - Adjusted to limit rides to ~22 max
+  TIME_COST_NORMAL: 30,      // Was 28 - Adjusted to limit rides to ~16 max
+  TIME_COST_SCENIC: 38,      // Was 35 - Adjusted to limit rides to ~12 max
+  TIME_COST_POLICE: 27,      // Was 25 - Adjusted to limit rides to ~18 max
   // Route risk levels
   RISK_NORMAL: 1,
   RISK_SHORTCUT: 3,
@@ -44,7 +44,9 @@ export const SCREENS = {
   BRIEFING: 'briefing',
   GAME: 'game',
   GAME_OVER: 'gameOver',
-  SUCCESS: 'success'
+  SUCCESS: 'success',
+  SKILL_TREE: 'skillTree',
+  ALMANAC: 'almanac'
 } as const;
 
 export const GAME_PHASES = {

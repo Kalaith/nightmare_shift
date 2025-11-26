@@ -54,7 +54,11 @@ const getDefaultPlayerStats = (): PlayerStats => ({
   legendaryPassengersEncountered: new Set(),
   achievementsUnlocked: new Set(),
   firstPlayDate: Date.now(),
-  lastPlayDate: Date.now()
+  lastPlayDate: Date.now(),
+  bankBalance: 0,
+  loreFragments: 0,
+  unlockedSkills: [],
+  almanacProgress: {}
 });
 
 export class PlayerStatsService {

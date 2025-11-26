@@ -34,6 +34,8 @@ export const createScreenProps = (
   onLoadGame: actions.loadGame,
   onShowLeaderboard: () => actions.showScreen(SCREENS.LEADERBOARD),
   onShowLoading: () => actions.showScreen(SCREENS.LOADING),
+  onShowSkillTree: () => console.log('Skill tree not yet implemented'),
+  onShowAlmanac: () => console.log('Almanac not yet implemented'),
   onStartShift: actions.startShift,
   onSaveGame: actions.saveGame,
   onEndShift: actions.handleEndShift,

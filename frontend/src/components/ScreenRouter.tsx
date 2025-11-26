@@ -8,6 +8,7 @@ import BriefingScreen from './screens/BriefingScreen/BriefingScreen';
 import GameScreen from './screens/GameScreen/GameScreen';
 import GameOverScreen from './screens/GameOverScreen/GameOverScreen';
 import SuccessScreen from './screens/SuccessScreen/SuccessScreen';
+import ErrorBoundary from './ErrorBoundary';
 
 interface ScreenRouterProps {
   gameState: GameState;
@@ -18,6 +19,8 @@ interface ScreenRouterProps {
   onLoadGame: () => void;
   onShowLeaderboard: () => void;
   onShowLoading: () => void;
+  onShowSkillTree: () => void;
+  onShowAlmanac: () => void;
   onStartShift: () => void;
   onSaveGame: () => void;
   onEndShift: (successful: boolean) => void;
@@ -44,6 +47,8 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
   onLoadGame,
   onShowLeaderboard,
   onShowLoading,
+  onShowSkillTree,
+  onShowAlmanac,
   onStartShift,
   onSaveGame,
   onEndShift,
@@ -68,15 +73,19 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
           onStartGame={onStartGame}
           onLoadGame={onLoadGame}
           onShowLeaderboard={onShowLeaderboard}
+          onShowSkillTree={onShowSkillTree}
+          onShowAlmanac={onShowAlmanac}
         />
       );
 
     case SCREENS.LEADERBOARD:
       return (
-        <LeaderboardScreen
-          leaderboard={LeaderboardService.getLeaderboard()}
-          onBack={onShowLoading}
-        />
+        <ErrorBoundary>
+          <LeaderboardScreen
+            leaderboard={LeaderboardService.getLeaderboard()}
+            onBack={onShowLoading}
+          />
+        </ErrorBoundary>
       );
 
     case SCREENS.BRIEFING:
@@ -135,6 +144,8 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
           onStartGame={onStartGame}
           onLoadGame={onLoadGame}
           onShowLeaderboard={onShowLeaderboard}
+          onShowSkillTree={onShowSkillTree}
+          onShowAlmanac={onShowAlmanac}
         />
       );
   }

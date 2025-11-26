@@ -52,7 +52,7 @@ export class GameSimulator {
             const passenger = this.selectRandomPassenger();
             const routeChoice = this.chooseRoute(strategy, passenger, consecutiveRouteStreak);
 
-            if (consecutiveRouteStreak?.type === routeChoice) {
+            if (consecutiveRouteStreak && consecutiveRouteStreak.type === routeChoice) {
                 consecutiveRouteStreak.count++;
                 if (routeChoice === 'shortcut' && consecutiveRouteStreak.count >= GAME_BALANCE.CONSECUTIVE_ROUTE.VIOLATION_THRESHOLD) {
                     gameOverReason = `Consecutive shortcut violation (${consecutiveRouteStreak.count} shortcuts)`;
@@ -70,8 +70,10 @@ export class GameSimulator {
                 gameOverReason = `Ran out of fuel (needed ${routeCosts.fuelCost}, had ${Math.round(fuel)})`;
                 break;
             }
+            // Time running out is NOT a failure - it's just the end of the shift
+            // The loop will naturally end when timeRemaining <= 0
             if (timeRemaining < routeCosts.timeCost) {
-                gameOverReason = `Ran out of time (needed ${routeCosts.timeCost}min, had ${Math.round(timeRemaining)}min)`;
+                // Not enough time for another ride, shift ends naturally
                 break;
             }
 
@@ -164,17 +166,20 @@ export class GameSimulator {
                 let bestRoute: RouteChoice = 'normal';
                 let bestScore = 0;
 
-                // Get fuel costs for each route type
+                // Get fuel costs for each route type from constants
                 const fuelCosts = {
-                    shortcut: 5,
-                    normal: 9,
-                    scenic: 15,
-                    police: 12
+                    shortcut: GAME_CONSTANTS.FUEL_COST_SHORTCUT,
+                    normal: GAME_CONSTANTS.FUEL_COST_NORMAL,
+                    scenic: GAME_CONSTANTS.FUEL_COST_SCENIC,
+                    police: GAME_CONSTANTS.FUEL_COST_POLICE
                 };
 
                 for (const pref of prefs) {
                     const route = pref.route as RouteChoice;
-                    const routeMult = route === 'shortcut' ? 0.85 : route === 'scenic' ? 1.25 : route === 'police' ? 1.05 : 1.0;
+                    const routeMult = route === 'shortcut' ? GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SHORTCUT :
+                        route === 'scenic' ? GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SCENIC :
+                            route === 'police' ? GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.POLICE :
+                                GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.NORMAL;
                     const passengerMult = pref.fareModifier || 1.0;
                     const fareMultiplier = routeMult * passengerMult;
 
@@ -249,10 +254,10 @@ export class GameSimulator {
         console.log('='.repeat(80));
 
         console.log('\nBase Costs (no modifiers):');
-        console.log(`  Shortcut: ${GAME_CONSTANTS.FUEL_COST_SHORTCUT}f, ${GAME_CONSTANTS.TIME_COST_SHORTCUT}m → 0.85x fare`);
-        console.log(`  Normal:   ${GAME_CONSTANTS.FUEL_COST_NORMAL}f, ${GAME_CONSTANTS.TIME_COST_NORMAL}m → 1.0x fare`);
-        console.log(`  Scenic:   ${GAME_CONSTANTS.FUEL_COST_SCENIC}f, ${GAME_CONSTANTS.TIME_COST_SCENIC}m → 1.25x fare`);
-        console.log(`  Police:   ${GAME_CONSTANTS.FUEL_COST_POLICE}f, ${GAME_CONSTANTS.TIME_COST_POLICE}m → 1.05x fare`);
+        console.log(`  Shortcut: ${GAME_CONSTANTS.FUEL_COST_SHORTCUT}f, ${GAME_CONSTANTS.TIME_COST_SHORTCUT}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SHORTCUT}x fare`);
+        console.log(`  Normal:   ${GAME_CONSTANTS.FUEL_COST_NORMAL}f, ${GAME_CONSTANTS.TIME_COST_NORMAL}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.NORMAL}x fare`);
+        console.log(`  Scenic:   ${GAME_CONSTANTS.FUEL_COST_SCENIC}f, ${GAME_CONSTANTS.TIME_COST_SCENIC}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SCENIC}x fare`);
+        console.log(`  Police:   ${GAME_CONSTANTS.FUEL_COST_POLICE}f, ${GAME_CONSTANTS.TIME_COST_POLICE}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.POLICE}x fare`);
 
         console.log('\n' + '='.repeat(80));
         console.log('BALANCE ANALYSIS');
