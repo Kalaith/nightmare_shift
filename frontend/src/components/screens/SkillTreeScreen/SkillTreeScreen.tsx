@@ -15,15 +15,15 @@ const SkillTreeScreen: React.FC<SkillTreeScreenProps> = ({
 }) => {
     const [selectedSkill, setSelectedSkill] = React.useState<Skill | null>(null);
 
-    const canAfford = (skill: Skill) => playerStats.bankBalance >= skill.cost;
+    const canAfford = (skill: Skill) => (playerStats.bankBalance || 0) >= skill.cost;
 
     const hasPrerequisites = (skill: Skill) => {
         return skill.prerequisites.every(prereqId =>
-            playerStats.unlockedSkills.includes(prereqId)
+            (playerStats.unlockedSkills || []).includes(prereqId)
         );
     };
 
-    const isUnlocked = (skill: Skill) => playerStats.unlockedSkills.includes(skill.id);
+    const isUnlocked = (skill: Skill) => (playerStats.unlockedSkills || []).includes(skill.id);
 
     const canPurchase = (skill: Skill) => {
         return !isUnlocked(skill) && canAfford(skill) && hasPrerequisites(skill);
@@ -157,7 +157,7 @@ const SkillTreeScreen: React.FC<SkillTreeScreenProps> = ({
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {selectedSkill.prerequisites.map(prereqId => {
                                         const prereq = SKILL_TREE.find(s => s.id === prereqId);
-                                        const unlocked = playerStats.unlockedSkills.includes(prereqId);
+                                        const unlocked = (playerStats.unlockedSkills || []).includes(prereqId);
                                         return (
                                             <span
                                                 key={prereqId}

@@ -1,8 +1,9 @@
-import type { PassengerReputation, RouteChoice, WeatherCondition, TimeOfDay, EnvironmentalHazard } from '../types/game';
+import type { PassengerReputation, RouteChoice, WeatherCondition, TimeOfDay, EnvironmentalHazard, PlayerStats } from '../types/game';
 import { GAME_CONSTANTS } from '../data/constants';
 import { GAME_BALANCE, BalanceHelpers } from '../constants/gameBalance';
 import { WeatherService } from './weatherService';
 import { ErrorHandling, type GameResult } from '../utils/errorHandling';
+import { AlmanacHelper } from '../utils/almanacHelper';
 
 export class ReputationService {
   static initializeReputation(): Record<number, PassengerReputation> {
@@ -243,7 +244,8 @@ export class RouteService {
     hazards?: EnvironmentalHazard[],
     passenger?: import('../types/game').Passenger,
     routeMastery?: Record<string, number>,
-    routeConsequences?: string[]
+    routeConsequences?: string[],
+    playerStats?: PlayerStats
   ): GameResult<Array<{
     type: 'normal' | 'shortcut' | 'scenic' | 'police';
     name: string;
@@ -300,7 +302,7 @@ export class RouteService {
             const passengerReaction = passengerPreference ? this.getReactionFromPreference(passengerPreference.preference) : 'neutral';
             const fareModifier = passengerPreference?.fareModifier || 1.0;
 
-            let bonusInfo = this.buildRouteInfo(route.type, passengerPreference, routeMastery, weather, hazards, timeOfDay);
+            let bonusInfo = this.buildRouteInfo(route.type, passengerPreference, routeMastery, weather, hazards, timeOfDay, passenger, playerStats);
 
             const routeResult = {
               ...route,
@@ -352,6 +354,7 @@ export class RouteService {
 
   /**
    * Build informative text about route choice including passenger reactions
+   * Information is hidden based on Almanac knowledge level
    */
   static buildRouteInfo(
     routeType: 'normal' | 'shortcut' | 'scenic' | 'police',
@@ -359,16 +362,30 @@ export class RouteService {
     routeMastery?: Record<string, number>,
     weather?: WeatherCondition,
     hazards?: EnvironmentalHazard[],
-    timeOfDay?: import('../types/game').TimeOfDay
+    timeOfDay?: import('../types/game').TimeOfDay,
+    passenger?: import('../types/game').Passenger,
+    playerStats?: PlayerStats
   ): string {
     const infoSections: string[] = [];
 
-    // Base route benefits
+    // Check knowledge level if we have passenger and playerStats
+    const passengerId = passenger?.id;
+    const canSeePreferences = passengerId && playerStats ?
+      AlmanacHelper.canSeePreferences(playerStats, passengerId) : false;
+    const canSeeFareModifiers = passengerId && playerStats ?
+      AlmanacHelper.canSeeFareModifiers(playerStats, passengerId) : false;
+
+    // Base route benefits - only show fare modifiers if knowledge level >= 2
     switch (routeType) {
       case 'scenic':
-        const bonus = passengerPreference?.fareModifier ?
-          Math.round((passengerPreference.fareModifier - 1) * 100) : 10;
-        infoSections.push(`+${bonus}% fare bonus`);
+        if (canSeeFareModifiers) {
+          const bonus = passengerPreference?.fareModifier ?
+            Math.round((passengerPreference.fareModifier - 1) * 100) : 10;
+          infoSections.push(`+${bonus}% fare bonus`);
+        } else if (passengerId && playerStats) {
+          // Show locked indicator
+          infoSections.push('🔒 Fare bonus (Unlock in Almanac)');
+        }
         break;
       case 'police':
         infoSections.push('No supernatural encounters');
@@ -378,8 +395,8 @@ export class RouteService {
         break;
     }
 
-    // Passenger reaction with penalty warnings
-    if (passengerPreference) {
+    // Passenger reaction - only show if knowledge level >= 2
+    if (passengerPreference && canSeePreferences) {
       const reactionText = {
         'loves': '😍 Passenger loves this route',
         'likes': '😊 Passenger likes this route',
@@ -391,9 +408,14 @@ export class RouteService {
       if (reactionText && passengerPreference.preference !== 'neutral') {
         infoSections.push(reactionText);
       }
+    } else if (passengerPreference && passengerId && playerStats && !canSeePreferences) {
+      // Show locked indicator for preferences
+      if (passengerPreference.preference !== 'neutral') {
+        infoSections.push('🔒 Passenger preference (Unlock in Almanac)');
+      }
     }
 
-    // Mastery bonuses
+    // Mastery bonuses - always visible (player's own progress)
     if (routeMastery && routeMastery[routeType] >= 5) {
       const level = routeMastery[routeType];
       if (level >= 10) {
@@ -403,7 +425,7 @@ export class RouteService {
       }
     }
 
-    // Weather warnings with specific impacts
+    // Weather warnings - always visible (environmental conditions)
     if (weather) {
       if (weather.intensity === 'heavy') {
         if (routeType === 'shortcut' && (weather.type === 'rain' || weather.type === 'fog' || weather.type === 'snow')) {
@@ -416,12 +438,12 @@ export class RouteService {
       }
     }
 
-    // Time-based warnings
+    // Time-based warnings - always visible
     if (timeOfDay && routeType === 'scenic' && timeOfDay.phase === 'latenight') {
       infoSections.push('🌙 NIGHT RISK: +3 fuel, +8 min, +1 risk');
     }
 
-    // Hazard warnings  
+    // Hazard warnings - always visible
     if (hazards && hazards.length > 0) {
       const routeHazards = hazards.filter(h => h.effects.routeBlocked?.includes(routeType));
       if (routeHazards.length > 0) {

@@ -24,6 +24,9 @@ export const createScreenProps = (
     refuelFull?: () => void;
     refuelPartial?: () => void;
     continueFromDropOff?: () => void;
+    upgradeKnowledge?: (passengerId: number) => void;
+    purchaseSkill?: (skillId: string) => void;
+    allPassengers?: Passenger[];
   }
 ) => ({
   gameState,
@@ -34,8 +37,8 @@ export const createScreenProps = (
   onLoadGame: actions.loadGame,
   onShowLeaderboard: () => actions.showScreen(SCREENS.LEADERBOARD),
   onShowLoading: () => actions.showScreen(SCREENS.LOADING),
-  onShowSkillTree: () => console.log('Skill tree not yet implemented'),
-  onShowAlmanac: () => console.log('Almanac not yet implemented'),
+  onShowSkillTree: () => actions.showScreen(SCREENS.SKILL_TREE),
+  onShowAlmanac: () => actions.showScreen(SCREENS.ALMANAC),
   onStartShift: actions.startShift,
   onSaveGame: actions.saveGame,
   onEndShift: actions.handleEndShift,
@@ -50,5 +53,8 @@ export const createScreenProps = (
   onTradeItem: actions.tradeItem,
   onRefuelFull: actions.refuelFull,
   onRefuelPartial: actions.refuelPartial,
-  onContinueFromDropOff: actions.continueFromDropOff
+  onContinueFromDropOff: actions.continueFromDropOff,
+  onUpgradeKnowledge: actions.upgradeKnowledge,
+  onPurchaseSkill: actions.purchaseSkill,
+  allPassengers: actions.allPassengers
 });

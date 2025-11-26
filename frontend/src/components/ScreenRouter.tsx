@@ -8,6 +8,8 @@ import BriefingScreen from './screens/BriefingScreen/BriefingScreen';
 import GameScreen from './screens/GameScreen/GameScreen';
 import GameOverScreen from './screens/GameOverScreen/GameOverScreen';
 import SuccessScreen from './screens/SuccessScreen/SuccessScreen';
+import AlmanacScreen from './screens/AlmanacScreen/AlmanacScreen';
+import SkillTreeScreen from './screens/SkillTreeScreen/SkillTreeScreen';
 import ErrorBoundary from './ErrorBoundary';
 
 interface ScreenRouterProps {
@@ -36,6 +38,10 @@ interface ScreenRouterProps {
   onRefuelFull?: () => void;
   onRefuelPartial?: () => void;
   onContinueFromDropOff?: () => void;
+  // Almanac & Skill Tree
+  onUpgradeKnowledge?: (passengerId: number) => void;
+  onPurchaseSkill?: (skillId: string) => void;
+  allPassengers?: Passenger[];
 }
 
 const ScreenRouter: React.FC<ScreenRouterProps> = ({
@@ -63,7 +69,10 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
   onTradeItem,
   onRefuelFull,
   onRefuelPartial,
-  onContinueFromDropOff
+  onContinueFromDropOff,
+  onUpgradeKnowledge,
+  onPurchaseSkill,
+  allPassengers
 }) => {
   switch (gameState.currentScreen) {
     case SCREENS.LOADING:
@@ -100,6 +109,7 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
       return (
         <GameScreen
           gameState={gameState}
+          playerStats={playerStats}
           onSaveGame={onSaveGame}
           onEndShift={onEndShift}
           showInventory={showInventory}
@@ -135,6 +145,29 @@ const ScreenRouter: React.FC<ScreenRouterProps> = ({
           onShowLeaderboard={onShowLeaderboard}
           onShowMainMenu={onShowLoading}
         />
+      );
+
+    case SCREENS.ALMANAC:
+      return (
+        <ErrorBoundary>
+          <AlmanacScreen
+            playerStats={playerStats}
+            allPassengers={allPassengers || []}
+            onUpgradeKnowledge={onUpgradeKnowledge || (() => { })}
+            onBack={onShowLoading}
+          />
+        </ErrorBoundary>
+      );
+
+    case SCREENS.SKILL_TREE:
+      return (
+        <ErrorBoundary>
+          <SkillTreeScreen
+            playerStats={playerStats}
+            onPurchaseSkill={onPurchaseSkill || (() => { })}
+            onBack={onShowLoading}
+          />
+        </ErrorBoundary>
       );
 
     default:

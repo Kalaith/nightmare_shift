@@ -18,7 +18,7 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
     const [selectedPassenger, setSelectedPassenger] = React.useState<Passenger | null>(null);
 
     const getAlmanacEntry = (passengerId: number): AlmanacEntry => {
-        return playerStats.almanacProgress[passengerId] || {
+        return (playerStats.almanacProgress || {})[passengerId] || {
             passengerId,
             encountered: false,
             knowledgeLevel: 0,
@@ -121,9 +121,9 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
                                         </h2>
                                         <div className="flex items-center gap-3">
                                             <span className={`px-3 py-1 rounded-full text-sm ${selectedEntry.knowledgeLevel === 0 ? 'bg-gray-700 text-gray-400' :
-                                                    selectedEntry.knowledgeLevel === 1 ? 'bg-blue-900 text-blue-300' :
-                                                        selectedEntry.knowledgeLevel === 2 ? 'bg-purple-900 text-purple-300' :
-                                                            'bg-yellow-900 text-yellow-300'
+                                                selectedEntry.knowledgeLevel === 1 ? 'bg-blue-900 text-blue-300' :
+                                                    selectedEntry.knowledgeLevel === 2 ? 'bg-purple-900 text-purple-300' :
+                                                        'bg-yellow-900 text-yellow-300'
                                                 }`}>
                                                 {ALMANAC_LEVELS[selectedEntry.knowledgeLevel].name}
                                             </span>
@@ -171,10 +171,10 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
                                                                 <p className="text-sm text-gray-400">{pref.reason}</p>
                                                             </div>
                                                             <span className={`px-2 py-1 rounded text-sm ${pref.preference === 'loves' ? 'bg-green-900 text-green-300' :
-                                                                    pref.preference === 'likes' ? 'bg-blue-900 text-blue-300' :
-                                                                        pref.preference === 'dislikes' ? 'bg-orange-900 text-orange-300' :
-                                                                            pref.preference === 'fears' ? 'bg-red-900 text-red-300' :
-                                                                                'bg-gray-700 text-gray-300'
+                                                                pref.preference === 'likes' ? 'bg-blue-900 text-blue-300' :
+                                                                    pref.preference === 'dislikes' ? 'bg-orange-900 text-orange-300' :
+                                                                        pref.preference === 'fears' ? 'bg-red-900 text-red-300' :
+                                                                            'bg-gray-700 text-gray-300'
                                                                 }`}>
                                                                 {pref.preference}
                                                             </span>
