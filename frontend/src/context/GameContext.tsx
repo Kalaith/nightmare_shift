@@ -55,7 +55,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             awardLoreFragments(loreReward);
 
             // Transfer 20% of earnings to permanent bank balance
-            const bankTransfer = Math.floor(gameStateLogic.gameState.earnings * 0.2);
+            // Use shiftData.earnings as it includes the survival bonus
+            const bankTransfer = Math.floor(shiftData.earnings * 0.2);
             addToBankBalance(bankTransfer);
         } else {
             // Consolation rewards for failed shift (50% of what you would have gotten)
@@ -66,7 +67,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
 
             // Small consolation bank transfer (10% instead of 20%)
-            const bankTransfer = Math.floor(gameStateLogic.gameState.earnings * 0.1);
+            // Use shiftData.earnings as it includes any partial earnings
+            const bankTransfer = Math.floor(shiftData.earnings * 0.1);
             if (bankTransfer > 0) {
                 addToBankBalance(bankTransfer);
             }
