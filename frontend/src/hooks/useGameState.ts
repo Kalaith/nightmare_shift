@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { GameState, PlayerStats, Passenger } from '../types/game';
 import type { ShiftData } from '../utils/statsHandler';
 import { STORAGE_KEYS, GAME_CONSTANTS, SCREENS, GAME_PHASES } from '../data/constants';
@@ -73,6 +73,12 @@ export const useGameState = (playerStats: PlayerStats) => {
     ...localGameState,
     currentScreen
   } as GameState;
+
+  // Ref to access latest game state in async callbacks
+  const gameStateRef = useRef(gameState);
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
 
   // Game timer effect
   useEffect(() => {
@@ -164,10 +170,12 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const showRideRequest = () => {
+    const currentGameState = gameStateRef.current;
+
     // Don't show new ride request if in active phases (but allow if transitioning from dropOff)
-    if (gameState.currentPassenger &&
-      gameState.gamePhase !== GAME_PHASES.DROP_OFF &&
-      gameState.gamePhase !== GAME_PHASES.WAITING) {
+    if (currentGameState.currentPassenger &&
+      currentGameState.gamePhase !== GAME_PHASES.DROP_OFF &&
+      currentGameState.gamePhase !== GAME_PHASES.WAITING) {
       return;
     }
 
@@ -176,11 +184,11 @@ export const useGameState = (playerStats: PlayerStats) => {
 
     // Check if all passengers have been used and reset if necessary
     const availablePassengers = gameData.passengers.filter(
-      passenger => !gameState.usedPassengers.includes(passenger.id)
+      passenger => !currentGameState.usedPassengers.includes(passenger.id)
     );
 
     // If no passengers available, either reset the used passenger list or select from all
-    let currentUsedPassengers = gameState.usedPassengers;
+    let currentUsedPassengers = currentGameState.usedPassengers;
     if (availablePassengers.length === 0) {
       // Allow passengers to repeat after all have been used once
       currentUsedPassengers = [];
@@ -189,10 +197,10 @@ export const useGameState = (playerStats: PlayerStats) => {
     // Use weather-aware passenger selection
     const passengerResult = PassengerService.selectWeatherAwarePassenger(
       currentUsedPassengers,
-      gameState.difficultyLevel || 1,
-      gameState.currentWeather,
-      gameState.timeOfDay,
-      gameState.season
+      currentGameState.difficultyLevel || 1,
+      currentGameState.currentWeather,
+      currentGameState.timeOfDay,
+      currentGameState.season
     );
 
     let passenger = passengerResult.success ? passengerResult.data : null;
@@ -202,7 +210,7 @@ export const useGameState = (playerStats: PlayerStats) => {
       passenger = PassengerService.getRandomPassenger(
         gameData.passengers,
         currentUsedPassengers,
-        gameState.difficultyLevel || 1
+        currentGameState.difficultyLevel || 1
       );
     }
 
@@ -219,8 +227,8 @@ export const useGameState = (playerStats: PlayerStats) => {
 
     // Apply weather-triggered rules
     const weatherTriggeredRules = WeatherService.getWeatherTriggeredRules(
-      gameState.currentWeather,
-      gameState.timeOfDay
+      currentGameState.currentWeather,
+      currentGameState.timeOfDay
     );
 
     const passengerNeedState = PassengerStateMachine.initialize(passenger);
