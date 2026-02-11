@@ -1,45 +1,49 @@
-{
-  "name": "nightmare-shift-react",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "preview": "vite preview",
-    "type-check": "tsc --noEmit",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui",
-    "test:balance": "tsx src/testing/runBalanceTests.ts",
-    "ci": "npm run lint && npm run type-check && npm run format:check && npm run test:run && npm run build",
-    "ci:quick": "npm run lint && npm run type-check && npm run format:check"
-  },
-  "dependencies": {
-    "@tailwindcss/vite": "^4.1.12",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "tailwindcss": "^4.1.12"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.33.0",
-    "@types/node": "^24.10.1",
-    "@types/react": "^19.1.10",
-    "@types/react-dom": "^19.1.7",
-    "@typescript-eslint/eslint-plugin": "^8.40.0",
-    "@typescript-eslint/parser": "^8.40.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "eslint": "^9.33.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.3.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.3.0",
-    "vite": "^7.1.2"
-  }
+﻿{
+    "name":  "nightmare-shift-react",
+    "private":  true,
+    "version":  "0.0.0",
+    "type":  "module",
+    "scripts":  {
+                    "dev":  "vite",
+                    "build":  "tsc -b \u0026\u0026 vite build",
+                    "lint":  "eslint .",
+                    "lint:fix":  "eslint . --fix",
+                    "format":  "prettier --write .",
+                    "format:check":  "prettier --check .",
+                    "preview":  "vite preview",
+                    "type-check":  "tsc --noEmit",
+                    "test":  "vitest --configLoader runner",
+                    "test:run":  "vitest run --configLoader runner",
+                    "test:coverage":  "vitest run --coverage",
+                    "test:ui":  "vitest --ui",
+                    "test:balance":  "tsx src/testing/runBalanceTests.ts",
+                    "ci":  "npm run lint \u0026\u0026 npm run type-check \u0026\u0026 npm run format:check \u0026\u0026 npm run test:run \u0026\u0026 npm run build",
+                    "ci:quick":  "npm run lint \u0026\u0026 npm run type-check \u0026\u0026 npm run format:check"
+                },
+    "dependencies":  {
+                         "@tailwindcss/vite":  "^4.1.12",
+                         "react":  "^19.1.1",
+                         "react-dom":  "^19.1.1",
+                         "tailwindcss":  "^4.1.12"
+                     },
+    "devDependencies":  {
+                            "@eslint/js":  "^9.33.0",
+                            "@types/node":  "^24.10.1",
+                            "@types/react":  "^19.1.10",
+                            "@types/react-dom":  "^19.1.7",
+                            "@typescript-eslint/eslint-plugin":  "^8.40.0",
+                            "@typescript-eslint/parser":  "^8.40.0",
+                            "@vitejs/plugin-react":  "^4.4.1",
+                            "eslint":  "^9.33.0",
+                            "eslint-plugin-react-hooks":  "^5.2.0",
+                            "eslint-plugin-react-refresh":  "^0.4.20",
+                            "globals":  "^16.3.0",
+                            "tsx":  "^4.19.2",
+                            "typescript":  "^5.3.0",
+                            "vite":  "^6.3.5",
+                            "vitest":  "^3.2.4",
+                            "@testing-library/jest-dom":  "^6.8.0",
+                            "@testing-library/react":  "^16.3.0",
+                            "@testing-library/user-event":  "^14.6.1"
+                        }
 }
