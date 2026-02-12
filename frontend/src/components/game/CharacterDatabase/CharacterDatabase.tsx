@@ -79,12 +79,14 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
           return a.passenger.name.localeCompare(b.passenger.name);
         case 'encounters':
           return b.encounterCount - a.encounterCount;
-        case 'rarity':
+        case 'rarity': {
           const rarityOrder = { 'legendary': 4, 'rare': 3, 'uncommon': 2, 'common': 1 };
           return rarityOrder[b.passenger.rarity] - rarityOrder[a.passenger.rarity];
-        case 'trust':
+        }
+        case 'trust': {
           const trustOrder = { 'trusted': 5, 'friendly': 4, 'neutral': 3, 'hostile': 2, 'unknown': 1 };
           return trustOrder[b.trustLevel] - trustOrder[a.trustLevel];
+        }
         default:
           return 0;
       }
@@ -186,7 +188,7 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
           <span className={styles.sortLabel}>Sort by:</span>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as 'name' | 'encounters' | 'rarity' | 'trust')}
             className={styles.sortSelect}
           >
             <option value="encounters">Encounters</option>

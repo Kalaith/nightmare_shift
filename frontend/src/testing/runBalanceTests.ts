@@ -1,3 +1,4 @@
+/* eslint-env node */
 import { GameSimulator, type Strategy } from './gameSimulator';
 import * as fs from 'fs';
 
@@ -65,7 +66,6 @@ for (let i = 0; i < TOTAL_RUNS; i++) {
     if (result.success) strategyProgress[strategy].successes++;
 
     if (completedRuns % 6 === 0 || completedRuns === TOTAL_RUNS) {
-        process.stdout.write('\x1b[' + (STRATEGIES.length + 3) + 'A');
         console.log(colors.bright + 'Progress:' + colors.reset);
         console.log('  ' + printProgressBar(completedRuns, TOTAL_RUNS) + '\n');
         console.log(colors.bright + 'Strategy Status:' + colors.reset);

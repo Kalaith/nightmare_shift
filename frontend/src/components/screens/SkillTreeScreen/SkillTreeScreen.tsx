@@ -39,7 +39,6 @@ const SkillTreeScreen: React.FC<SkillTreeScreenProps> = ({
         const unlocked = isUnlocked(skill);
         const affordable = canAfford(skill);
         const hasPrereqs = hasPrerequisites(skill);
-        const purchasable = canPurchase(skill);
 
         return (
             <div

@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import type { GameState, PlayerStats, Passenger } from '../types/game';
+import { useState, useEffect, useRef, type SetStateAction } from 'react';
+import type { GameState, PlayerStats } from '../types/game';
 import type { ShiftData } from '../utils/statsHandler';
-import { STORAGE_KEYS, GAME_CONSTANTS, SCREENS, GAME_PHASES } from '../data/constants';
+import { GAME_CONSTANTS, SCREENS, GAME_PHASES } from '../data/constants';
 import { ReputationService } from '../services/reputationService';
 import { GameEngine } from '../services/gameEngine';
 import { PassengerService } from '../services/passengerService';
@@ -159,14 +159,6 @@ export const useGameState = (playerStats: PlayerStats) => {
 
   const deleteSavedGame = () => {
     SaveGameService.clearSave();
-  };
-
-  const getRandomPassenger = (): Passenger | null => {
-    return PassengerService.getRandomPassenger(
-      gameData.passengers,
-      gameState.usedPassengers,
-      gameState.difficultyLevel || 1
-    );
   };
 
   const showRideRequest = () => {
@@ -353,7 +345,7 @@ export const useGameState = (playerStats: PlayerStats) => {
   // Expose setGameState for game actions
   // We need to be careful here. If updater tries to set currentScreen, it will be ignored by local state
   // But since we are merging it back in the return, it should be fine as long as we don't expect setGameState to update screen
-  const updateGameState = (updater: React.SetStateAction<GameState>) => {
+  const updateGameState = (updater: SetStateAction<GameState>) => {
     setLocalGameState(prev => {
       // If updater is a function, call it with the FULL state (including screen)
       // but only use the result to update local state (excluding screen)

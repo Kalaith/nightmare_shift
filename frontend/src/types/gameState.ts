@@ -1,10 +1,9 @@
 // Game state and core types
-import type { Rule, Guideline, PassengerNeedState, RuleConflict, HiddenRuleViolation, GuidelineDecision, DetectedTell, GuidelineException } from './rules';
+import type { Rule, Guideline, PassengerNeedState, RuleConflict, GuidelineDecision, DetectedTell, GuidelineException } from './rules';
 import type { Passenger, RouteChoice, PassengerReputation } from './passenger';
 import type { WeatherCondition, TimeOfDay, Season, EnvironmentalHazard, WeatherEffect } from './environment';
 import type { Location } from './location';
 import type { InventoryItem } from './inventory';
-import type { PlayerStats } from './playerStats';
 
 export interface GameState {
     currentScreen: string;

@@ -1,4 +1,4 @@
-import type { Passenger, RoutePreference } from '../types/game';
+import type { Passenger } from '../types/game';
 
 export const passengerData: Passenger[] = [
     // Original passengers

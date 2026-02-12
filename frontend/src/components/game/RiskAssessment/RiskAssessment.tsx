@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState, Passenger, Guideline, DetectedTell } from '../../../types/game';
-import { GuidelineEngine } from '../../../services/guidelineEngine';
 import styles from './RiskAssessment.module.css';
 
 interface RiskAssessmentProps {

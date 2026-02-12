@@ -29,7 +29,7 @@ export const formatDate = (timestamp: number | Date): string => {
       month: 'short',
       day: 'numeric'
     });
-  } catch (error) {
+  } catch {
     return 'Invalid Date';
   }
 };

@@ -5,7 +5,7 @@ const LocalStorage = {
   save: (key: string, data: unknown): void => {
     try {
       localStorage.setItem(key, JSON.stringify(data));
-    } catch (error) {
+    } catch {
       // Silent fail - localStorage may be unavailable
     }
   },
@@ -14,7 +14,7 @@ const LocalStorage = {
     try {
       const stored = localStorage.getItem(key);
       return stored ? JSON.parse(stored) : defaultValue;
-    } catch (error) {
+    } catch {
       return defaultValue;
     }
   },
@@ -22,7 +22,7 @@ const LocalStorage = {
   remove: (key: string): void => {
     try {
       localStorage.removeItem(key);
-    } catch (error) {
+    } catch {
       // Silent fail
     }
   },
@@ -32,7 +32,7 @@ const LocalStorage = {
       Object.values(STORAGE_KEYS).forEach(key => {
         localStorage.removeItem(key);
       });
-    } catch (error) {
+    } catch {
       // Silent fail
     }
   }

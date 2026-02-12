@@ -1,4 +1,4 @@
-import type { PlayerStats, GameState } from '../types/game';
+import type { PlayerStats } from '../types/game';
 
 export interface ShiftData {
   timeSpent: number;

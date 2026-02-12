@@ -141,7 +141,7 @@ export const GuidelineInteraction: React.FC<GuidelineInteractionProps> = ({
     onDecision(decision);
   };
 
-  const handleTellClick = (tell: DetectedTell) => {
+  const handleTellClick = (_tell: DetectedTell) => {
     // Toggle risk assessment when clicking on tells
     setInteraction(prev => ({
       ...prev,

@@ -12,7 +12,7 @@ interface TellIndicatorProps {
 
 export const TellIndicator: React.FC<TellIndicatorProps> = ({
   detectedTells,
-  passenger,
+  passenger: _passenger,
   isActive,
   playerTrust,
   onTellClicked

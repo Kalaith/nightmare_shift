@@ -1,4 +1,4 @@
-import type { Passenger, PassengerTell, GuidelineException } from '../types/game';
+import type { Passenger, PassengerTell } from '../types/game';
 
 interface PassengerVariation {
   tells: PassengerTell[];
@@ -295,7 +295,7 @@ export class PassengerVariationService {
   /**
    * Adjusts trust required based on behavior pattern
    */
-  private static adjustTrustRequired(baseTrust: number, behaviorPattern: PassengerVariation['behaviorPattern'], playerExperience: number): number {
+  private static adjustTrustRequired(baseTrust: number, behaviorPattern: PassengerVariation['behaviorPattern'], _playerExperience: number): number {
     let adjusted = baseTrust;
     
     switch (behaviorPattern) {

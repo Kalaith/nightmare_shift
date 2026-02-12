@@ -19,8 +19,7 @@ const GameScreen: React.FC = () => {
     saveGame: onSaveGame,
     endShift: onEndShift,
     showInventory,
-    setShowInventory,
-    gameOver: onGameOver
+    setShowInventory
   } = useGameContext();
 
   const { playerStats } = usePlayerContext();

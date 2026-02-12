@@ -185,7 +185,7 @@ export const useGameActions = () => {
     }
   }, [gameState, setGameState, endShift]);
 
-  const startPassengerInteraction = useCallback((nextNeedState?: PassengerNeedState | null) => {
+  const startPassengerInteraction = useCallback((_nextNeedState?: PassengerNeedState | null) => {
     const passenger = gameState.currentPassenger;
     if (!passenger) return;
 

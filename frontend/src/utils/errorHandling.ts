@@ -78,7 +78,7 @@ export const ErrorHandling = {
    * Logs errors consistently
    * TODO: Replace with proper logging service in production
    */
-  logError: (error: GameError, context?: string) => {
+  logError: (_error: GameError, _context?: string) => {
     // Error logging disabled in production
     // In development, would log: [${error.name}] ${error.code}: ${error.message}
   },

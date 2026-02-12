@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { PlayerStats, LeaderboardEntry } from '../types/game';
 import { STORAGE_KEYS } from '../data/constants';
-import LocalStorage, { PlayerStatsService, LeaderboardService } from '../services/storageService';
+import LocalStorage, { LeaderboardService } from '../services/storageService';
 
 const getDefaultPlayerStats = (): PlayerStats => ({
   totalShiftsCompleted: 0,

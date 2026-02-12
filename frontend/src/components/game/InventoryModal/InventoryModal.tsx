@@ -17,7 +17,7 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
   isOpen,
   onClose,
   inventory,
-  gameState,
+  gameState: _gameState,
   onUseItem,
   onTradeItem,
   currentPassenger

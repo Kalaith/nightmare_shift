@@ -1,4 +1,4 @@
-import type { PlayerStats, GameState, Passenger } from '../types/game';
+import type { PlayerStats, GameState } from '../types/game';
 
 export const calculatePlayerExperience = (playerStats: PlayerStats): number => {
   const rides = playerStats.totalRidesCompleted || 0;
@@ -25,7 +25,7 @@ export const getRandomElement = <T>(array: T[]): T | null => {
   return array[Math.floor(Math.random() * array.length)];
 };
 
-export const getWeightedRandomElement = <T extends Record<string, any>>(
+export const getWeightedRandomElement = <T extends Record<string, unknown>>(
   items: T[], 
   weightKey: keyof T = 'weight'
 ): T | null => {
@@ -94,7 +94,7 @@ export const isDevelopment = (): boolean => {
 export const safeJsonParse = <T>(jsonString: string, fallback: T): T => {
   try {
     return JSON.parse(jsonString);
-  } catch (error) {
+  } catch {
     // JSON parse failed, returning fallback
     return fallback;
   }

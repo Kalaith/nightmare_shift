@@ -1,4 +1,4 @@
-import type { PassengerReputation, RouteChoice, WeatherCondition, TimeOfDay, EnvironmentalHazard, PlayerStats } from '../types/game';
+import type { PassengerReputation, WeatherCondition, TimeOfDay, EnvironmentalHazard, PlayerStats } from '../types/game';
 import { GAME_CONSTANTS } from '../data/constants';
 import { GAME_BALANCE, BalanceHelpers } from '../constants/gameBalance';
 import { WeatherService } from './weatherService';
@@ -314,7 +314,7 @@ export class RouteService {
             };
 
             return routeResult;
-          } catch (error) {
+          } catch {
             // Return a basic route if processing fails
             return {
               ...route,
@@ -341,11 +341,11 @@ export class RouteService {
    * ALL ROUTES ARE ALWAYS AVAILABLE - no route blocking, only penalties
    */
   static checkRouteAvailability(
-    routeType: 'normal' | 'shortcut' | 'scenic' | 'police',
-    weather?: WeatherCondition,
-    timeOfDay?: TimeOfDay,
-    routeConsequences?: string[],
-    passenger?: import('../types/game').Passenger
+    _routeType: 'normal' | 'shortcut' | 'scenic' | 'police',
+    _weather?: WeatherCondition,
+    _timeOfDay?: TimeOfDay,
+    _routeConsequences?: string[],
+    _passenger?: import('../types/game').Passenger
   ): boolean {
     // ALL ROUTES ARE ALWAYS AVAILABLE
     // Former blocking conditions now just add severe penalties instead of disabling routes

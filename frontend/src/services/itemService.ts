@@ -1,5 +1,4 @@
-import type { InventoryItem, ItemEffect, CursedProperties, ProtectiveProperties, GameState, Passenger } from '../types/game';
-import { GAME_BALANCE } from '../constants/gameBalance';
+import type { InventoryItem, GameState, Passenger } from '../types/game';
 import { ErrorHandling, type GameResult } from '../utils/errorHandling';
 
 export class ItemService {

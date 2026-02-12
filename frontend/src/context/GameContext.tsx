@@ -2,7 +2,6 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useGameState } from '../hooks/useGameState';
 import { usePlayerContext } from './PlayerContext';
 import type { GameState } from '../types/game';
-import type { ShiftData } from '../utils/statsHandler';
 import { createStatsUpdater } from '../utils/statsHandler';
 
 interface GameContextType {

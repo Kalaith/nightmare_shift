@@ -3,10 +3,8 @@ import type {
   TimeOfDay, 
   Season, 
   EnvironmentalHazard, 
-  WeatherEffect,
-  GameState 
+  WeatherEffect
 } from '../types/game';
-import { GAME_BALANCE } from '../constants/gameBalance';
 import { ErrorHandling, type GameResult } from '../utils/errorHandling';
 
 export class WeatherService {
@@ -535,7 +533,7 @@ export class WeatherService {
   private static createEnvironmentalHazard(
     type: EnvironmentalHazard['type'],
     weather: WeatherCondition,
-    timeOfDay: TimeOfDay
+    _timeOfDay: TimeOfDay
   ): EnvironmentalHazard {
     const locations = [
       'Downtown Bridge', 'Highway 101', 'Industrial District', 'Cemetery Road',

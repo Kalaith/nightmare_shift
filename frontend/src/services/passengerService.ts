@@ -2,7 +2,7 @@ import { gameData } from '../data/gameData';
 import { RARITY_WEIGHTS, GAME_CONSTANTS } from '../data/constants';
 import { GAME_BALANCE } from '../constants/gameBalance';
 import { BackstoryService } from './storageService';
-import { ErrorHandling, ServiceError, type GameResult } from '../utils/errorHandling';
+import { ErrorHandling, type GameResult } from '../utils/errorHandling';
 import type { Passenger, CompletedRide, Season, WeatherCondition, TimeOfDay } from '../types/game';
 
 export class PassengerService {
@@ -87,7 +87,7 @@ export class PassengerService {
     }
   }
 
-  static shouldSpawnRelatedPassenger(completedRides: CompletedRide[]): GameResult<Passenger | null> {
+  static shouldSpawnRelatedPassenger(_completedRides: CompletedRide[]): GameResult<Passenger | null> {
     return ErrorHandling.wrap(
       () => {
         if (Math.random() > GAME_BALANCE.PROBABILITIES.RELATED_PASSENGER_SPAWN) return null;
