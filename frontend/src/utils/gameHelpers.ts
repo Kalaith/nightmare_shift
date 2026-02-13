@@ -1,4 +1,3 @@
-
 import type { PlayerStats, GameState } from "../types/game";
 
 export const calculatePlayerExperience = (playerStats: PlayerStats): number => {
