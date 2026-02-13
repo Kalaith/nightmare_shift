@@ -1,7 +1,7 @@
-import React from 'react';
-import { SaveGameService } from '../../../services/storageService';
-import type { PlayerStats } from '../../../types/game';
-import bannerImg from '../../../assets/banner.png';
+import React from "react";
+import { SaveGameService } from "../../../services/storageService";
+import type { PlayerStats } from "../../../types/game";
+import bannerImg from "../../../assets/banner.png";
 
 interface LoadingScreenProps {
   playerStats: PlayerStats;
@@ -18,16 +18,24 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onLoadGame,
   onShowLeaderboard,
   onShowSkillTree,
-  onShowAlmanac
+  onShowAlmanac,
 }) => {
   const hasSavedGame = SaveGameService.hasSavedGame();
 
   return (
     <div className="min-h-screen p-5 flex flex-col bg-gradient-to-b from-gray-800 to-slate-900">
       <div className="text-center mb-8">
-        <img src={bannerImg} alt="Nightmare Shift Banner" className="w-full max-w-md mx-auto rounded-lg shadow-lg mb-4" />
-        <h1 className="text-4xl font-bold text-teal-300 mb-2 drop-shadow-lg">🚗 Nightmare Shift</h1>
-        <p className="text-lg text-gray-300">Drive the supernatural. Follow the rules. Survive the shift.</p>
+        <img
+          src={bannerImg}
+          alt="Nightmare Shift Banner"
+          className="w-full max-w-md mx-auto rounded-lg shadow-lg mb-4"
+        />
+        <h1 className="text-4xl font-bold text-teal-300 mb-2 drop-shadow-lg">
+          🚗 Nightmare Shift
+        </h1>
+        <p className="text-lg text-gray-300">
+          Drive the supernatural. Follow the rules. Survive the shift.
+        </p>
       </div>
 
       <div className="bg-gray-800 border border-gray-600 rounded-lg p-4 mb-6">
@@ -35,7 +43,9 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-400">Shifts Completed:</span>
-            <span className="text-gray-200">{playerStats.totalShiftsCompleted}</span>
+            <span className="text-gray-200">
+              {playerStats.totalShiftsCompleted}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Total Earnings:</span>
@@ -43,7 +53,9 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Best Shift:</span>
-            <span className="text-gray-200">${playerStats.bestShiftEarnings}</span>
+            <span className="text-gray-200">
+              ${playerStats.bestShiftEarnings}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Max Rides:</span>
@@ -51,11 +63,15 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Bank Balance:</span>
-            <span className="text-green-400 font-semibold">${playerStats.bankBalance}</span>
+            <span className="text-green-400 font-semibold">
+              ${playerStats.bankBalance}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Lore Fragments:</span>
-            <span className="text-purple-400 font-semibold">{playerStats.loreFragments}</span>
+            <span className="text-purple-400 font-semibold">
+              {playerStats.loreFragments}
+            </span>
           </div>
         </div>
       </div>
@@ -108,7 +124,11 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         <div className="pt-4 border-t border-gray-700 mt-4">
           <button
             onClick={() => {
-              if (window.confirm("⚠️ ARE YOU SURE? ⚠️\n\nThis will wipe ALL progress including:\n- Bank Balance\n- Lore Fragments\n- Unlocked Skills\n- Almanac Data\n\nThis cannot be undone!")) {
+              if (
+                window.confirm(
+                  "⚠️ ARE YOU SURE? ⚠️\n\nThis will wipe ALL progress including:\n- Bank Balance\n- Lore Fragments\n- Unlocked Skills\n- Almanac Data\n\nThis cannot be undone!",
+                )
+              ) {
                 localStorage.clear();
                 window.location.reload();
               }
@@ -120,7 +140,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoadingScreen
+export default LoadingScreen;

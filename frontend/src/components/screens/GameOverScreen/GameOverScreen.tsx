@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import type { GameState } from '../../../types/game';
-import jumpScareImg from '../../../assets/jumpscare.png';
+import React, { useState, useEffect } from "react";
+import type { GameState } from "../../../types/game";
+import jumpScareImg from "../../../assets/jumpscare.png";
 
 interface GameOverScreenProps {
   gameState: GameState;
@@ -13,7 +13,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
   gameState,
   onTryAgain,
   onShowLeaderboard,
-  onShowMainMenu
+  onShowMainMenu,
 }) => {
   const [showJumpScare, setShowJumpScare] = useState(true);
 
@@ -42,7 +42,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
             src={jumpScareImg}
             alt=""
             className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-60 animate-glitch-1"
-            style={{ filter: 'hue-rotate(90deg)' }}
+            style={{ filter: "hue-rotate(90deg)" }}
           />
 
           {/* Glitch Layer 2 (Cyan Shift) */}
@@ -50,7 +50,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
             src={jumpScareImg}
             alt=""
             className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-60 animate-glitch-2"
-            style={{ filter: 'hue-rotate(-90deg)' }}
+            style={{ filter: "hue-rotate(-90deg)" }}
           />
 
           <div className="absolute inset-0 bg-red-900/30 mix-blend-overlay"></div>
@@ -62,7 +62,9 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
   return (
     <div className="min-h-screen p-5 flex items-center justify-center bg-gradient-to-b from-gray-800 to-slate-900 animate-fade-in">
       <div className="text-center max-w-md mx-auto py-8">
-        <h2 className="text-3xl font-semibold text-red-400 mb-6">Shift Terminated</h2>
+        <h2 className="text-3xl font-semibold text-red-400 mb-6">
+          Shift Terminated
+        </h2>
 
         <div className="bg-red-400/10 border border-red-400/30 rounded p-5 mb-6 text-red-400">
           <p>{gameState.gameOverReason}</p>
@@ -108,7 +110,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default GameOverScreen
+export default GameOverScreen;

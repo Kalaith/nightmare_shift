@@ -4,111 +4,283 @@
     "title": "Mrs. Chen",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Elderly Chinese woman in a faded floral coat, clutching an old locket and withered flowers; pale, slightly translucent skin hinting at a ghostly nature; dark foggy night background with distant city lights creating soft amber glows through the mist, moody and melancholy atmosphere, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["ghost", "elderly", "Chinese", "locket", "flowers", "foggy night", "city lights", "melancholy", "translucent"]
+    "tags": [
+      "ghost",
+      "elderly",
+      "Chinese",
+      "locket",
+      "flowers",
+      "foggy night",
+      "city lights",
+      "melancholy",
+      "translucent"
+    ]
   },
   {
     "id": 2,
     "title": "Jake Morrison",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Stern adult professional businessman with unnaturally pale, corpse-like complexion, wearing an immaculate dark charcoal suit with perfectly straight tie; cold, calculating expression with subtle vampiric features (slightly elongated canine teeth), piercing tired eyes that suggest centuries of weariness; arms at sides, professional corporate posture; dark foggy night background with distant city lights creating soft amber glows through the mist, cool blues with small blood-red accents, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["vampire", "corporate", "pale", "suit", "fangs", "business card", "foggy night", "city lights", "undead", "professional"]
+    "tags": [
+      "vampire",
+      "corporate",
+      "pale",
+      "suit",
+      "fangs",
+      "business card",
+      "foggy night",
+      "city lights",
+      "undead",
+      "professional"
+    ]
   },
   {
     "id": 3,
     "title": "Sarah Woods",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Disheveled young woman with dirt under fingernails and torn, mud-stained jacket; clutching a muddy branch and glancing over shoulder with raw fear; dark foggy night background with distant city lights creating soft amber glows through the mist, tense and hunted mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["hunted", "survivor", "disheveled", "dirt", "torn jacket", "branch", "fear", "foggy night", "city lights"]
+    "tags": [
+      "hunted",
+      "survivor",
+      "disheveled",
+      "dirt",
+      "torn jacket",
+      "branch",
+      "fear",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 4,
     "title": "Dr. Hollow",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Weathered doctor in stained old coat carrying antique medical bag and metal syringe; clinical yet uncanny expression, slightly outdated 1940s attire, surgical tools peeking from bag; dark foggy night background with distant city lights creating soft amber glows through the mist, unnerving professionalism, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["doctor", "vintage", "1940s", "medical bag", "syringe", "clinical", "weathered", "foggy night", "city lights"]
+    "tags": [
+      "doctor",
+      "vintage",
+      "1940s",
+      "medical bag",
+      "syringe",
+      "clinical",
+      "weathered",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 5,
     "title": "The Collector",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Impeccably dressed, well-groomed figure in tailored suit holding briefcase with arcane artifacts visible; unreadable face lit by low warm light, ancient coins and crystal pendant gleaming; dark foggy night background with distant city lights creating soft amber glows through the mist, mysterious and transactional mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["collector", "artifacts", "tailored suit", "briefcase", "coins", "crystal pendant", "mysterious", "well-groomed", "foggy night", "city lights"]
+    "tags": [
+      "collector",
+      "artifacts",
+      "tailored suit",
+      "briefcase",
+      "coins",
+      "crystal pendant",
+      "mysterious",
+      "well-groomed",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 6,
     "title": "Tommy Sullivan",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Small boy in faded school uniform holding torn homework sheet and old lunch box; pale, out-of-time expression, eyes that feel too-old for his face; dark foggy night background with distant city lights creating soft amber glows through the mist, uncanny innocence and sorrow, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["child", "school uniform", "homework", "lunch box", "pale", "old eyes", "sorrow", "foggy night", "city lights"]
+    "tags": [
+      "child",
+      "school uniform",
+      "homework",
+      "lunch box",
+      "pale",
+      "old eyes",
+      "sorrow",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 7,
     "title": "Elena Vasquez",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Vintage-dressed dancer from 1940s in sequined dress and pearl necklace, faint burn marks on fabric; delicate yet haunted expression, humming to herself; dark foggy night background with distant city lights creating soft amber glows through the mist, wistful and tragic mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["dancer", "1940s", "sequined dress", "pearl necklace", "burn marks", "tragic", "vintage", "haunted", "foggy night", "city lights"]
+    "tags": [
+      "dancer",
+      "1940s",
+      "sequined dress",
+      "pearl necklace",
+      "burn marks",
+      "tragic",
+      "vintage",
+      "haunted",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 8,
     "title": "Marcus Thompson",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Athletic jogger in running gear, breath visible in cold air, constantly glancing over shoulder; torn shoe and claw-marked clothing with broken GPS watch on wrist; dark foggy night background with distant city lights creating soft amber glows through the mist, tense and urgent energy, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["jogger", "athletic", "running gear", "cold breath", "torn shoe", "claw marks", "GPS watch", "pursued", "urgent", "foggy night", "city lights"]
+    "tags": [
+      "jogger",
+      "athletic",
+      "running gear",
+      "cold breath",
+      "torn shoe",
+      "claw marks",
+      "GPS watch",
+      "pursued",
+      "urgent",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 9,
     "title": "Nurse Catherine",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Tired hospital nurse in stained scrubs holding broken stethoscope and guilt-stained badge; exhausted, haunted eyes and rigid posture; dark foggy night background with distant city lights creating soft amber glows through the mist, weary and remorseful mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["nurse", "hospital", "scrubs", "stethoscope", "badge", "exhausted", "haunted", "guilt", "remorseful", "foggy night", "city lights"]
+    "tags": [
+      "nurse",
+      "hospital",
+      "scrubs",
+      "stethoscope",
+      "badge",
+      "exhausted",
+      "haunted",
+      "guilt",
+      "remorseful",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 10,
     "title": "Old Pete",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Weather-beaten fisherman wearing soaked coat and carrying rusty hook; water clings to clothes though the night is dry, gaze distant and resigned; dark foggy night background with distant city lights creating soft amber glows through the mist, melancholic and eerie mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["fisherman", "weather-beaten", "soaked coat", "rusty hook", "water", "resigned", "melancholic", "foggy night", "city lights"]
+    "tags": [
+      "fisherman",
+      "weather-beaten",
+      "soaked coat",
+      "rusty hook",
+      "water",
+      "resigned",
+      "melancholic",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 11,
     "title": "Madame Zelda",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Mysterious fortune-teller draped in layered fabrics and crystal jewelry, tarot cards in hand and smoky crystal ball nearby; knowing, slightly menacing smile with eyes that seem to look through you; dark foggy night background with distant city lights creating soft amber glows through the mist, prophetic and unsettling mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["fortune teller", "crystal jewelry", "tarot cards", "crystal ball", "occult", "prophetic", "menacing smile", "layered fabrics", "mysterious", "foggy night", "city lights"]
+    "tags": [
+      "fortune teller",
+      "crystal jewelry",
+      "tarot cards",
+      "crystal ball",
+      "occult",
+      "prophetic",
+      "menacing smile",
+      "layered fabrics",
+      "mysterious",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 12,
     "title": "Frank the Pianist",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Well-dressed musician with bandaged hands holding worn sheet music, fingers stained like blood and ink; tragic obsession in his eyes; dark foggy night background with distant city lights creating soft amber glows through the mist, melancholic and obsessive mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["pianist", "musician", "bandaged hands", "sheet music", "blood stains", "obsessive", "tragic", "foggy night", "city lights"]
+    "tags": [
+      "pianist",
+      "musician",
+      "bandaged hands",
+      "sheet music",
+      "blood stains",
+      "obsessive",
+      "tragic",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 13,
     "title": "Sister Agnes",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Nun in plain habit clutching ancient texts and blessed rosary, eyes lined with worry and determination; solemn expression with unwavering resolve; dark foggy night background with distant city lights creating soft amber glows through the mist, solemn and resolute mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["nun", "habit", "ancient texts", "rosary", "determined", "solemn", "resolute", "foggy night", "city lights"]
+    "tags": [
+      "nun",
+      "habit",
+      "ancient texts",
+      "rosary",
+      "determined",
+      "solemn",
+      "resolute",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 14,
     "title": "Detective Morrison",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Tired detective in rumpled trench coat holding case files and stained coffee cup, face creased by sleepless nights; investigative determination despite exhaustion; dark foggy night background with distant city lights creating soft amber glows through the mist, weary but determined mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["detective", "trench coat", "case files", "coffee cup", "sleepless", "investigative", "weary", "determined", "foggy night", "city lights"]
+    "tags": [
+      "detective",
+      "trench coat",
+      "case files",
+      "coffee cup",
+      "sleepless",
+      "investigative",
+      "weary",
+      "determined",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 15,
     "title": "The Midnight Mayor",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Impossibly tall aristocratic figure in formal era attire, wearing tall hat and holding ornate mayoral seal and ancient key; surreal presence, shadowed face with faint smile; dark foggy night background with distant city lights creating soft amber glows through the mist, authoritative and uncanny mood, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["mayor", "aristocratic", "tall hat", "mayoral seal", "ancient key", "authoritative", "uncanny", "surreal", "foggy night", "city lights"]
+    "tags": [
+      "mayor",
+      "aristocratic",
+      "tall hat",
+      "mayoral seal",
+      "ancient key",
+      "authoritative",
+      "uncanny",
+      "surreal",
+      "foggy night",
+      "city lights"
+    ]
   },
   {
     "id": 16,
     "title": "Death's Taxi Driver",
     "description": "Cinematic supernatural horror style: photorealistic, low-saturation, high-contrast, subtle film grain, dramatic chiaroscuro lighting, selective warm accents, shallow depth of field. Shrouded figure in dark robes with hourglass and scythe pendant visible; mysterious face partially hidden in shadows, holding a list of names; dark foggy night background with distant city lights creating soft amber glows through the mist, chilling and inevitable presence, 50mm portrait.",
     "negative_prompt": "low quality, blurry, inappropriate content, violence, gore, distorted proportions, unrealistic textures, oversaturated colors, poorly drawn features, asymmetrical when should be symmetrical, floating disconnected parts, inconsistent lighting, pixelated, artifacts, bright lighting, daylight, clear sky",
-    "tags": ["death", "robes", "hourglass", "scythe", "list of names", "inevitable", "chilling", "mysterious", "foggy night", "city lights"]
+    "tags": [
+      "death",
+      "robes",
+      "hourglass",
+      "scythe",
+      "list of names",
+      "inevitable",
+      "chilling",
+      "mysterious",
+      "foggy night",
+      "city lights"
+    ]
   }
 ]

@@ -17,7 +17,7 @@ export interface GameConstants {
   FUEL_COST_SHORTCUT: number;
   FUEL_COST_SCENIC: number;
   FUEL_COST_POLICE: number;
-  // Route time costs  
+  // Route time costs
   TIME_COST_NORMAL: number;
   TIME_COST_SHORTCUT: number;
   TIME_COST_SCENIC: number;

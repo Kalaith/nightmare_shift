@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import type { Guideline, Passenger, GameState, DetectedTell } from '../../../types/game';
-import { GuidelineEngine } from '../../../services/guidelineEngine';
-import Portrait from '../../common/Portrait/Portrait';
-import styles from './GuidelineChoice.module.css';
+import React, { useState, useEffect } from "react";
+import type {
+  Guideline,
+  Passenger,
+  GameState,
+  DetectedTell,
+} from "../../../types/game";
+import { GuidelineEngine } from "../../../services/guidelineEngine";
+import Portrait from "../../common/Portrait/Portrait";
+import styles from "./GuidelineChoice.module.css";
 
 interface GuidelineChoiceProps {
   guideline: Guideline;
   passenger: Passenger;
   gameState: GameState;
-  onChoice: (action: 'follow' | 'break', reasoning?: string) => void;
+  onChoice: (action: "follow" | "break", reasoning?: string) => void;
   isVisible: boolean;
 }
 
@@ -17,26 +22,33 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
   passenger,
   gameState,
   onChoice,
-  isVisible
+  isVisible,
 }) => {
   const [detectedTells, setDetectedTells] = useState<DetectedTell[]>([]);
-  const [playerReasoning, setPlayerReasoning] = useState('');
+  const [playerReasoning, setPlayerReasoning] = useState("");
   const [showReasoningInput, setShowReasoningInput] = useState(false);
-  const [pendingChoice, setPendingChoice] = useState<'follow' | 'break' | null>(null);
+  const [pendingChoice, setPendingChoice] = useState<"follow" | "break" | null>(
+    null,
+  );
   const [timeToDecide, setTimeToDecide] = useState(30); // 30 second decision timer
 
   useEffect(() => {
     if (isVisible) {
       // Analyze passenger for tells when component becomes visible
-      const tells = GuidelineEngine.analyzePassenger(passenger, gameState, [guideline]);
+      const tells = GuidelineEngine.analyzePassenger(passenger, gameState, [
+        guideline,
+      ]);
       setDetectedTells(tells);
-      
+
       // Start decision timer
       const timer = setInterval(() => {
-        setTimeToDecide(prev => {
+        setTimeToDecide((prev) => {
           if (prev <= 1) {
             // Auto-follow guideline if time runs out
-            onChoice('follow', 'Time ran out - defaulted to following guideline');
+            onChoice(
+              "follow",
+              "Time ran out - defaulted to following guideline",
+            );
             return 0;
           }
           return prev - 1;
@@ -47,7 +59,7 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
     }
   }, [isVisible, passenger, gameState, guideline, onChoice]);
 
-  const handleChoice = (choice: 'follow' | 'break') => {
+  const handleChoice = (choice: "follow" | "break") => {
     if (showReasoningInput) {
       setPendingChoice(choice);
     } else {
@@ -67,29 +79,46 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
     return styles.timeColorNormal;
   };
 
-  const getTellIntensityIcon = (intensity: 'subtle' | 'moderate' | 'obvious') => {
+  const getTellIntensityIcon = (
+    intensity: "subtle" | "moderate" | "obvious",
+  ) => {
     switch (intensity) {
-      case 'obvious': return '🔴';
-      case 'moderate': return '🟡';
-      case 'subtle': return '🔵';
+      case "obvious":
+        return "🔴";
+      case "moderate":
+        return "🟡";
+      case "subtle":
+        return "🔵";
     }
   };
 
-  const getTellTypeIcon = (type: 'verbal' | 'behavioral' | 'visual' | 'environmental') => {
+  const getTellTypeIcon = (
+    type: "verbal" | "behavioral" | "visual" | "environmental",
+  ) => {
     switch (type) {
-      case 'verbal': return '💬';
-      case 'behavioral': return '🎭';
-      case 'visual': return '👁️';
-      case 'environmental': return '🌫️';
+      case "verbal":
+        return "💬";
+      case "behavioral":
+        return "🎭";
+      case "visual":
+        return "👁️";
+      case "environmental":
+        return "🌫️";
     }
   };
 
   const getReadingDifficulty = () => {
-    const difficulty = GuidelineEngine.calculateReadingDifficulty(passenger, gameState);
-    if (difficulty >= 0.7) return { text: 'Very Hard to Read', color: styles.difficultyVeryHard };
-    if (difficulty >= 0.5) return { text: 'Hard to Read', color: styles.difficultyHard };
-    if (difficulty >= 0.3) return { text: 'Moderate', color: styles.difficultyModerate };
-    return { text: 'Easy to Read', color: styles.difficultyEasy };
+    const difficulty = GuidelineEngine.calculateReadingDifficulty(
+      passenger,
+      gameState,
+    );
+    if (difficulty >= 0.7)
+      return { text: "Very Hard to Read", color: styles.difficultyVeryHard };
+    if (difficulty >= 0.5)
+      return { text: "Hard to Read", color: styles.difficultyHard };
+    if (difficulty >= 0.3)
+      return { text: "Moderate", color: styles.difficultyModerate };
+    return { text: "Easy to Read", color: styles.difficultyEasy };
   };
 
   const readingDifficulty = getReadingDifficulty();
@@ -111,7 +140,9 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
       <div className={styles.guidelineInfo}>
         <h4 className={styles.guidelineTitle}>{guideline.title}</h4>
         <p className={styles.guidelineDescription}>{guideline.description}</p>
-        <div className={`${styles.safetyLevel} ${styles[`safety${guideline.defaultSafety}`]}`}>
+        <div
+          className={`${styles.safetyLevel} ${styles[`safety${guideline.defaultSafety}`]}`}
+        >
           Default Safety: {guideline.defaultSafety.toUpperCase()}
         </div>
       </div>
@@ -119,28 +150,32 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
       {/* Passenger Context */}
       <div className={styles.passengerContext}>
         <div className={styles.passengerHeader}>
-          <Portrait 
+          <Portrait
             passengerName={passenger.name}
             emoji={passenger.emoji}
             size="small"
             className={styles.passengerEmoji}
           />
           <span className={styles.passengerName}>{passenger.name}</span>
-          <div className={`${styles.readingDifficulty} ${readingDifficulty.color}`}>
+          <div
+            className={`${styles.readingDifficulty} ${readingDifficulty.color}`}
+          >
             {readingDifficulty.text}
           </div>
         </div>
-        
+
         {passenger.stressLevel !== undefined && (
           <div className={styles.stressIndicator}>
-            Stress Level: 
+            Stress Level:
             <div className={styles.stressBar}>
-              <div 
-                className={styles.stressLevel} 
+              <div
+                className={styles.stressLevel}
                 style={{ width: `${passenger.stressLevel * 100}%` }}
               />
             </div>
-            <span className={styles.stressValue}>{Math.round(passenger.stressLevel * 100)}%</span>
+            <span className={styles.stressValue}>
+              {Math.round(passenger.stressLevel * 100)}%
+            </span>
           </div>
         )}
       </div>
@@ -151,7 +186,7 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
           <h4 className={styles.tellsTitle}>🔍 What You Notice:</h4>
           <div className={styles.tellsList}>
             {detectedTells.map((detectedTell, index) => (
-              <div 
+              <div
                 key={index}
                 className={`${styles.tell} ${styles[`tell${detectedTell.tell.intensity}`]}`}
               >
@@ -170,7 +205,7 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
                   )}
                   <div className={styles.tellMeta}>
                     {detectedTell.tell.type} • {detectedTell.tell.intensity}
-                    {detectedTell.playerNoticed ? ' • Noticed' : ' • Missed'}
+                    {detectedTell.playerNoticed ? " • Noticed" : " • Missed"}
                   </div>
                 </div>
               </div>
@@ -198,7 +233,7 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
       {/* Choice Buttons */}
       <div className={styles.choiceButtons}>
         <button
-          onClick={() => handleChoice('follow')}
+          onClick={() => handleChoice("follow")}
           className={`${styles.choiceButton} ${styles.followButton}`}
           disabled={!!pendingChoice}
         >
@@ -212,7 +247,7 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
         </button>
 
         <button
-          onClick={() => handleChoice('break')}
+          onClick={() => handleChoice("break")}
           className={`${styles.choiceButton} ${styles.breakButton}`}
           disabled={!!pendingChoice}
         >
@@ -245,7 +280,7 @@ export const GuidelineChoice: React.FC<GuidelineChoiceProps> = ({
             onClick={handleSubmitWithReasoning}
             className={styles.submitButton}
           >
-            Submit {pendingChoice === 'follow' ? 'Follow' : 'Break'} Decision
+            Submit {pendingChoice === "follow" ? "Follow" : "Break"} Decision
           </button>
         </div>
       )}

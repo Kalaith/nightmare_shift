@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import type { InventoryItem, GameState, Passenger } from '../../../types/game';
-import { ItemService } from '../../../services/itemService';
-import styles from './InventoryModal.module.css';
+import React, { useState } from "react";
+import type { InventoryItem, GameState, Passenger } from "../../../types/game";
+import { ItemService } from "../../../services/itemService";
+import styles from "./InventoryModal.module.css";
 
 interface InventoryModalProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
   gameState: _gameState,
   onUseItem,
   onTradeItem,
-  currentPassenger
+  currentPassenger,
 }) => {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showTradeOptions, setShowTradeOptions] = useState(false);
@@ -49,23 +49,33 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
     }
   };
 
-  const getItemTypeIcon = (type: InventoryItem['type']) => {
+  const getItemTypeIcon = (type: InventoryItem["type"]) => {
     switch (type) {
-      case 'protective': return '🛡️';
-      case 'cursed': return '☠️';
-      case 'consumable': return '🧪';
-      case 'tradeable': return '💰';
-      case 'story': return '📜';
-      default: return '❓';
+      case "protective":
+        return "🛡️";
+      case "cursed":
+        return "☠️";
+      case "consumable":
+        return "🧪";
+      case "tradeable":
+        return "💰";
+      case "story":
+        return "📜";
+      default:
+        return "❓";
     }
   };
 
-  const getRarityColor = (rarity: InventoryItem['rarity']) => {
+  const getRarityColor = (rarity: InventoryItem["rarity"]) => {
     switch (rarity) {
-      case 'legendary': return styles.rarityLegendary;
-      case 'rare': return styles.rarityRare;
-      case 'uncommon': return styles.rarityUncommon;
-      default: return styles.rarityCommon;
+      case "legendary":
+        return styles.rarityLegendary;
+      case "rare":
+        return styles.rarityRare;
+      case "uncommon":
+        return styles.rarityUncommon;
+      default:
+        return styles.rarityCommon;
     }
   };
 
@@ -74,9 +84,10 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
     return (item.durability / item.maxDurability) * 100;
   };
 
-  const tradeOptions = selectedItem && currentPassenger 
-    ? ItemService.getTradeOptions(selectedItem, currentPassenger) 
-    : [];
+  const tradeOptions =
+    selectedItem && currentPassenger
+      ? ItemService.getTradeOptions(selectedItem, currentPassenger)
+      : [];
 
   return (
     <div className={styles.modalOverlay}>
@@ -85,8 +96,8 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
           <h2 className={styles.modalTitle}>
             🎒 Inventory ({inventory.length} items)
           </h2>
-          <button 
-            className={styles.closeButton} 
+          <button
+            className={styles.closeButton}
             onClick={onClose}
             aria-label="Close inventory"
           >
@@ -103,7 +114,7 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
               <strong>Trading: {selectedItem.name}</strong>
               <p>{selectedItem.description}</p>
             </div>
-            
+
             <div className={styles.tradeOptions}>
               {tradeOptions.map((option, index) => (
                 <div key={index} className={styles.tradeOption}>
@@ -121,7 +132,7 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                 </div>
               ))}
             </div>
-            
+
             <button
               className={styles.cancelTradeButton}
               onClick={() => {
@@ -148,11 +159,11 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                   const durabilityPercent = getDurabilityPercentage(item);
                   const isDeterioring = durabilityPercent < 50;
                   const isBroken = durabilityPercent <= 0;
-                  
+
                   return (
-                    <div 
-                      key={item.id} 
-                      className={`${styles.inventoryItem} ${isBroken ? styles.brokenItem : ''}`}
+                    <div
+                      key={item.id}
+                      className={`${styles.inventoryItem} ${isBroken ? styles.brokenItem : ""}`}
                     >
                       <div className={styles.itemHeader}>
                         <div className={styles.itemTitle}>
@@ -160,7 +171,9 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                             {getItemTypeIcon(item.type)}
                           </span>
                           <span className={styles.itemName}>{item.name}</span>
-                          <span className={`${styles.rarityBadge} ${getRarityColor(item.rarity)}`}>
+                          <span
+                            className={`${styles.rarityBadge} ${getRarityColor(item.rarity)}`}
+                          >
                             {item.rarity}
                           </span>
                         </div>
@@ -171,7 +184,9 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                         </div>
                       </div>
 
-                      <p className={styles.itemDescription}>{item.description}</p>
+                      <p className={styles.itemDescription}>
+                        {item.description}
+                      </p>
 
                       {/* Durability bar */}
                       {item.durability && item.maxDurability && (
@@ -180,9 +195,9 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                             Condition: {item.durability}/{item.maxDurability}
                           </div>
                           <div className={styles.durabilityBar}>
-                            <div 
+                            <div
                               className={`${styles.durabilityFill} ${
-                                isDeterioring ? styles.durabilityLow : ''
+                                isDeterioring ? styles.durabilityLow : ""
                               }`}
                               style={{ width: `${durabilityPercent}%` }}
                             />
@@ -196,8 +211,12 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                           <strong>Effects:</strong>
                           {item.effects.map((effect, index) => (
                             <span key={index} className={styles.effect}>
-                              {effect.type.replace('_', ' ')}: {effect.value > 0 ? '+' : ''}{effect.value}
-                              {effect.duration ? ` (${effect.duration}min)` : ''}
+                              {effect.type.replace("_", " ")}:{" "}
+                              {effect.value > 0 ? "+" : ""}
+                              {effect.value}
+                              {effect.duration
+                                ? ` (${effect.duration}min)`
+                                : ""}
                             </span>
                           ))}
                         </div>
@@ -206,10 +225,12 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                       {/* Curse warning */}
                       {item.cursedProperties && (
                         <div className={styles.curseWarning}>
-                          ⚠️ Cursed: {item.cursedProperties.penaltyType.replace('_', ' ')}
+                          ⚠️ Cursed:{" "}
+                          {item.cursedProperties.penaltyType.replace("_", " ")}
                           {item.cursedProperties.canBeRemoved && (
                             <span className={styles.curseRemoval}>
-                              (Can be removed: {item.cursedProperties.removalCondition})
+                              (Can be removed:{" "}
+                              {item.cursedProperties.removalCondition})
                             </span>
                           )}
                         </div>
@@ -218,10 +239,15 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                       {/* Protection info */}
                       {item.protectiveProperties && (
                         <div className={styles.protectionInfo}>
-                          🛡️ Protection: {item.protectiveProperties.protectionType.replace('_', ' ')}
+                          🛡️ Protection:{" "}
+                          {item.protectiveProperties.protectionType.replace(
+                            "_",
+                            " ",
+                          )}
                           {item.protectiveProperties.usesRemaining && (
                             <span className={styles.usesRemaining}>
-                              ({item.protectiveProperties.usesRemaining} uses left)
+                              ({item.protectiveProperties.usesRemaining} uses
+                              left)
                             </span>
                           )}
                         </div>
@@ -237,16 +263,17 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                             Use
                           </button>
                         )}
-                        
-                        {item.canTrade && currentPassenger && 
-                         ItemService.canTradeWith(item, currentPassenger) && (
-                          <button
-                            className={styles.tradeButton}
-                            onClick={() => handleTradeItem(item)}
-                          >
-                            Trade with {currentPassenger.name}
-                          </button>
-                        )}
+
+                        {item.canTrade &&
+                          currentPassenger &&
+                          ItemService.canTradeWith(item, currentPassenger) && (
+                            <button
+                              className={styles.tradeButton}
+                              onClick={() => handleTradeItem(item)}
+                            >
+                              Trade with {currentPassenger.name}
+                            </button>
+                          )}
 
                         {item.backstoryItem && (
                           <span className={styles.backstoryBadge}>
@@ -263,10 +290,7 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
         )}
 
         <div className={styles.modalActions}>
-          <button 
-            className={styles.actionButton} 
-            onClick={onClose}
-          >
+          <button className={styles.actionButton} onClick={onClose}>
             Close Inventory
           </button>
         </div>

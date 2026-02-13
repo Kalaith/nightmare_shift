@@ -427,20 +427,20 @@
     flex-direction: column;
     gap: 0.75rem;
   }
-  
+
   .timeInfo {
     border: none;
     padding: 0;
   }
-  
+
   .detailedDisplay {
     grid-template-columns: 1fr;
   }
-  
+
   .effectsGrid {
     grid-template-columns: 1fr;
   }
-  
+
   .seasonGrid {
     grid-template-columns: 1fr;
   }
@@ -464,7 +464,8 @@
 
 /* Pulsing animation for hazard alerts */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

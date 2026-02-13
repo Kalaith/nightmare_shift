@@ -1,7 +1,7 @@
-import React from 'react';
-import type { GameState, Passenger, InventoryItem } from '../../../types/game';
-import Portrait from '../../common/Portrait/Portrait';
-import styles from './DropOffState.module.css';
+import React from "react";
+import type { GameState, Passenger, InventoryItem } from "../../../types/game";
+import Portrait from "../../common/Portrait/Portrait";
+import styles from "./DropOffState.module.css";
 
 interface DropOffStateProps {
   gameState: GameState;
@@ -21,10 +21,11 @@ export const DropOffState: React.FC<DropOffStateProps> = ({
   fareEarned,
   itemsReceived,
   backstoryUnlocked,
-  onContinue
+  onContinue,
 }) => {
   const getRideQualityText = () => {
-    if (fareEarned >= completedPassenger.fare + 5) return "⭐⭐⭐ Exceptional Service";
+    if (fareEarned >= completedPassenger.fare + 5)
+      return "⭐⭐⭐ Exceptional Service";
     if (fareEarned >= completedPassenger.fare) return "⭐⭐ Good Service";
     if (fareEarned >= completedPassenger.fare - 5) return "⭐ Adequate Service";
     return "⚠️ Poor Service";
@@ -43,12 +44,11 @@ export const DropOffState: React.FC<DropOffStateProps> = ({
       <div className={styles.compactHeader}>
         <div className={styles.rideInfo}>
           <h2 className={styles.title}>🏁 Ride Completed</h2>
-          <p className={styles.destination}>Arrived at {completedPassenger.destination}</p>
+          <p className={styles.destination}>
+            Arrived at {completedPassenger.destination}
+          </p>
         </div>
-        <button 
-          onClick={onContinue}
-          className={styles.continueButton}
-        >
+        <button onClick={onContinue} className={styles.continueButton}>
           Continue Driving
         </button>
       </div>
@@ -60,17 +60,21 @@ export const DropOffState: React.FC<DropOffStateProps> = ({
           {/* Passenger Feedback */}
           <div className={styles.passengerFeedback}>
             <div className={styles.passengerInfo}>
-              <Portrait 
+              <Portrait
                 passengerName={completedPassenger.name}
                 emoji={completedPassenger.emoji}
                 size="small"
               />
               <div>
-                <h3 className={styles.passengerName}>{completedPassenger.name}</h3>
+                <h3 className={styles.passengerName}>
+                  {completedPassenger.name}
+                </h3>
                 <p className={styles.fareInfo}>
                   Expected: ${completedPassenger.fare} • Earned: ${fareEarned}
                 </p>
-                <div className={`${styles.serviceRating} ${getRideQualityClass()}`}>
+                <div
+                  className={`${styles.serviceRating} ${getRideQualityClass()}`}
+                >
                   {getRideQualityText()}
                 </div>
               </div>
@@ -82,14 +86,18 @@ export const DropOffState: React.FC<DropOffStateProps> = ({
             <div className={styles.statusItem}>
               <span className={styles.statusIcon}>💰</span>
               <div className={styles.statusInfo}>
-                <span className={styles.statusValue}>${gameState.earnings}</span>
+                <span className={styles.statusValue}>
+                  ${gameState.earnings}
+                </span>
                 <span className={styles.statusLabel}>Total Earnings</span>
               </div>
             </div>
             <div className={styles.statusItem}>
               <span className={styles.statusIcon}>🚗</span>
               <div className={styles.statusInfo}>
-                <span className={styles.statusValue}>{gameState.ridesCompleted}</span>
+                <span className={styles.statusValue}>
+                  {gameState.ridesCompleted}
+                </span>
                 <span className={styles.statusLabel}>Rides Completed</span>
               </div>
             </div>
@@ -103,7 +111,9 @@ export const DropOffState: React.FC<DropOffStateProps> = ({
             <div className={styles.statusItem}>
               <span className={styles.statusIcon}>⏰</span>
               <div className={styles.statusInfo}>
-                <span className={styles.statusValue}>{Math.floor(gameState.timeRemaining)}</span>
+                <span className={styles.statusValue}>
+                  {Math.floor(gameState.timeRemaining)}
+                </span>
                 <span className={styles.statusLabel}>Minutes Left</span>
               </div>
             </div>
@@ -128,7 +138,10 @@ export const DropOffState: React.FC<DropOffStateProps> = ({
                       <div className={styles.cursedWarning}>⚠️ Unsettling</div>
                     )}
                     {item.protectiveProperties && (
-                      <div className={styles.protectiveInfo}>🛡️ Protective ({item.protectiveProperties.usesRemaining} uses)</div>
+                      <div className={styles.protectiveInfo}>
+                        🛡️ Protective ({item.protectiveProperties.usesRemaining}{" "}
+                        uses)
+                      </div>
                     )}
                   </div>
                 ))}
@@ -159,7 +172,8 @@ export const DropOffState: React.FC<DropOffStateProps> = ({
           {itemsReceived.length === 0 && !backstoryUnlocked && (
             <div className={styles.noExtrasSection}>
               <p className={styles.noExtrasText}>
-                The passenger gathered their belongings and left without a trace...
+                The passenger gathered their belongings and left without a
+                trace...
               </p>
             </div>
           )}

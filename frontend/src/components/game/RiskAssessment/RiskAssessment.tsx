@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import type { GameState, Passenger, Guideline, DetectedTell } from '../../../types/game';
-import styles from './RiskAssessment.module.css';
+import React, { useState, useEffect } from "react";
+import type {
+  GameState,
+  Passenger,
+  Guideline,
+  DetectedTell,
+} from "../../../types/game";
+import styles from "./RiskAssessment.module.css";
 
 interface RiskAssessmentProps {
   gameState: GameState;
@@ -24,7 +29,7 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
   passenger,
   guidelines,
   detectedTells,
-  isVisible
+  isVisible,
 }) => {
   const [analysis, setAnalysis] = useState<RiskAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -37,16 +42,16 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
     }
 
     setIsAnalyzing(true);
-    
+
     // Simulate analysis delay for tension
     const analysisDelay = 1000 + Math.random() * 1500;
-    
+
     setTimeout(() => {
       const newAnalysis = calculateRiskAnalysis(
         gameState,
         passenger,
         guidelines,
-        detectedTells
+        detectedTells,
       );
       setAnalysis(newAnalysis);
       setIsAnalyzing(false);
@@ -57,56 +62,70 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
     gameState: GameState,
     passenger: Passenger,
     guidelines: Guideline[],
-    tells: DetectedTell[]
+    tells: DetectedTell[],
   ): RiskAnalysis => {
     const playerTrust = gameState.playerTrust || 0;
     const passengerStress = passenger.stressLevel || 0.5;
     const deceptionLevel = passenger.deceptionLevel || 0;
-    
+
     // Calculate base trustworthiness
     let trustworthiness = 0.5;
-    if (passenger.supernatural.includes('Ghost')) trustworthiness -= 0.2;
-    if (passenger.supernatural.includes('child')) trustworthiness += 0.3;
+    if (passenger.supernatural.includes("Ghost")) trustworthiness -= 0.2;
+    if (passenger.supernatural.includes("child")) trustworthiness += 0.3;
     if (deceptionLevel > 0) trustworthiness -= deceptionLevel;
 
     // Analyze tells for conflicting signals
-    const obviousTells = tells.filter(t => t.tell.intensity === 'obvious');
-    const subtleTells = tells.filter(t => t.tell.intensity === 'subtle');
-    const conflictingSignals = obviousTells.length > 0 && subtleTells.length > 0;
-    
+    const obviousTells = tells.filter((t) => t.tell.intensity === "obvious");
+    const subtleTells = tells.filter((t) => t.tell.intensity === "subtle");
+    const conflictingSignals =
+      obviousTells.length > 0 && subtleTells.length > 0;
+
     // Calculate deception likelihood
-    const deceptionLikelihood = Math.min(0.9, 
-      deceptionLevel + 
-      (conflictingSignals ? 0.3 : 0) + 
-      (passengerStress > 0.7 ? 0.2 : 0)
+    const deceptionLikelihood = Math.min(
+      0.9,
+      deceptionLevel +
+        (conflictingSignals ? 0.3 : 0) +
+        (passengerStress > 0.7 ? 0.2 : 0),
     );
 
     // Calculate overall risk
-    const tellsReliability = tells.length > 0 
-      ? tells.reduce((sum, t) => sum + t.tell.reliability, 0) / tells.length 
-      : 0.5;
-    
-    const overallRisk = Math.min(0.95, Math.max(0.05,
-      (1 - trustworthiness) * 0.4 +
-      deceptionLikelihood * 0.3 +
-      (1 - tellsReliability) * 0.2 +
-      (1 - playerTrust) * 0.1
-    ));
+    const tellsReliability =
+      tells.length > 0
+        ? tells.reduce((sum, t) => sum + t.tell.reliability, 0) / tells.length
+        : 0.5;
+
+    const overallRisk = Math.min(
+      0.95,
+      Math.max(
+        0.05,
+        (1 - trustworthiness) * 0.4 +
+          deceptionLikelihood * 0.3 +
+          (1 - tellsReliability) * 0.2 +
+          (1 - playerTrust) * 0.1,
+      ),
+    );
 
     // Calculate uncertainty
-    const uncertaintyLevel = Math.min(0.9,
+    const uncertaintyLevel = Math.min(
+      0.9,
       (conflictingSignals ? 0.4 : 0) +
-      (tells.filter(t => !t.playerNoticed).length / Math.max(1, tells.length)) * 0.3 +
-      (Math.abs(passengerStress - 0.5)) * 0.3
+        (tells.filter((t) => !t.playerNoticed).length /
+          Math.max(1, tells.length)) *
+          0.3 +
+        Math.abs(passengerStress - 0.5) * 0.3,
     );
 
     // Generate recommendations
     const recommendations: string[] = [];
-    
+
     if (overallRisk > 0.7) {
-      recommendations.push("⚠️ High risk passenger - consider following guidelines strictly");
+      recommendations.push(
+        "⚠️ High risk passenger - consider following guidelines strictly",
+      );
     } else if (overallRisk < 0.3) {
-      recommendations.push("✅ Relatively safe passenger - exception scenarios may apply");
+      recommendations.push(
+        "✅ Relatively safe passenger - exception scenarios may apply",
+      );
     }
 
     if (deceptionLikelihood > 0.6) {
@@ -114,7 +133,9 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
     }
 
     if (conflictingSignals) {
-      recommendations.push("🔄 Conflicting signals detected - analyze carefully");
+      recommendations.push(
+        "🔄 Conflicting signals detected - analyze carefully",
+      );
     }
 
     if (uncertaintyLevel > 0.6) {
@@ -122,7 +143,9 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
     }
 
     if (playerTrust < 0.5) {
-      recommendations.push("📈 Improve perception skill through correct decisions");
+      recommendations.push(
+        "📈 Improve perception skill through correct decisions",
+      );
     }
 
     return {
@@ -131,7 +154,7 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
       deceptionLikelihood,
       recommendations,
       conflictingSignals,
-      uncertaintyLevel
+      uncertaintyLevel,
     };
   };
 
@@ -142,18 +165,18 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
   };
 
   const getRiskLabel = (risk: number) => {
-    if (risk >= 0.8) return 'Extreme Risk';
-    if (risk >= 0.6) return 'High Risk';
-    if (risk >= 0.4) return 'Moderate Risk';
-    if (risk >= 0.2) return 'Low Risk';
-    return 'Minimal Risk';
+    if (risk >= 0.8) return "Extreme Risk";
+    if (risk >= 0.6) return "High Risk";
+    if (risk >= 0.4) return "Moderate Risk";
+    if (risk >= 0.2) return "Low Risk";
+    return "Minimal Risk";
   };
 
   const getUncertaintyIcon = (uncertainty: number) => {
-    if (uncertainty >= 0.7) return '❓❓❓';
-    if (uncertainty >= 0.5) return '❓❓';
-    if (uncertainty >= 0.3) return '❓';
-    return '✓';
+    if (uncertainty >= 0.7) return "❓❓❓";
+    if (uncertainty >= 0.5) return "❓❓";
+    if (uncertainty >= 0.3) return "❓";
+    return "✓";
   };
 
   if (!isVisible) return null;
@@ -170,7 +193,7 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
           onClick={() => setShowDetails(!showDetails)}
           disabled={isAnalyzing}
         >
-          {showDetails ? '👁️‍🗨️ Hide' : '👁️ Details'}
+          {showDetails ? "👁️‍🗨️ Hide" : "👁️ Details"}
         </button>
       </div>
 
@@ -186,12 +209,14 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
             <div className={styles.riskMeter}>
               <div className={styles.riskLabel}>Overall Risk</div>
               <div className={styles.riskBar}>
-                <div 
+                <div
                   className={`${styles.riskFill} ${getRiskColor(analysis.overallRisk)}`}
                   style={{ width: `${analysis.overallRisk * 100}%` }}
                 />
               </div>
-              <div className={`${styles.riskValue} ${getRiskColor(analysis.overallRisk)}`}>
+              <div
+                className={`${styles.riskValue} ${getRiskColor(analysis.overallRisk)}`}
+              >
                 {getRiskLabel(analysis.overallRisk)}
               </div>
             </div>
@@ -212,12 +237,16 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
               <span className={styles.indicatorIcon}>🤝</span>
               <span className={styles.indicatorLabel}>Trust</span>
               <div className={styles.indicatorBar}>
-                <div 
+                <div
                   className={styles.indicatorFill}
-                  style={{ 
+                  style={{
                     width: `${analysis.trustworthiness * 100}%`,
-                    backgroundColor: analysis.trustworthiness > 0.6 ? '#22c55e' : 
-                                   analysis.trustworthiness > 0.3 ? '#fbbf24' : '#ef4444'
+                    backgroundColor:
+                      analysis.trustworthiness > 0.6
+                        ? "#22c55e"
+                        : analysis.trustworthiness > 0.3
+                          ? "#fbbf24"
+                          : "#ef4444",
                   }}
                 />
               </div>
@@ -227,12 +256,16 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
               <span className={styles.indicatorIcon}>🎭</span>
               <span className={styles.indicatorLabel}>Deception</span>
               <div className={styles.indicatorBar}>
-                <div 
+                <div
                   className={styles.indicatorFill}
-                  style={{ 
+                  style={{
                     width: `${analysis.deceptionLikelihood * 100}%`,
-                    backgroundColor: analysis.deceptionLikelihood > 0.6 ? '#ef4444' : 
-                                   analysis.deceptionLikelihood > 0.3 ? '#fbbf24' : '#22c55e'
+                    backgroundColor:
+                      analysis.deceptionLikelihood > 0.6
+                        ? "#ef4444"
+                        : analysis.deceptionLikelihood > 0.3
+                          ? "#fbbf24"
+                          : "#22c55e",
                   }}
                 />
               </div>
@@ -267,8 +300,12 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
                 <h6 className={styles.analysisTitle}>Passenger Profile</h6>
                 <div className={styles.analysisGrid}>
                   <div className={styles.analysisItem}>
-                    <span className={styles.analysisLabel}>Supernatural Type:</span>
-                    <span className={styles.analysisValue}>{passenger.supernatural}</span>
+                    <span className={styles.analysisLabel}>
+                      Supernatural Type:
+                    </span>
+                    <span className={styles.analysisValue}>
+                      {passenger.supernatural}
+                    </span>
                   </div>
                   <div className={styles.analysisItem}>
                     <span className={styles.analysisLabel}>Stress Level:</span>
@@ -277,7 +314,9 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
                     </span>
                   </div>
                   <div className={styles.analysisItem}>
-                    <span className={styles.analysisLabel}>Deception Risk:</span>
+                    <span className={styles.analysisLabel}>
+                      Deception Risk:
+                    </span>
                     <span className={styles.analysisValue}>
                       {Math.round((passenger.deceptionLevel || 0) * 100)}%
                     </span>
@@ -289,9 +328,22 @@ export const RiskAssessment: React.FC<RiskAssessmentProps> = ({
                 <h6 className={styles.analysisTitle}>Tell Analysis</h6>
                 <div className={styles.tellAnalysis}>
                   <span>Total: {detectedTells.length}</span>
-                  <span>Noticed: {detectedTells.filter(t => t.playerNoticed).length}</span>
-                  <span>Obvious: {detectedTells.filter(t => t.tell.intensity === 'obvious').length}</span>
-                  <span>Exceptions: {detectedTells.filter(t => t.exceptionId).length}</span>
+                  <span>
+                    Noticed:{" "}
+                    {detectedTells.filter((t) => t.playerNoticed).length}
+                  </span>
+                  <span>
+                    Obvious:{" "}
+                    {
+                      detectedTells.filter(
+                        (t) => t.tell.intensity === "obvious",
+                      ).length
+                    }
+                  </span>
+                  <span>
+                    Exceptions:{" "}
+                    {detectedTells.filter((t) => t.exceptionId).length}
+                  </span>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import type { PlayerStats } from '../types/game';
+import type { PlayerStats } from "../types/game";
 
 export interface ShiftData {
   timeSpent: number;
@@ -12,24 +12,35 @@ export interface ShiftData {
 }
 
 export const createStatsUpdater = (
-  playerStats: PlayerStats, 
+  playerStats: PlayerStats,
   updatePlayerStats: (updates: Partial<PlayerStats>) => void,
-  addToLeaderboard: (data: ShiftData) => void
+  addToLeaderboard: (data: ShiftData) => void,
 ) => {
   return (successful: boolean, shiftData: ShiftData) => {
     const baseUpdates = {
-      totalTimePlayedMinutes: playerStats.totalTimePlayedMinutes + shiftData.timeSpent,
-      totalRidesCompleted: playerStats.totalRidesCompleted + shiftData.ridesCompleted,
-      totalEarnings: playerStats.totalEarnings + shiftData.earnings
+      totalTimePlayedMinutes:
+        playerStats.totalTimePlayedMinutes + shiftData.timeSpent,
+      totalRidesCompleted:
+        playerStats.totalRidesCompleted + shiftData.ridesCompleted,
+      totalEarnings: playerStats.totalEarnings + shiftData.earnings,
     };
 
     if (successful) {
       updatePlayerStats({
         ...baseUpdates,
         totalShiftsCompleted: playerStats.totalShiftsCompleted + 1,
-        bestShiftEarnings: Math.max(playerStats.bestShiftEarnings, shiftData.earnings),
-        bestShiftRides: Math.max(playerStats.bestShiftRides, shiftData.ridesCompleted),
-        longestShiftMinutes: Math.max(playerStats.longestShiftMinutes, shiftData.timeSpent)
+        bestShiftEarnings: Math.max(
+          playerStats.bestShiftEarnings,
+          shiftData.earnings,
+        ),
+        bestShiftRides: Math.max(
+          playerStats.bestShiftRides,
+          shiftData.ridesCompleted,
+        ),
+        longestShiftMinutes: Math.max(
+          playerStats.longestShiftMinutes,
+          shiftData.timeSpent,
+        ),
       });
     } else {
       updatePlayerStats(baseUpdates);

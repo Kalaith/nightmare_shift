@@ -11,8 +11,9 @@ npm run test:balance
 ```
 
 This will run 100 simulations across 5 different strategies and display:
+
 - ✅ Real-time progress bar
-- 📊 Live success rates per strategy  
+- 📊 Live success rates per strategy
 - ⚡ Performance metrics
 - 📈 Detailed balance analysis
 
@@ -80,10 +81,11 @@ Strategy Status:
 Edit `src/testing/runBalanceTests.ts` to adjust:
 
 ```typescript
-const TOTAL_RUNS = 100;  // Number of simulations
-const STRATEGIES: Strategy[] = [  // Which strategies to test
-  'shortcut_spam',
-  'strategic',
+const TOTAL_RUNS = 100; // Number of simulations
+const STRATEGIES: Strategy[] = [
+  // Which strategies to test
+  "shortcut_spam",
+  "strategic",
   // ... add or remove strategies
 ];
 ```
@@ -113,6 +115,7 @@ The final report shows:
 3. **Balance Analysis** - Automated assessment of game balance
 
 Look for:
+
 - Strategic play should be most rewarding
 - Shortcut spam should fail consistently
 - Balanced approaches should be viable but not optimal
@@ -120,10 +123,12 @@ Look for:
 ## Troubleshooting
 
 **Tests run too slowly:**
+
 - Reduce `TOTAL_RUNS` to 50 or 25 for faster testing
 - Remove strategies you don't need to test
 
 **Results seem wrong:**
+
 - Check that balance constants in `gameBalance.ts` are correct
 - Verify fare calculation in `useGameActions.ts`
 - Review route cost calculation in `reputationService.ts`

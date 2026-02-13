@@ -5,6 +5,7 @@ A horror-themed taxi driving survival game built with React, TypeScript, and Tai
 ## 🎮 Current Status: **FULLY MIGRATED TO TYPESCRIPT**
 
 The application has been completely migrated from JavaScript to TypeScript with:
+
 - ✅ **Type Safety**: Full TypeScript implementation with strict compiler settings
 - ✅ **Modern Build**: Vite 7.1 with optimized TypeScript compilation
 - ✅ **Code Quality**: ESLint with TypeScript support and React hooks validation
@@ -19,7 +20,7 @@ npm install
 # Start development server
 npm run dev
 
-# Build for production  
+# Build for production
 npm run build
 
 # Run linting

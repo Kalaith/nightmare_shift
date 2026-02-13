@@ -157,7 +157,8 @@
   flex-shrink: 0;
 }
 
-.typeIcon, .intensityIcon {
+.typeIcon,
+.intensityIcon {
   font-size: 16px;
   display: block;
 }
@@ -249,7 +250,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -292,27 +294,27 @@
     padding: 12px;
     margin: 8px 0;
   }
-  
+
   .header {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .trustLevel {
     align-self: stretch;
     justify-content: space-between;
   }
-  
+
   .tellItem {
     padding: 10px;
     gap: 10px;
   }
-  
+
   .summary {
     gap: 8px;
   }
-  
+
   .summaryValue {
     font-size: 16px;
   }
@@ -337,12 +339,12 @@
   .tellItem {
     border-left-width: 4px;
   }
-  
+
   .tellDescription {
     color: #ffffff;
     font-weight: 500;
   }
-  
+
   .tellPhrase {
     background: rgba(251, 191, 36, 0.2);
     border: 1px solid #fbbf24;

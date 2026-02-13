@@ -1,5 +1,5 @@
-import { STORAGE_KEYS } from '../data/constants';
-import type { PlayerStats, LeaderboardEntry, SaveData } from '../types/game';
+import { STORAGE_KEYS } from "../data/constants";
+import type { PlayerStats, LeaderboardEntry, SaveData } from "../types/game";
 
 const LocalStorage = {
   save: (key: string, data: unknown): void => {
@@ -29,13 +29,13 @@ const LocalStorage = {
 
   clear: (): void => {
     try {
-      Object.values(STORAGE_KEYS).forEach(key => {
+      Object.values(STORAGE_KEYS).forEach((key) => {
         localStorage.removeItem(key);
       });
     } catch {
       // Silent fail
     }
-  }
+  },
 };
 
 const getDefaultPlayerStats = (): PlayerStats => ({
@@ -58,17 +58,24 @@ const getDefaultPlayerStats = (): PlayerStats => ({
   bankBalance: 0,
   loreFragments: 0,
   unlockedSkills: [],
-  almanacProgress: {}
+  almanacProgress: {},
 });
 
 export class PlayerStatsService {
   static getStats(): PlayerStats {
-    return LocalStorage.load(STORAGE_KEYS.PLAYER_STATS, getDefaultPlayerStats());
+    return LocalStorage.load(
+      STORAGE_KEYS.PLAYER_STATS,
+      getDefaultPlayerStats(),
+    );
   }
 
   static updateStats(updates: Partial<PlayerStats>): void {
     const currentStats = this.getStats();
-    const updatedStats = { ...currentStats, ...updates, lastPlayDate: Date.now() };
+    const updatedStats = {
+      ...currentStats,
+      ...updates,
+      lastPlayDate: Date.now(),
+    };
     LocalStorage.save(STORAGE_KEYS.PLAYER_STATS, updatedStats);
   }
 

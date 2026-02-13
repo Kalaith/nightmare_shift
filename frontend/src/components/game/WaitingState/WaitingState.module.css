@@ -12,26 +12,26 @@
 .title {
   font-size: 2rem;
   font-weight: bold;
-  color: #5EEAD4;
+  color: #5eead4;
   margin-bottom: 1rem;
 }
 
 .description {
-  color: #D1D5DB;
+  color: #d1d5db;
   font-size: 1.1rem;
   line-height: 1.6;
 }
 
 .fuelStatus {
   background: rgba(55, 65, 81, 0.5);
-  border: 1px solid #4B5563;
+  border: 1px solid #4b5563;
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .fuelStatusCritical {
-  border-color: #DC2626;
+  border-color: #dc2626;
   background: rgba(185, 28, 28, 0.1);
 }
 
@@ -50,7 +50,7 @@
 .fuelValue {
   font-weight: bold;
   font-size: 1.2rem;
-  color: #FBBF24;
+  color: #fbbf24;
 }
 
 .fuelBarContainer {
@@ -68,24 +68,24 @@
 }
 
 .fuelGood {
-  background: linear-gradient(90deg, #10B981, #34D399);
+  background: linear-gradient(90deg, #10b981, #34d399);
 }
 
 .fuelMedium {
-  background: linear-gradient(90deg, #F59E0B, #FBBF24);
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
 }
 
 .fuelLow {
-  background: linear-gradient(90deg, #EF4444, #F87171);
+  background: linear-gradient(90deg, #ef4444, #f87171);
 }
 
 .fuelCritical {
-  background: linear-gradient(90deg, #DC2626, #EF4444);
+  background: linear-gradient(90deg, #dc2626, #ef4444);
   animation: pulse 2s infinite;
 }
 
 .fuelWarning {
-  color: #FCA5A5;
+  color: #fca5a5;
   font-weight: 600;
   text-align: center;
   margin: 0;
@@ -101,7 +101,7 @@
   align-items: center;
   gap: 0.75rem;
   background: #374151;
-  border: 1px solid #4B5563;
+  border: 1px solid #4b5563;
   color: white;
   padding: 1rem 1.5rem;
   border-radius: 0.5rem;
@@ -111,19 +111,19 @@
 }
 
 .inventoryButton:hover {
-  background: #4B5563;
+  background: #4b5563;
   transform: translateY(-1px);
 }
 
 .fuelSection {
   background: rgba(55, 65, 81, 0.3);
-  border: 1px solid #4B5563;
+  border: 1px solid #4b5563;
   border-radius: 0.75rem;
   padding: 1.5rem;
 }
 
 .sectionTitle {
-  color: #5EEAD4;
+  color: #5eead4;
   font-size: 1.25rem;
   font-weight: bold;
   margin: 0 0 1rem 0;
@@ -149,7 +149,7 @@
 
 .fullRefuel {
   background: #059669;
-  border-color: #10B981;
+  border-color: #10b981;
   color: white;
 }
 
@@ -159,20 +159,20 @@
 }
 
 .partialRefuel {
-  background: #D97706;
-  border-color: #F59E0B;
+  background: #d97706;
+  border-color: #f59e0b;
   color: white;
 }
 
 .partialRefuel:hover:not(:disabled) {
-  background: #B45309;
+  background: #b45309;
   transform: translateY(-1px);
 }
 
 .fuelButton:disabled {
   background: #374151;
-  border-color: #4B5563;
-  color: #9CA3AF;
+  border-color: #4b5563;
+  color: #9ca3af;
   cursor: not-allowed;
   transform: none;
 }
@@ -201,7 +201,7 @@
 .buttonDisabled {
   display: block;
   font-size: 0.875rem;
-  color: #EF4444;
+  color: #ef4444;
   margin-top: 0.25rem;
 }
 
@@ -211,7 +211,7 @@
   justify-content: center;
   gap: 0.75rem;
   background: rgba(16, 185, 129, 0.1);
-  border: 1px solid #10B981;
+  border: 1px solid #10b981;
   border-radius: 0.75rem;
   padding: 1.5rem;
   text-align: center;
@@ -222,21 +222,21 @@
 }
 
 .fuelFullText {
-  color: #34D399;
+  color: #34d399;
   font-weight: 600;
   font-size: 1.1rem;
 }
 
 .tips {
   background: rgba(55, 65, 81, 0.3);
-  border: 1px solid #4B5563;
+  border: 1px solid #4b5563;
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-top: 2rem;
 }
 
 .tipsTitle {
-  color: #FBBF24;
+  color: #fbbf24;
   font-size: 1.1rem;
   font-weight: bold;
   margin: 0 0 1rem 0;
@@ -246,7 +246,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  color: #D1D5DB;
+  color: #d1d5db;
 }
 
 .tipsList li {
@@ -259,12 +259,13 @@
 }
 
 .hazardTip {
-  color: #FBBF24 !important;
+  color: #fbbf24 !important;
   font-weight: 600;
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

@@ -5,14 +5,14 @@ A React component for displaying character portraits with emoji fallback support
 ## Usage
 
 ```tsx
-import Portrait from '../../common/Portrait/Portrait';
+import Portrait from "../../common/Portrait/Portrait";
 
-<Portrait 
+<Portrait
   passengerName="Mrs. Chen"
   emoji="👵"
   size="medium"
   className="custom-class"
-/>
+/>;
 ```
 
 ## Props
@@ -62,7 +62,7 @@ Portrait images should be placed in `/public/nightmare_shift/assets/` with ID-ba
 The Portrait component has been integrated into:
 
 - ✅ Ride Request (GameScreen)
-- ✅ Drop-off Feedback (DropOffState)  
+- ✅ Drop-off Feedback (DropOffState)
 - ✅ Character Database (cards and details)
 - ✅ Guideline Interactions
 - ✅ Guideline Choice dialogs

@@ -1,40 +1,28 @@
-import React from 'react';
-import { SCREENS } from '../data/constants';
-import { LeaderboardService } from '../services/storageService';
-import { gameData } from '../data/gameData';
-import { useGameContext } from '../context/GameContext';
-import { usePlayerContext } from '../context/PlayerContext';
-import { useUIContext } from '../context/UIContext';
+import React from "react";
+import { SCREENS } from "../data/constants";
+import { LeaderboardService } from "../services/storageService";
+import { gameData } from "../data/gameData";
+import { useGameContext } from "../context/GameContext";
+import { usePlayerContext } from "../context/PlayerContext";
+import { useUIContext } from "../context/UIContext";
 
-import LoadingScreen from './screens/LoadingScreen/LoadingScreen';
-import LeaderboardScreen from './screens/LeaderboardScreen/LeaderboardScreen';
-import BriefingScreen from './screens/BriefingScreen/BriefingScreen';
-import GameScreen from './screens/GameScreen/GameScreen';
-import GameOverScreen from './screens/GameOverScreen/GameOverScreen';
-import SuccessScreen from './screens/SuccessScreen/SuccessScreen';
-import AlmanacScreen from './screens/AlmanacScreen/AlmanacScreen';
-import SkillTreeScreen from './screens/SkillTreeScreen/SkillTreeScreen';
-import ErrorBoundary from './ErrorBoundary';
+import LoadingScreen from "./screens/LoadingScreen/LoadingScreen";
+import LeaderboardScreen from "./screens/LeaderboardScreen/LeaderboardScreen";
+import BriefingScreen from "./screens/BriefingScreen/BriefingScreen";
+import GameScreen from "./screens/GameScreen/GameScreen";
+import GameOverScreen from "./screens/GameOverScreen/GameOverScreen";
+import SuccessScreen from "./screens/SuccessScreen/SuccessScreen";
+import AlmanacScreen from "./screens/AlmanacScreen/AlmanacScreen";
+import SkillTreeScreen from "./screens/SkillTreeScreen/SkillTreeScreen";
+import ErrorBoundary from "./ErrorBoundary";
 
 const ScreenRouter: React.FC = () => {
-  const {
-    gameState,
-    startGame,
-    loadGame,
-    startShift,
-    resetGame
-  } = useGameContext();
+  const { gameState, startGame, loadGame, startShift, resetGame } =
+    useGameContext();
 
-  const {
-    playerStats,
-    upgradeKnowledge,
-    purchaseSkill
-  } = usePlayerContext();
+  const { playerStats, upgradeKnowledge, purchaseSkill } = usePlayerContext();
 
-  const {
-    currentScreen,
-    showScreen
-  } = useUIContext();
+  const { currentScreen, showScreen } = useUIContext();
 
   const handleResetAndShow = (screen: string) => {
     resetGame();
@@ -74,17 +62,10 @@ const ScreenRouter: React.FC = () => {
       );
 
     case SCREENS.BRIEFING:
-      return (
-        <BriefingScreen
-          gameState={gameState}
-          onStartShift={startShift}
-        />
-      );
+      return <BriefingScreen gameState={gameState} onStartShift={startShift} />;
 
     case SCREENS.GAME:
-      return (
-        <GameScreen />
-      );
+      return <GameScreen />;
 
     case SCREENS.GAME_OVER:
       return (

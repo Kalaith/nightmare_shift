@@ -11,7 +11,7 @@
 }
 
 .interactionContainer::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -22,8 +22,13 @@
 }
 
 @keyframes phaseFlow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Phase Header */
@@ -116,8 +121,13 @@
 }
 
 @keyframes tick {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .timerText {
@@ -150,8 +160,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .phaseTitle {
@@ -294,8 +308,13 @@
 }
 
 @keyframes glow {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .hintText {
@@ -337,36 +356,36 @@
     padding: 16px;
     margin: 12px 0;
   }
-  
+
   .phaseHeader {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
   }
-  
+
   .phaseIndicator {
     justify-content: center;
   }
-  
+
   .phaseConnector {
     width: 30px;
   }
-  
+
   .passengerInfo {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .passengerEmoji {
     font-size: 40px;
   }
-  
+
   .observationControls {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
   }
-  
+
   .proceedHint {
     justify-content: center;
     text-align: center;
@@ -394,11 +413,11 @@
   .interactionContainer {
     border-width: 3px;
   }
-  
+
   .phaseStep.active .stepNumber {
     border: 2px solid #ffffff;
   }
-  
+
   .guidelineCard {
     border-width: 2px;
   }

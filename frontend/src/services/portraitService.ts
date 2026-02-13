@@ -24,7 +24,7 @@ export class PortraitService {
     "Sister Agnes": 13,
     "Detective Morrison": 14,
     "The Midnight Mayor": 15,
-    "Death's Taxi Driver": 16
+    "Death's Taxi Driver": 16,
   };
 
   /**
@@ -34,7 +34,7 @@ export class PortraitService {
   static getPortraitPath(passengerName: string): string {
     const id = this.passengerIdMap[passengerName];
     if (!id) {
-      return '';
+      return "";
     }
     return `/nightmare_shift/assets/${id}.png`;
   }
@@ -42,7 +42,10 @@ export class PortraitService {
   /**
    * Get portrait with fallback to emoji if image fails to load
    */
-  static getPortraitWithFallback(passengerName: string, emoji: string): {
+  static getPortraitWithFallback(
+    passengerName: string,
+    emoji: string,
+  ): {
     imageSrc: string;
     alt: string;
     fallbackEmoji: string;
@@ -50,7 +53,7 @@ export class PortraitService {
     return {
       imageSrc: this.getPortraitPath(passengerName),
       alt: `${passengerName} portrait`,
-      fallbackEmoji: emoji
+      fallbackEmoji: emoji,
     };
   }
 
@@ -66,7 +69,7 @@ export class PortraitService {
    */
   static getThumbnailPath(passengerName: string): string {
     const id = this.passengerIdMap[passengerName];
-    if (!id) return '';
+    if (!id) return "";
     return `/nightmare_shift/assets/${id}_thumb.png`;
   }
 
@@ -75,7 +78,7 @@ export class PortraitService {
    */
   static getFullSizePath(passengerName: string): string {
     const id = this.passengerIdMap[passengerName];
-    if (!id) return '';
+    if (!id) return "";
     return `/nightmare_shift/assets/${id}_full.png`;
   }
 

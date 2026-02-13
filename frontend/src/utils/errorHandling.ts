@@ -4,30 +4,36 @@
 
 export class GameError extends Error {
   constructor(
-    message: string, 
-    public code: string, 
-    public recoverable: boolean = true
+    message: string,
+    public code: string,
+    public recoverable: boolean = true,
   ) {
     super(message);
-    this.name = 'GameError';
+    this.name = "GameError";
   }
 }
 
 export class ServiceError extends GameError {
-  constructor(message: string, public serviceName: string, public operation: string) {
+  constructor(
+    message: string,
+    public serviceName: string,
+    public operation: string,
+  ) {
     super(message, `${serviceName.toLowerCase()}_${operation}_failed`, true);
-    this.name = 'ServiceError';
+    this.name = "ServiceError";
   }
 }
 
-export type GameResult<T> = {
-  success: true;
-  data: T;
-} | {
-  success: false;
-  error: GameError;
-  fallback?: T;
-};
+export type GameResult<T> =
+  | {
+      success: true;
+      data: T;
+    }
+  | {
+      success: false;
+      error: GameError;
+      fallback?: T;
+    };
 
 export const ErrorHandling = {
   /**
@@ -38,18 +44,19 @@ export const ErrorHandling = {
       const result = fn();
       return { success: true, data: result };
     } catch (error) {
-      const gameError = error instanceof GameError 
-        ? error 
-        : new GameError(
-            error instanceof Error ? error.message : 'Unknown error',
-            errorCode,
-            true
-          );
-      
-      return { 
-        success: false, 
-        error: gameError, 
-        ...(fallback !== undefined && { fallback })
+      const gameError =
+        error instanceof GameError
+          ? error
+          : new GameError(
+              error instanceof Error ? error.message : "Unknown error",
+              errorCode,
+              true,
+            );
+
+      return {
+        success: false,
+        error: gameError,
+        ...(fallback !== undefined && { fallback }),
       };
     }
   },
@@ -58,19 +65,19 @@ export const ErrorHandling = {
    * Safely handles null/undefined values with fallback
    */
   handleNullable: <T>(
-    value: T | null | undefined, 
+    value: T | null | undefined,
     errorMessage: string,
     errorCode: string,
-    fallback?: T
+    fallback?: T,
   ): GameResult<T> => {
     if (value !== null && value !== undefined) {
       return { success: true, data: value };
     }
-    
+
     return {
       success: false,
       error: new GameError(errorMessage, errorCode, true),
-      ...(fallback !== undefined && { fallback })
+      ...(fallback !== undefined && { fallback }),
     };
   },
 
@@ -86,9 +93,13 @@ export const ErrorHandling = {
   /**
    * Creates a service error
    */
-  serviceError: (serviceName: string, operation: string, message: string): ServiceError => {
+  serviceError: (
+    serviceName: string,
+    operation: string,
+    message: string,
+  ): ServiceError => {
     return new ServiceError(message, serviceName, operation);
-  }
+  },
 };
 
 export const GameResultHelpers = {
@@ -122,12 +133,13 @@ export const GameResultHelpers = {
       } catch (error) {
         return {
           success: false,
-          error: error instanceof GameError 
-            ? error 
-            : new GameError('Mapping function failed', 'map_error')
+          error:
+            error instanceof GameError
+              ? error
+              : new GameError("Mapping function failed", "map_error"),
         };
       }
     }
     return result as GameResult<U>;
-  }
+  },
 };
