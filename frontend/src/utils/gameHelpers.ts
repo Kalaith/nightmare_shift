@@ -1,3 +1,4 @@
+
 import type { PlayerStats, GameState } from "../types/game";
 
 export const calculatePlayerExperience = (playerStats: PlayerStats): number => {
@@ -38,13 +39,13 @@ export const getWeightedRandomElement = <T extends Record<string, unknown>>(
   if (!Array.isArray(items) || items.length === 0) return null;
 
   const totalWeight = items.reduce(
-    (sum, item) => sum + (item[weightKey] || 1),
+    (sum, item) => sum + Number(item[weightKey] ?? 1),
     0,
   );
   let random = Math.random() * totalWeight;
 
   for (const item of items) {
-    random -= item[weightKey] || 1;
+    random -= Number(item[weightKey] ?? 1);
     if (random <= 0) return item;
   }
 
