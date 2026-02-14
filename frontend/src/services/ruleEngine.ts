@@ -4,7 +4,7 @@ import type {
   PassengerNeedState,
   Rule,
   RuleEvaluationResult,
-} from "../types/game";
+} from '../types/game';
 
 const STAGE_ORDER: Record<string, number> = {
   calm: 0,
@@ -19,12 +19,12 @@ export class RuleEngine {
     rules: Rule[],
     passenger: Passenger | null,
     needState: PassengerNeedState | null,
-    ruleConfidence: number,
+    ruleConfidence: number
   ): RuleEvaluationResult | null {
     const rule = this.findMatchingRule(action, rules);
     if (!rule) return null;
 
-    if (rule.actionType && rule.actionType !== "forbidden") {
+    if (rule.actionType && rule.actionType !== 'forbidden') {
       return {
         rule,
         action,
@@ -35,11 +35,7 @@ export class RuleEngine {
       };
     }
 
-    const activeException = this.findActiveException(
-      rule,
-      passenger,
-      needState,
-    );
+    const activeException = this.findActiveException(rule, passenger, needState);
 
     if (activeException && activeException.breakingSafer) {
       return {
@@ -60,26 +56,21 @@ export class RuleEngine {
       consequences: rule.breakConsequences || [],
       confidenceDelta: this.calculateConfidenceDelta(ruleConfidence, false),
       needAdjustment: rule.breakNeedAdjustment ?? 10,
-      message:
-        rule.violationMessage ||
-        `Breaking "${rule.title}" backfired disastrously.`,
+      message: rule.violationMessage || `Breaking "${rule.title}" backfired disastrously.`,
     };
   }
 
   private static findMatchingRule(action: string, rules: Rule[]): Rule | null {
-    return rules.find((rule) => rule.actionKey === action) || null;
+    return rules.find(rule => rule.actionKey === action) || null;
   }
 
   private static findActiveException(
     rule: Rule,
     passenger: Passenger | null,
-    needState: PassengerNeedState | null,
+    needState: PassengerNeedState | null
   ): GuidelineException | null {
     if (!rule.exceptions || rule.exceptions.length === 0) return null;
-    if (
-      !passenger?.guidelineExceptions ||
-      passenger.guidelineExceptions.length === 0
-    ) {
+    if (!passenger?.guidelineExceptions || passenger.guidelineExceptions.length === 0) {
       return null;
     }
 
@@ -96,11 +87,11 @@ export class RuleEngine {
 
   private static meetsStageRequirement(
     exception: GuidelineException,
-    needState: PassengerNeedState | null,
+    needState: PassengerNeedState | null
   ): boolean {
     if (!needState) return false;
 
-    const requiredStage = exception.requiredStage || "warning";
+    const requiredStage = exception.requiredStage || 'warning';
     const currentStageRank = STAGE_ORDER[needState.stage] ?? 0;
     const requiredStageRank = STAGE_ORDER[requiredStage] ?? 0;
 
@@ -109,7 +100,7 @@ export class RuleEngine {
 
   private static calculateConfidenceDelta(
     currentConfidence: number,
-    correctBreak: boolean,
+    correctBreak: boolean
   ): number {
     const base = correctBreak ? 0.1 : -0.15;
 

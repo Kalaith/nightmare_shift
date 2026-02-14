@@ -1,79 +1,73 @@
-import type { Rule, GuidelineException } from "../types/game";
-import { guidelineData } from "./guidelineData";
+import type { Rule, GuidelineException } from '../types/game';
+import { guidelineData } from './guidelineData';
 
 const guidelineExceptionIndex = new Map<string, GuidelineException>();
 
-guidelineData.forEach((guideline) => {
-  guideline.exceptions.forEach((exception) => {
+guidelineData.forEach(guideline => {
+  guideline.exceptions.forEach(exception => {
     guidelineExceptionIndex.set(exception.id, exception);
   });
 });
 
-const cloneGuidelineException = (
-  exceptionId: string,
-): GuidelineException | null => {
+const cloneGuidelineException = (exceptionId: string): GuidelineException | null => {
   const exception = guidelineExceptionIndex.get(exceptionId);
   if (!exception) return null;
 
   return {
     ...exception,
-    conditions: exception.conditions.map((condition) => ({ ...condition })),
-    tells: exception.tells.map((tell) => ({ ...tell })),
+    conditions: exception.conditions.map(condition => ({ ...condition })),
+    tells: exception.tells.map(tell => ({ ...tell })),
   };
 };
 
 const getExceptions = (exceptionIds: string[]): GuidelineException[] =>
   exceptionIds
-    .map((id) => cloneGuidelineException(id))
+    .map(id => cloneGuidelineException(id))
     .filter((exception): exception is GuidelineException => exception !== null);
 
 export const shiftRulesData: Rule[] = [
   // Basic rules (always visible)
   {
     id: 1,
-    title: "No Eye Contact",
-    description: "Do not look directly at passengers tonight",
-    difficulty: "medium",
-    type: "basic",
+    title: 'No Eye Contact',
+    description: 'Do not look directly at passengers tonight',
+    difficulty: 'medium',
+    type: 'basic',
     visible: true,
-    actionKey: "eye_contact",
-    actionType: "forbidden",
+    actionKey: 'eye_contact',
+    actionType: 'forbidden',
     relatedGuidelineId: 1001,
-    defaultSafety: "safe",
+    defaultSafety: 'safe',
     defaultOutcome:
-      "Averting your gaze keeps predatory spirits at bay and maintains cab stability.",
-    exceptions: getExceptions(["eye_contact_lonely"]),
+      'Averting your gaze keeps predatory spirits at bay and maintains cab stability.',
+    exceptions: getExceptions(['eye_contact_lonely']),
     followConsequences: [
       {
-        type: "survival",
+        type: 'survival',
         value: 1,
-        description:
-          "You resisted the passenger's pull and finished the ride unharmed.",
+        description: "You resisted the passenger's pull and finished the ride unharmed.",
         probability: 0.85,
       },
     ],
     breakConsequences: [
       {
-        type: "death",
+        type: 'death',
         value: 1,
-        description:
-          "Staring into a void-touched passenger shredded your sense of self.",
+        description: 'Staring into a void-touched passenger shredded your sense of self.',
         probability: 0.7,
       },
     ],
     exceptionRewards: [
       {
-        type: "reputation",
+        type: 'reputation',
         value: 8,
-        description:
-          "Acknowledged a lonely spirit and earned supernatural goodwill.",
+        description: 'Acknowledged a lonely spirit and earned supernatural goodwill.',
         probability: 0.75,
       },
       {
-        type: "story_unlock",
+        type: 'story_unlock',
         value: 1,
-        description:
-          "Unlocked a heartfelt confession that opens a new narrative thread.",
+        description: 'Unlocked a heartfelt confession that opens a new narrative thread.',
         probability: 0.5,
       },
     ],
@@ -81,39 +75,38 @@ export const shiftRulesData: Rule[] = [
     followNeedAdjustment: 5,
     breakNeedAdjustment: 15,
     violationMessage:
-      "You locked eyes when you were warned not to. Something inside you unraveled.",
+      'You locked eyes when you were warned not to. Something inside you unraveled.',
   },
   {
     id: 2,
-    title: "Silent Night",
-    description: "No radio or music allowed during rides",
-    difficulty: "easy",
-    type: "basic",
+    title: 'Silent Night',
+    description: 'No radio or music allowed during rides',
+    difficulty: 'easy',
+    type: 'basic',
     visible: true,
-    actionKey: "play_music",
-    actionType: "forbidden",
+    actionKey: 'play_music',
+    actionType: 'forbidden',
     relatedGuidelineId: 1011,
-    defaultSafety: "safe",
-    defaultOutcome:
-      "Maintaining silence prevents the radio frequencies from attracting spirits.",
-    exceptions: getExceptions(["silent_soothing_song"]),
+    defaultSafety: 'safe',
+    defaultOutcome: 'Maintaining silence prevents the radio frequencies from attracting spirits.',
+    exceptions: getExceptions(['silent_soothing_song']),
     followConsequences: [
       {
-        type: "survival",
+        type: 'survival',
         value: 1,
-        description: "Kept the cab quiet and avoided spectral interference.",
+        description: 'Kept the cab quiet and avoided spectral interference.',
         probability: 0.8,
       },
     ],
     breakConsequences: [
       {
-        type: "death",
+        type: 'death',
         value: 1,
-        description: "The song acted as a beacon for the wrong audience.",
+        description: 'The song acted as a beacon for the wrong audience.',
         probability: 0.4,
       },
       {
-        type: "fuel",
+        type: 'fuel',
         value: -5,
         description: "Equipment interference drained your cab's power.",
         probability: 0.5,
@@ -121,70 +114,69 @@ export const shiftRulesData: Rule[] = [
     ],
     exceptionRewards: [
       {
-        type: "reputation",
+        type: 'reputation',
         value: 6,
-        description: "Calmed a trembling passenger with the perfect track.",
+        description: 'Calmed a trembling passenger with the perfect track.',
         probability: 0.7,
       },
       {
-        type: "item",
+        type: 'item',
         value: 1,
-        description: "Received a protective mixtape for future rides.",
+        description: 'Received a protective mixtape for future rides.',
         probability: 0.35,
       },
     ],
     exceptionNeedAdjustment: -18,
     followNeedAdjustment: 8,
     breakNeedAdjustment: 12,
-    violationMessage:
-      "Breaking the silence invited a chorus of voices you cannot silence.",
+    violationMessage: 'Breaking the silence invited a chorus of voices you cannot silence.',
   },
   {
     id: 3,
-    title: "Cash Only",
-    description: "Do not accept tips of any kind tonight",
-    difficulty: "hard",
-    type: "basic",
+    title: 'Cash Only',
+    description: 'Do not accept tips of any kind tonight',
+    difficulty: 'hard',
+    type: 'basic',
     visible: true,
-    actionKey: "accept_tip",
-    actionType: "forbidden",
+    actionKey: 'accept_tip',
+    actionType: 'forbidden',
     relatedGuidelineId: 1003,
-    defaultSafety: "safe",
-    defaultOutcome: "Hard currency keeps cursed favors from binding to you.",
-    exceptions: getExceptions(["cash_intangible_beings"]),
+    defaultSafety: 'safe',
+    defaultOutcome: 'Hard currency keeps cursed favors from binding to you.',
+    exceptions: getExceptions(['cash_intangible_beings']),
     followConsequences: [
       {
-        type: "money",
+        type: 'money',
         value: 15,
-        description: "Collected predictable, clean payments.",
+        description: 'Collected predictable, clean payments.',
         probability: 0.9,
       },
     ],
     breakConsequences: [
       {
-        type: "death",
+        type: 'death',
         value: 1,
-        description: "A cursed coin latched onto your lifeline.",
+        description: 'A cursed coin latched onto your lifeline.',
         probability: 0.5,
       },
       {
-        type: "reputation",
+        type: 'reputation',
         value: -10,
-        description: "Word spread that you accept forbidden currency.",
+        description: 'Word spread that you accept forbidden currency.',
         probability: 0.6,
       },
     ],
     exceptionRewards: [
       {
-        type: "reputation",
+        type: 'reputation',
         value: 7,
-        description: "Offered charity to a soul who could not pay otherwise.",
+        description: 'Offered charity to a soul who could not pay otherwise.',
         probability: 0.65,
       },
       {
-        type: "story_unlock",
+        type: 'story_unlock',
         value: 1,
-        description: "Unlocked a spectral favor redeemable later in the night.",
+        description: 'Unlocked a spectral favor redeemable later in the night.',
         probability: 0.45,
       },
     ],
@@ -192,175 +184,168 @@ export const shiftRulesData: Rule[] = [
     followNeedAdjustment: 4,
     breakNeedAdjustment: 14,
     violationMessage:
-      "That payment was never meant for mortal hands. It stains everything it touches.",
+      'That payment was never meant for mortal hands. It stains everything it touches.',
   },
   {
     id: 4,
-    title: "Windows Sealed",
-    description: "Keep all windows closed at all times",
-    difficulty: "medium",
-    type: "basic",
+    title: 'Windows Sealed',
+    description: 'Keep all windows closed at all times',
+    difficulty: 'medium',
+    type: 'basic',
     visible: true,
-    actionKey: "open_window",
-    actionType: "forbidden",
+    actionKey: 'open_window',
+    actionType: 'forbidden',
     relatedGuidelineId: 1009,
-    defaultSafety: "safe",
-    defaultOutcome:
-      "Closed windows keep whispers, ash, and hungry winds outside the cab.",
-    exceptions: getExceptions(["windows_suffocation"]),
+    defaultSafety: 'safe',
+    defaultOutcome: 'Closed windows keep whispers, ash, and hungry winds outside the cab.',
+    exceptions: getExceptions(['windows_suffocation']),
     followConsequences: [
       {
-        type: "survival",
+        type: 'survival',
         value: 1,
-        description: "Protected the cabin from invasive spirits.",
+        description: 'Protected the cabin from invasive spirits.',
         probability: 0.75,
       },
     ],
     breakConsequences: [
       {
-        type: "death",
+        type: 'death',
         value: 1,
-        description: "The gale carried something inside that never left.",
+        description: 'The gale carried something inside that never left.',
         probability: 0.5,
       },
       {
-        type: "fuel",
+        type: 'fuel',
         value: -3,
-        description: "Air drag cut into your efficiency.",
+        description: 'Air drag cut into your efficiency.',
         probability: 0.6,
       },
     ],
     exceptionRewards: [
       {
-        type: "reputation",
+        type: 'reputation',
         value: 9,
-        description:
-          "Saved a suffocating passenger by cracking the seal just in time.",
+        description: 'Saved a suffocating passenger by cracking the seal just in time.',
         probability: 0.7,
       },
       {
-        type: "item",
+        type: 'item',
         value: 1,
-        description: "Received a sunlight talisman for your compassion.",
+        description: 'Received a sunlight talisman for your compassion.',
         probability: 0.4,
       },
     ],
     exceptionNeedAdjustment: -20,
     followNeedAdjustment: 6,
     breakNeedAdjustment: 16,
-    violationMessage:
-      "You opened the cab to the storm and something new rode with you.",
+    violationMessage: 'You opened the cab to the storm and something new rode with you.',
   },
   {
     id: 5,
-    title: "Route Restriction",
-    description: "Do not deviate from GPS route for any reason",
-    difficulty: "hard",
-    type: "basic",
+    title: 'Route Restriction',
+    description: 'Do not deviate from GPS route for any reason',
+    difficulty: 'hard',
+    type: 'basic',
     visible: true,
-    actionKey: "take_shortcut",
-    actionType: "forbidden",
+    actionKey: 'take_shortcut',
+    actionType: 'forbidden',
     relatedGuidelineId: 1010,
-    defaultSafety: "safe",
-    defaultOutcome:
-      "Following dispatch routes minimizes ambush chances and keeps dispatch happy.",
-    exceptions: getExceptions(["shortcut_time_critical"]),
+    defaultSafety: 'safe',
+    defaultOutcome: 'Following dispatch routes minimizes ambush chances and keeps dispatch happy.',
+    exceptions: getExceptions(['shortcut_time_critical']),
     followConsequences: [
       {
-        type: "time",
+        type: 'time',
         value: -5,
-        description: "Arrived on schedule without raising suspicion.",
+        description: 'Arrived on schedule without raising suspicion.',
         probability: 0.8,
       },
     ],
     breakConsequences: [
       {
-        type: "death",
+        type: 'death',
         value: 1,
-        description: "The shortcut led you straight into a supernatural trap.",
+        description: 'The shortcut led you straight into a supernatural trap.',
         probability: 0.3,
       },
       {
-        type: "fuel",
+        type: 'fuel',
         value: -10,
-        description:
-          "You burned fuel retracing your route through cursed alleys.",
+        description: 'You burned fuel retracing your route through cursed alleys.',
         probability: 0.6,
       },
     ],
     exceptionRewards: [
       {
-        type: "money",
+        type: 'money',
         value: 25,
-        description: "Passenger tipped big for getting them to safety in time.",
+        description: 'Passenger tipped big for getting them to safety in time.',
         probability: 0.7,
       },
       {
-        type: "reputation",
+        type: 'reputation',
         value: 10,
-        description:
-          "Earned trust among nocturnal regulars for decisive driving.",
+        description: 'Earned trust among nocturnal regulars for decisive driving.',
         probability: 0.65,
       },
     ],
     exceptionNeedAdjustment: -30,
     followNeedAdjustment: 12,
     breakNeedAdjustment: 18,
-    violationMessage:
-      "Dispatch routes exist for a reason. The shadows were waiting off-grid.",
+    violationMessage: 'Dispatch routes exist for a reason. The shadows were waiting off-grid.',
   },
 
   // Conditional rules (only apply in certain situations)
   {
     id: 6,
-    title: "Midnight Curfew",
-    description: "No pickups after midnight from cemetery locations",
-    difficulty: "medium",
-    type: "conditional",
+    title: 'Midnight Curfew',
+    description: 'No pickups after midnight from cemetery locations',
+    difficulty: 'medium',
+    type: 'conditional',
     visible: true,
   },
   {
     id: 7,
-    title: "Living Passengers Only",
-    description: "Do not transport supernatural entities during thunderstorms",
-    difficulty: "hard",
-    type: "conditional",
+    title: 'Living Passengers Only',
+    description: 'Do not transport supernatural entities during thunderstorms',
+    difficulty: 'hard',
+    type: 'conditional',
     visible: true,
   },
   {
     id: 8,
-    title: "Hospital Protocol",
-    description: "Medical personnel must exit at original pickup location",
-    difficulty: "medium",
-    type: "conditional",
+    title: 'Hospital Protocol',
+    description: 'Medical personnel must exit at original pickup location',
+    difficulty: 'medium',
+    type: 'conditional',
     visible: true,
   },
 
   // Conflicting rules (create impossible situations)
   {
     id: 9,
-    title: "Emergency Response",
-    description: "Always take the fastest route when passenger is in distress",
-    difficulty: "hard",
-    type: "conflicting",
+    title: 'Emergency Response',
+    description: 'Always take the fastest route when passenger is in distress',
+    difficulty: 'hard',
+    type: 'conflicting',
     conflictsWith: [5], // Conflicts with Route Restriction
     visible: true,
   },
   {
     id: 10,
-    title: "Customer Service",
-    description: "Always comply with reasonable passenger requests",
-    difficulty: "medium",
-    type: "conflicting",
+    title: 'Customer Service',
+    description: 'Always comply with reasonable passenger requests',
+    difficulty: 'medium',
+    type: 'conflicting',
     conflictsWith: [4], // Conflicts with Windows Sealed
     visible: true,
   },
   {
     id: 11,
-    title: "Safety First",
+    title: 'Safety First',
     description: "Make eye contact with passengers to ensure they're alert",
-    difficulty: "hard",
-    type: "conflicting",
+    difficulty: 'hard',
+    type: 'conflicting',
     conflictsWith: [1], // Conflicts with No Eye Contact
     visible: true,
   },
@@ -368,101 +353,94 @@ export const shiftRulesData: Rule[] = [
   // Hidden rules (not shown until violated)
   {
     id: 12,
-    title: "The Counting Rule",
-    description:
-      "Never pick up more than 3 passengers with the same supernatural type",
-    difficulty: "expert",
-    type: "hidden",
+    title: 'The Counting Rule',
+    description: 'Never pick up more than 3 passengers with the same supernatural type',
+    difficulty: 'expert',
+    type: 'hidden',
     visible: false,
     violationMessage:
       "You've transported too many of the same supernatural entities. They're drawn to patterns...",
   },
   {
     id: 13,
-    title: "The Time Limit",
-    description: "No single ride should take longer than 45 minutes",
-    difficulty: "expert",
-    type: "hidden",
+    title: 'The Time Limit',
+    description: 'No single ride should take longer than 45 minutes',
+    difficulty: 'expert',
+    type: 'hidden',
     visible: false,
-    violationMessage:
-      "You took too long with that passenger. Time has consequences in this job...",
+    violationMessage: 'You took too long with that passenger. Time has consequences in this job...',
   },
   {
     id: 14,
-    title: "The Silence Between",
-    description: "Never speak during the last 5 minutes of your shift",
-    difficulty: "expert",
-    type: "hidden",
+    title: 'The Silence Between',
+    description: 'Never speak during the last 5 minutes of your shift',
+    difficulty: 'expert',
+    type: 'hidden',
     visible: false,
     violationMessage:
-      "Words spoken in the final moments carry too much weight. You should have stayed quiet...",
+      'Words spoken in the final moments carry too much weight. You should have stayed quiet...',
   },
 
   // Weather-triggered rules (activated by weather conditions)
   {
     id: 101,
-    title: "Storm Silence",
+    title: 'Storm Silence',
     description: "Don't use windshield wipers during thunderstorms",
-    difficulty: "hard",
-    type: "weather",
+    difficulty: 'hard',
+    type: 'weather',
     visible: false,
-    trigger: "thunderstorm",
-    violationMessage:
-      "The wipers disturbed something that feeds on electrical storms...",
+    trigger: 'thunderstorm',
+    violationMessage: 'The wipers disturbed something that feeds on electrical storms...',
   },
   {
     id: 102,
-    title: "Light in Darkness",
-    description: "Keep headlights on during heavy fog",
-    difficulty: "medium",
-    type: "weather",
+    title: 'Light in Darkness',
+    description: 'Keep headlights on during heavy fog',
+    difficulty: 'medium',
+    type: 'weather',
     visible: false,
-    trigger: "heavy_fog",
+    trigger: 'heavy_fog',
     violationMessage:
-      "In the fog, darkness means something different. You should have kept the lights on.",
+      'In the fog, darkness means something different. You should have kept the lights on.',
   },
   {
     id: 103,
-    title: "Winter Caution",
-    description: "Drive under 25 mph in snow conditions",
-    difficulty: "medium",
-    type: "weather",
+    title: 'Winter Caution',
+    description: 'Drive under 25 mph in snow conditions',
+    difficulty: 'medium',
+    type: 'weather',
     visible: false,
-    trigger: "snow",
-    violationMessage:
-      "Speed in snow conditions attracted the attention of winter spirits...",
+    trigger: 'snow',
+    violationMessage: 'Speed in snow conditions attracted the attention of winter spirits...',
   },
   {
     id: 104,
-    title: "Shelter Protocol",
-    description: "No stops during late night bad weather",
-    difficulty: "hard",
-    type: "weather",
+    title: 'Shelter Protocol',
+    description: 'No stops during late night bad weather',
+    difficulty: 'hard',
+    type: 'weather',
     visible: false,
-    trigger: "latenight_badweather",
-    violationMessage:
-      "Stopping in bad weather during the witching hour was a mistake...",
+    trigger: 'latenight_badweather',
+    violationMessage: 'Stopping in bad weather during the witching hour was a mistake...',
   },
   {
     id: 105,
-    title: "Clear Sight",
+    title: 'Clear Sight',
     description: "Don't use air conditioning when visibility drops below 30%",
-    difficulty: "medium",
-    type: "weather",
+    difficulty: 'medium',
+    type: 'weather',
     visible: false,
-    trigger: "low_visibility",
-    violationMessage:
-      "The AC created condensation just when you needed clear vision most...",
+    trigger: 'low_visibility',
+    violationMessage: 'The AC created condensation just when you needed clear vision most...',
   },
   {
     id: 106,
-    title: "Wind Whispers",
-    description: "Keep all windows closed during windstorms",
-    difficulty: "easy",
-    type: "weather",
+    title: 'Wind Whispers',
+    description: 'Keep all windows closed during windstorms',
+    difficulty: 'easy',
+    type: 'weather',
     visible: false,
-    trigger: "heavy_wind",
-    violationMessage:
-      "The wind carried something in that you shouldn't have let inside...",
+    trigger: 'heavy_wind',
+    violationMessage: "The wind carried something in that you shouldn't have let inside...",
   },
 ];

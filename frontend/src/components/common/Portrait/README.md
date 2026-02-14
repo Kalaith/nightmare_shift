@@ -5,14 +5,9 @@ A React component for displaying character portraits with emoji fallback support
 ## Usage
 
 ```tsx
-import Portrait from "../../common/Portrait/Portrait";
+import Portrait from '../../common/Portrait/Portrait';
 
-<Portrait
-  passengerName="Mrs. Chen"
-  emoji="👵"
-  size="medium"
-  className="custom-class"
-/>;
+<Portrait passengerName="Mrs. Chen" emoji="👵" size="medium" className="custom-class" />;
 ```
 
 ## Props

@@ -1,8 +1,8 @@
 // Environment related types
 
 export interface WeatherCondition {
-  type: "clear" | "rain" | "fog" | "snow" | "thunderstorm" | "wind";
-  intensity: "light" | "moderate" | "heavy";
+  type: 'clear' | 'rain' | 'fog' | 'snow' | 'thunderstorm' | 'wind';
+  intensity: 'light' | 'moderate' | 'heavy';
   visibility: number; // 0-100, affects driving
   description: string;
   icon: string;
@@ -12,7 +12,7 @@ export interface WeatherCondition {
 }
 
 export interface TimeOfDay {
-  phase: "dawn" | "morning" | "afternoon" | "dusk" | "night" | "latenight";
+  phase: 'dawn' | 'morning' | 'afternoon' | 'dusk' | 'night' | 'latenight';
   hour: number; // 0-23
   description: string;
   ambientLight: number; // 0-100
@@ -20,9 +20,9 @@ export interface TimeOfDay {
 }
 
 export interface Season {
-  type: "spring" | "summer" | "fall" | "winter";
+  type: 'spring' | 'summer' | 'fall' | 'winter';
   month: number; // 1-12
-  temperature: "cold" | "cool" | "mild" | "warm" | "hot";
+  temperature: 'cold' | 'cool' | 'mild' | 'warm' | 'hot';
   description: string;
   passengerModifiers: {
     spawnRates: Record<string, number>; // passenger type -> modifier
@@ -32,13 +32,13 @@ export interface Season {
 
 export interface WeatherEffect {
   type:
-    | "visibility_reduction"
-    | "fuel_consumption"
-    | "time_delay"
-    | "supernatural_attraction"
-    | "passenger_behavior"
-    | "route_blockage"
-    | "rule_modification";
+    | 'visibility_reduction'
+    | 'fuel_consumption'
+    | 'time_delay'
+    | 'supernatural_attraction'
+    | 'passenger_behavior'
+    | 'route_blockage'
+    | 'rule_modification';
   value: number;
   description: string;
   appliesTo?: string; // specific context where effect applies
@@ -46,14 +46,9 @@ export interface WeatherEffect {
 
 export interface EnvironmentalHazard {
   id: string;
-  type:
-    | "construction"
-    | "accident"
-    | "supernatural_event"
-    | "road_closure"
-    | "police_checkpoint";
+  type: 'construction' | 'accident' | 'supernatural_event' | 'road_closure' | 'police_checkpoint';
   location: string;
-  severity: "minor" | "major" | "extreme";
+  severity: 'minor' | 'major' | 'extreme';
   description: string;
   effects: {
     routeBlocked?: string[]; // route types that are blocked

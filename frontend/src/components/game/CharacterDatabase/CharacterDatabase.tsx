@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import type { Passenger, GameState } from "../../../types/game";
-import { gameData } from "../../../data/gameData";
-import Portrait from "../../common/Portrait/Portrait";
-import styles from "./CharacterDatabase.module.css";
+import React, { useState, useEffect } from 'react';
+import type { Passenger, GameState } from '../../../types/game';
+import { gameData } from '../../../data/gameData';
+import Portrait from '../../common/Portrait/Portrait';
+import styles from './CharacterDatabase.module.css';
 
 interface CharacterDatabaseProps {
   gameState: GameState;
@@ -18,7 +18,7 @@ interface CharacterEntry {
   backstoryUnlocked: boolean;
   relationshipsRevealed: number[];
   guidelinesTriggered: string[];
-  trustLevel: "unknown" | "hostile" | "neutral" | "friendly" | "trusted";
+  trustLevel: 'unknown' | 'hostile' | 'neutral' | 'friendly' | 'trusted';
 }
 
 export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
@@ -26,18 +26,12 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
   isVisible,
   onClose,
 }) => {
-  const [characters, setCharacters] = useState<Map<number, CharacterEntry>>(
-    new Map(),
+  const [characters, setCharacters] = useState<Map<number, CharacterEntry>>(new Map());
+  const [selectedCharacter, setSelectedCharacter] = useState<number | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'encountered' | 'backstory' | 'mysterious'>(
+    'encountered'
   );
-  const [selectedCharacter, setSelectedCharacter] = useState<number | null>(
-    null,
-  );
-  const [filterType, setFilterType] = useState<
-    "all" | "encountered" | "backstory" | "mysterious"
-  >("encountered");
-  const [sortBy, setSortBy] = useState<
-    "name" | "encounters" | "rarity" | "trust"
-  >("encounters");
+  const [sortBy, setSortBy] = useState<'name' | 'encounters' | 'rarity' | 'trust'>('encounters');
 
   useEffect(() => {
     if (!isVisible) return;
@@ -47,11 +41,8 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
 
     gameData.passengers.forEach((passenger: Passenger) => {
       const reputation = gameState.passengerReputation?.[passenger.id];
-      const isUnlocked = (gameState.usedPassengers || []).includes(
-        passenger.id,
-      );
-      const backstoryUnlocked =
-        gameState.passengerBackstories?.[passenger.id] || false;
+      const isUnlocked = (gameState.usedPassengers || []).includes(passenger.id);
+      const backstoryUnlocked = gameState.passengerBackstories?.[passenger.id] || false;
 
       characterMap.set(passenger.id, {
         passenger,
@@ -61,7 +52,7 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
         backstoryUnlocked,
         relationshipsRevealed: [], // TODO: Track relationship discoveries
         guidelinesTriggered: passenger.guidelineExceptions || [],
-        trustLevel: reputation?.relationshipLevel || "unknown",
+        trustLevel: reputation?.relationshipLevel || 'unknown',
       });
     });
 
@@ -72,35 +63,29 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
     const allCharacters = Array.from(characters.values());
 
     switch (filterType) {
-      case "encountered":
-        return allCharacters.filter((entry) => entry.isUnlocked);
-      case "backstory":
-        return allCharacters.filter((entry) => entry.backstoryUnlocked);
-      case "mysterious":
-        return allCharacters.filter(
-          (entry) => entry.isUnlocked && !entry.backstoryUnlocked,
-        );
+      case 'encountered':
+        return allCharacters.filter(entry => entry.isUnlocked);
+      case 'backstory':
+        return allCharacters.filter(entry => entry.backstoryUnlocked);
+      case 'mysterious':
+        return allCharacters.filter(entry => entry.isUnlocked && !entry.backstoryUnlocked);
       default:
         return allCharacters;
     }
   };
 
-  const getSortedCharacters = (
-    filtered: CharacterEntry[],
-  ): CharacterEntry[] => {
+  const getSortedCharacters = (filtered: CharacterEntry[]): CharacterEntry[] => {
     return [...filtered].sort((a, b) => {
       switch (sortBy) {
-        case "name":
+        case 'name':
           return a.passenger.name.localeCompare(b.passenger.name);
-        case "encounters":
+        case 'encounters':
           return b.encounterCount - a.encounterCount;
-        case "rarity": {
+        case 'rarity': {
           const rarityOrder = { legendary: 4, rare: 3, uncommon: 2, common: 1 };
-          return (
-            rarityOrder[b.passenger.rarity] - rarityOrder[a.passenger.rarity]
-          );
+          return rarityOrder[b.passenger.rarity] - rarityOrder[a.passenger.rarity];
         }
-        case "trust": {
+        case 'trust': {
           const trustOrder = {
             trusted: 5,
             friendly: 4,
@@ -122,37 +107,35 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
     backstories: number;
   } => {
     const total = gameData.passengers.length;
-    const unlocked = Array.from(characters.values()).filter(
-      (entry) => entry.isUnlocked,
-    ).length;
+    const unlocked = Array.from(characters.values()).filter(entry => entry.isUnlocked).length;
     const backstories = Array.from(characters.values()).filter(
-      (entry) => entry.backstoryUnlocked,
+      entry => entry.backstoryUnlocked
     ).length;
     return { total, unlocked, backstories };
   };
 
-  const getTrustLevelIcon = (trustLevel: CharacterEntry["trustLevel"]) => {
+  const getTrustLevelIcon = (trustLevel: CharacterEntry['trustLevel']) => {
     switch (trustLevel) {
-      case "trusted":
-        return "💚";
-      case "friendly":
-        return "🟢";
-      case "neutral":
-        return "🟡";
-      case "hostile":
-        return "🔴";
+      case 'trusted':
+        return '💚';
+      case 'friendly':
+        return '🟢';
+      case 'neutral':
+        return '🟡';
+      case 'hostile':
+        return '🔴';
       default:
-        return "❓";
+        return '❓';
     }
   };
 
-  const getRarityColor = (rarity: Passenger["rarity"]) => {
+  const getRarityColor = (rarity: Passenger['rarity']) => {
     switch (rarity) {
-      case "legendary":
+      case 'legendary':
         return styles.rarityLegendary;
-      case "rare":
+      case 'rare':
         return styles.rarityRare;
-      case "uncommon":
+      case 'uncommon':
         return styles.rarityUncommon;
       default:
         return styles.rarityCommon;
@@ -164,9 +147,7 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
   const filtered = getFilteredCharacters();
   const sorted = getSortedCharacters(filtered);
   const progress = getUnlockProgress();
-  const selectedEntry = selectedCharacter
-    ? characters.get(selectedCharacter)
-    : null;
+  const selectedEntry = selectedCharacter ? characters.get(selectedCharacter) : null;
 
   return (
     <div className={styles.databaseContainer}>
@@ -217,39 +198,33 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
       <div className={styles.controls}>
         <div className={styles.filters}>
           <span className={styles.filterLabel}>Filter:</span>
-          {(["all", "encountered", "backstory", "mysterious"] as const).map(
-            (filter) => (
-              <button
-                key={filter}
-                onClick={() => setFilterType(filter)}
-                className={`${styles.filterButton} ${filterType === filter ? styles.active : ""}`}
-              >
-                {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                <span className={styles.filterCount}>
-                  (
-                  {filter === "all"
-                    ? progress.total
-                    : filter === "encountered"
-                      ? progress.unlocked
-                      : filter === "backstory"
-                        ? progress.backstories
-                        : progress.unlocked - progress.backstories}
-                  )
-                </span>
-              </button>
-            ),
-          )}
+          {(['all', 'encountered', 'backstory', 'mysterious'] as const).map(filter => (
+            <button
+              key={filter}
+              onClick={() => setFilterType(filter)}
+              className={`${styles.filterButton} ${filterType === filter ? styles.active : ''}`}
+            >
+              {filter.charAt(0).toUpperCase() + filter.slice(1)}
+              <span className={styles.filterCount}>
+                (
+                {filter === 'all'
+                  ? progress.total
+                  : filter === 'encountered'
+                    ? progress.unlocked
+                    : filter === 'backstory'
+                      ? progress.backstories
+                      : progress.unlocked - progress.backstories}
+                )
+              </span>
+            </button>
+          ))}
         </div>
 
         <div className={styles.sorting}>
           <span className={styles.sortLabel}>Sort by:</span>
           <select
             value={sortBy}
-            onChange={(e) =>
-              setSortBy(
-                e.target.value as "name" | "encounters" | "rarity" | "trust",
-              )
-            }
+            onChange={e => setSortBy(e.target.value as 'name' | 'encounters' | 'rarity' | 'trust')}
             className={styles.sortSelect}
           >
             <option value="encounters">Encounters</option>
@@ -262,14 +237,14 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
 
       <div className={styles.content}>
         <div className={styles.characterList}>
-          {sorted.map((entry) => (
+          {sorted.map(entry => (
             <div
               key={entry.passenger.id}
               onClick={() => setSelectedCharacter(entry.passenger.id)}
               className={`
                 ${styles.characterCard} 
-                ${selectedCharacter === entry.passenger.id ? styles.selected : ""}
-                ${!entry.isUnlocked ? styles.locked : ""}
+                ${selectedCharacter === entry.passenger.id ? styles.selected : ''}
+                ${!entry.isUnlocked ? styles.locked : ''}
               `}
             >
               <div className={styles.cardHeader}>
@@ -285,17 +260,13 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
                 )}
                 <div className={styles.cardInfo}>
                   <h4 className={styles.characterName}>
-                    {entry.isUnlocked ? entry.passenger.name : "Unknown"}
+                    {entry.isUnlocked ? entry.passenger.name : 'Unknown'}
                   </h4>
                   <div className={styles.cardMeta}>
-                    <span
-                      className={`${styles.rarity} ${getRarityColor(entry.passenger.rarity)}`}
-                    >
-                      {entry.isUnlocked ? entry.passenger.rarity : "???"}
+                    <span className={`${styles.rarity} ${getRarityColor(entry.passenger.rarity)}`}>
+                      {entry.isUnlocked ? entry.passenger.rarity : '???'}
                     </span>
-                    <span className={styles.trustLevel}>
-                      {getTrustLevelIcon(entry.trustLevel)}
-                    </span>
+                    <span className={styles.trustLevel}>{getTrustLevelIcon(entry.trustLevel)}</span>
                   </div>
                 </div>
               </div>
@@ -304,16 +275,12 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
                 <div className={styles.cardStats}>
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>Encounters:</span>
-                    <span className={styles.statValue}>
-                      {entry.encounterCount}
-                    </span>
+                    <span className={styles.statValue}>{entry.encounterCount}</span>
                   </div>
                   {entry.backstoryUnlocked && (
                     <div className={styles.backstoryIndicator}>
                       <span className={styles.backstoryIcon}>📖</span>
-                      <span className={styles.backstoryText}>
-                        Story Unlocked
-                      </span>
+                      <span className={styles.backstoryText}>Story Unlocked</span>
                     </div>
                   )}
                 </div>
@@ -334,9 +301,7 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
                     className={styles.detailsEmoji}
                   />
                   <div className={styles.detailsInfo}>
-                    <h3 className={styles.detailsName}>
-                      {selectedEntry.passenger.name}
-                    </h3>
+                    <h3 className={styles.detailsName}>{selectedEntry.passenger.name}</h3>
                     <p className={styles.detailsDescription}>
                       {selectedEntry.passenger.description}
                     </p>
@@ -348,31 +313,24 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
                     <h4 className={styles.sectionTitle}>📊 Statistics</h4>
                     <div className={styles.statGrid}>
                       <div className={styles.statItem}>
-                        <span className={styles.statLabel}>
-                          Supernatural Type:
-                        </span>
+                        <span className={styles.statLabel}>Supernatural Type:</span>
                         <span className={styles.statValue}>
                           {selectedEntry.passenger.supernatural}
                         </span>
                       </div>
                       <div className={styles.statItem}>
                         <span className={styles.statLabel}>Encounters:</span>
-                        <span className={styles.statValue}>
-                          {selectedEntry.encounterCount}
-                        </span>
+                        <span className={styles.statValue}>{selectedEntry.encounterCount}</span>
                       </div>
                       <div className={styles.statItem}>
                         <span className={styles.statLabel}>Trust Level:</span>
                         <span className={styles.statValue}>
-                          {getTrustLevelIcon(selectedEntry.trustLevel)}{" "}
-                          {selectedEntry.trustLevel}
+                          {getTrustLevelIcon(selectedEntry.trustLevel)} {selectedEntry.trustLevel}
                         </span>
                       </div>
                       <div className={styles.statItem}>
                         <span className={styles.statLabel}>Typical Fare:</span>
-                        <span className={styles.statValue}>
-                          ${selectedEntry.passenger.fare}
-                        </span>
+                        <span className={styles.statValue}>${selectedEntry.passenger.fare}</span>
                       </div>
                     </div>
                   </div>
@@ -388,21 +346,15 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
 
                   <div className={styles.detailsSection}>
                     <h4 className={styles.sectionTitle}>🎭 Behavioral Notes</h4>
-                    <p className={styles.personalRule}>
-                      {selectedEntry.passenger.personalRule}
-                    </p>
+                    <p className={styles.personalRule}>{selectedEntry.passenger.personalRule}</p>
                     {selectedEntry.guidelinesTriggered.length > 0 && (
                       <div className={styles.guidelineList}>
-                        <span className={styles.guidelineLabel}>
-                          Associated Guidelines:
-                        </span>
-                        {selectedEntry.guidelinesTriggered.map(
-                          (guideline, index) => (
-                            <span key={index} className={styles.guidelineTag}>
-                              {guideline.replace(/_/g, " ")}
-                            </span>
-                          ),
-                        )}
+                        <span className={styles.guidelineLabel}>Associated Guidelines:</span>
+                        {selectedEntry.guidelinesTriggered.map((guideline, index) => (
+                          <span key={index} className={styles.guidelineTag}>
+                            {guideline.replace(/_/g, ' ')}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -413,8 +365,7 @@ export const CharacterDatabase: React.FC<CharacterDatabaseProps> = ({
                 <div className={styles.lockedIcon}>🔒</div>
                 <h3 className={styles.lockedTitle}>Character Locked</h3>
                 <p className={styles.lockedDescription}>
-                  Encounter this passenger during your night shifts to unlock
-                  their information.
+                  Encounter this passenger during your night shifts to unlock their information.
                 </p>
               </div>
             )}

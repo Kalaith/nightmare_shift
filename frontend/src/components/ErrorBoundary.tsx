@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -21,7 +21,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+    console.error('Uncaught error:', error, errorInfo);
   }
 
   public render() {
@@ -29,11 +29,9 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         this.props.fallback || (
           <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
-            <h2 className="text-2xl font-bold text-red-400 mb-4">
-              Something went wrong
-            </h2>
+            <h2 className="text-2xl font-bold text-red-400 mb-4">Something went wrong</h2>
             <p className="text-gray-400 mb-6 text-center max-w-md">
-              {this.state.error?.message || "An unexpected error occurred."}
+              {this.state.error?.message || 'An unexpected error occurred.'}
             </p>
             <button
               onClick={() => window.location.reload()}

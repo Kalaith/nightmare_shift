@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { SCREENS } from "../data/constants";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { SCREENS } from '../data/constants';
 
 interface UIContextType {
   currentScreen: string;
@@ -35,7 +35,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 export const useUIContext = () => {
   const context = useContext(UIContext);
   if (context === undefined) {
-    throw new Error("useUIContext must be used within a UIProvider");
+    throw new Error('useUIContext must be used within a UIProvider');
   }
   return context;
 };

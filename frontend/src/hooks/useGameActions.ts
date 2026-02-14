@@ -1,44 +1,31 @@
-import { useCallback } from "react";
-import { useGameContext } from "../context/GameContext";
-import { GAME_PHASES } from "../data/constants";
-import { GAME_BALANCE } from "../constants/gameBalance";
-import type {
-  PassengerNeedState,
-  RuleEvaluationResult,
-  Passenger,
-} from "../types/game";
-import { RouteService } from "../services/reputationService";
-import { PassengerService } from "../services/passengerService";
-import { PassengerStateMachine } from "../services/passengerStateMachine";
-import { RuleEngine } from "../services/ruleEngine";
-import { ItemService } from "../services/itemService";
-import { gameData } from "../data/gameData";
+import { useCallback } from 'react';
+import { useGameContext } from '../context/GameContext';
+import { GAME_PHASES } from '../data/constants';
+import { GAME_BALANCE } from '../constants/gameBalance';
+import type { PassengerNeedState, RuleEvaluationResult, Passenger } from '../types/game';
+import { RouteService } from '../services/reputationService';
+import { PassengerService } from '../services/passengerService';
+import { PassengerStateMachine } from '../services/passengerStateMachine';
+import { RuleEngine } from '../services/ruleEngine';
+import { ItemService } from '../services/itemService';
+import { gameData } from '../data/gameData';
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, value));
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 export const useGameActions = () => {
-  const {
-    gameState,
-    updateGameState: setGameState,
-    showRideRequest,
-    endShift,
-  } = useGameContext();
+  const { gameState, updateGameState: setGameState, showRideRequest, endShift } = useGameContext();
 
   const acceptRide = useCallback(() => {
     if (gameState.fuel < 5) {
-      endShift(
-        false,
-        "You ran out of fuel with a passenger in the car. They were not pleased...",
-      );
+      endShift(false, 'You ran out of fuel with a passenger in the car. They were not pleased...');
       return;
     }
-    startDriving("pickup");
+    startDriving('pickup');
   }, [gameState.fuel, endShift]);
 
   const declineRide = useCallback(() => {
     // Reset to waiting state after declining
-    setGameState((prev) => ({
+    setGameState(prev => ({
       ...prev,
       gamePhase: GAME_PHASES.WAITING,
       currentPassenger: null,
@@ -48,38 +35,33 @@ export const useGameActions = () => {
       () => {
         showRideRequest();
       },
-      2000 + Math.random() * 3000,
+      2000 + Math.random() * 3000
     );
   }, [showRideRequest, setGameState]);
 
   const startDriving = useCallback(
-    (phase: "pickup" | "destination") => {
+    (phase: 'pickup' | 'destination') => {
       const location =
-        phase === "pickup"
-          ? gameData.locations.find(
-              (loc) => loc.name === gameState.currentPassenger?.pickup,
-            )
-          : gameData.locations.find(
-              (loc) => loc.name === gameState.currentPassenger?.destination,
-            );
+        phase === 'pickup'
+          ? gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)
+          : gameData.locations.find(loc => loc.name === gameState.currentPassenger?.destination);
 
-      setGameState((prev) => ({
+      setGameState(prev => ({
         ...prev,
         gamePhase: GAME_PHASES.DRIVING,
         currentDrivingPhase: phase,
         currentLocation: location,
       }));
     },
-    [gameState.currentPassenger, setGameState],
+    [gameState.currentPassenger, setGameState]
   );
 
   const handleDrivingChoice = useCallback(
     (choice: string, phase: string) => {
-      const routeChoice = choice as "normal" | "shortcut" | "scenic" | "police";
+      const routeChoice = choice as 'normal' | 'shortcut' | 'scenic' | 'police';
       const passengerRiskLevel = gameState.currentPassenger
-        ? gameData.locations.find(
-            (loc) => loc.name === gameState.currentPassenger?.pickup,
-          )?.riskLevel || 1
+        ? gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)
+            ?.riskLevel || 1
         : 1;
 
       const routeCosts = RouteService.calculateRouteCosts(
@@ -89,14 +71,14 @@ export const useGameActions = () => {
         gameState.timeOfDay,
         gameState.environmentalHazards,
         gameState.routeMastery,
-        gameState.currentPassenger || undefined,
+        gameState.currentPassenger || undefined
       );
 
       // Check if player has enough resources
       if (gameState.fuel < routeCosts.fuelCost) {
         endShift(
           false,
-          "You don't have enough fuel for this route. Your car sputtered to a stop...",
+          "You don't have enough fuel for this route. Your car sputtered to a stop..."
         );
         return;
       }
@@ -104,7 +86,7 @@ export const useGameActions = () => {
       if (gameState.timeRemaining < routeCosts.timeCost) {
         endShift(
           false,
-          "This route would take too long. Time ran out before you could reach your destination...",
+          'This route would take too long. Time ran out before you could reach your destination...'
         );
         return;
       }
@@ -117,19 +99,17 @@ export const useGameActions = () => {
         // Warn at threshold
         if (streakCount === GAME_BALANCE.CONSECUTIVE_ROUTE.WARNING_THRESHOLD) {
           // Show warning but allow (could add UI notification here)
-          console.warn(
-            `Warning: ${streakCount} consecutive ${routeChoice} routes taken`,
-          );
+          console.warn(`Warning: ${streakCount} consecutive ${routeChoice} routes taken`);
         }
 
         // Game over at violation threshold for shortcuts
         if (
-          routeChoice === "shortcut" &&
+          routeChoice === 'shortcut' &&
           streakCount >= GAME_BALANCE.CONSECUTIVE_ROUTE.VIOLATION_THRESHOLD
         ) {
           endShift(
             false,
-            `You've taken too many shortcuts. The supernatural entities have noticed your pattern and are waiting for you...`,
+            `You've taken too many shortcuts. The supernatural entities have noticed your pattern and are waiting for you...`
           );
           return;
         }
@@ -137,20 +117,20 @@ export const useGameActions = () => {
 
       // Check rule violations
       let ruleOutcome: RuleEvaluationResult | null = null;
-      if (routeChoice === "shortcut") {
+      if (routeChoice === 'shortcut') {
         ruleOutcome = RuleEngine.evaluateAction(
-          "take_shortcut",
+          'take_shortcut',
           gameState.currentRules,
           gameState.currentPassenger,
           gameState.currentPassengerNeedState || null,
-          gameState.ruleConfidence,
+          gameState.ruleConfidence
         );
 
         if (ruleOutcome?.violation) {
           endShift(
             false,
             ruleOutcome.message ||
-              "You deviated from the GPS route. Your passenger noticed... and they were not forgiving.",
+              'You deviated from the GPS route. Your passenger noticed... and they were not forgiving.'
           );
           return;
         }
@@ -160,20 +140,16 @@ export const useGameActions = () => {
         gameState.currentPassengerNeedState || null,
         gameState.currentPassenger || null,
         routeChoice,
-        ruleOutcome,
+        ruleOutcome
       );
 
       // Get passenger preference and calculate dialogue trigger
-      const passengerPreference =
-        gameState.currentPassenger?.routePreferences?.find(
-          (pref) => pref.route === routeChoice,
-        );
+      const passengerPreference = gameState.currentPassenger?.routePreferences?.find(
+        pref => pref.route === routeChoice
+      );
 
       let routeDialogue: string | null = null;
-      if (
-        passengerPreference &&
-        Math.random() < (passengerPreference.triggerChance || 0.5)
-      ) {
+      if (passengerPreference && Math.random() < (passengerPreference.triggerChance || 0.5)) {
         routeDialogue = passengerPreference.specialDialogue || null;
       }
 
@@ -183,7 +159,7 @@ export const useGameActions = () => {
       // Record route choice in history
       const routeHistoryEntry = {
         choice: routeChoice,
-        phase: phase as "pickup" | "destination",
+        phase: phase as 'pickup' | 'destination',
         fuelCost: routeCosts.fuelCost,
         timeCost: routeCosts.timeCost,
         riskLevel: routeCosts.riskLevel,
@@ -191,7 +167,7 @@ export const useGameActions = () => {
         timestamp: Date.now(),
       };
 
-      setGameState((prev) => ({
+      setGameState(prev => ({
         ...prev,
         fuel: prev.fuel - routeCosts.fuelCost,
         timeRemaining: prev.timeRemaining - routeCosts.timeCost,
@@ -215,35 +191,31 @@ export const useGameActions = () => {
         ruleConfidence: clamp(
           (prev.ruleConfidence ?? 0.5) + (ruleOutcome?.confidenceDelta ?? 0),
           0,
-          1,
+          1
         ),
-        currentPassengerNeedState:
-          needResult.state ?? prev.currentPassengerNeedState ?? null,
+        currentPassengerNeedState: needResult.state ?? prev.currentPassengerNeedState ?? null,
         detectedTells: PassengerStateMachine.mergeDetectedTells(
           prev.detectedTells || [],
           needResult.triggeredTells,
-          prev.currentPassenger?.id || gameState.currentPassenger?.id || 0,
+          prev.currentPassenger?.id || gameState.currentPassenger?.id || 0
         ),
       }));
 
       // Handle supernatural encounters based on risk level
       if (
-        routeCosts.riskLevel >
-          GAME_BALANCE.RISK_LEVELS.SUPERNATURAL_THRESHOLD &&
+        routeCosts.riskLevel > GAME_BALANCE.RISK_LEVELS.SUPERNATURAL_THRESHOLD &&
         Math.random() < GAME_BALANCE.PROBABILITIES.HIGH_RISK_ENCOUNTER
       ) {
         // High risk route taken, supernatural encounter possible
       }
 
-      if (phase === "pickup") {
-        startPassengerInteraction(
-          needResult.state ?? gameState.currentPassengerNeedState ?? null,
-        );
+      if (phase === 'pickup') {
+        startPassengerInteraction(needResult.state ?? gameState.currentPassengerNeedState ?? null);
       } else {
         completeRide();
       }
     },
-    [gameState, setGameState, endShift],
+    [gameState, setGameState, endShift]
   );
 
   const startPassengerInteraction = useCallback(
@@ -254,18 +226,16 @@ export const useGameActions = () => {
       // Use route dialogue if available, otherwise use random dialogue
       const dialogue =
         gameState.pendingRouteDialogue ||
-        passenger.dialogue[
-          Math.floor(Math.random() * passenger.dialogue.length)
-        ];
+        passenger.dialogue[Math.floor(Math.random() * passenger.dialogue.length)];
 
-      setGameState((prev) => ({
+      setGameState(prev => ({
         ...prev,
         gamePhase: GAME_PHASES.INTERACTION,
         currentDialogue: {
           text: dialogue,
-          speaker: "passenger",
+          speaker: 'passenger',
           timestamp: Date.now(),
-          type: "normal",
+          type: 'normal',
         },
         pendingRouteDialogue: null, // Clear after use
       }));
@@ -275,11 +245,11 @@ export const useGameActions = () => {
       gameState.currentPassengerNeedState,
       gameState.pendingRouteDialogue,
       setGameState,
-    ],
+    ]
   );
 
   const continueToDestination = useCallback(() => {
-    startDriving("destination");
+    startDriving('destination');
   }, [startDriving]);
 
   const completeRide = useCallback(() => {
@@ -287,23 +257,22 @@ export const useGameActions = () => {
     if (!passenger) return;
 
     // Get the route choice from recent history
-    const recentRoute =
-      gameState.routeHistory?.[gameState.routeHistory.length - 1];
+    const recentRoute = gameState.routeHistory?.[gameState.routeHistory.length - 1];
     const routeChoice = recentRoute?.choice;
 
     // Calculate route-based fare multiplier
     let routeFareMultiplier = 1.0;
     switch (routeChoice) {
-      case "shortcut":
+      case 'shortcut':
         routeFareMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SHORTCUT;
         break;
-      case "normal":
+      case 'normal':
         routeFareMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.NORMAL;
         break;
-      case "scenic":
+      case 'scenic':
         routeFareMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SCENIC;
         break;
-      case "police":
+      case 'police':
         routeFareMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.POLICE;
         break;
     }
@@ -314,14 +283,13 @@ export const useGameActions = () => {
     if (consecutiveStreak && consecutiveStreak.count >= 2) {
       // -10% per consecutive same route after the first
       consecutivePenalty =
-        (consecutiveStreak.count - 1) *
-        GAME_BALANCE.CONSECUTIVE_ROUTE.PENALTY_PER_REPEAT;
+        (consecutiveStreak.count - 1) * GAME_BALANCE.CONSECUTIVE_ROUTE.PENALTY_PER_REPEAT;
       routeFareMultiplier *= 1 - consecutivePenalty;
     }
 
     // Find passenger's preference for the chosen route
     const passengerPreference = passenger.routePreferences?.find(
-      (pref) => pref.route === routeChoice,
+      pref => pref.route === routeChoice
     );
 
     // Apply passenger preference modifier (stacks with route multiplier)
@@ -329,27 +297,17 @@ export const useGameActions = () => {
 
     // Calculate final fare: base fare × route multiplier × passenger preference
     const baseFare = passenger.fare;
-    const modifiedFare = Math.floor(
-      baseFare * routeFareMultiplier * passengerFareModifier,
-    );
+    const modifiedFare = Math.floor(baseFare * routeFareMultiplier * passengerFareModifier);
 
     // Add small random variation (±$5)
     const earnedFare = Math.floor(modifiedFare + Math.random() * 10 - 5);
     const actualEarnings = Math.max(earnedFare, 5); // Minimum $5
 
     // Collect items that might be received
-    const itemsReceived: import("../types/game").InventoryItem[] = [];
-    if (
-      passenger.items &&
-      Math.random() < GAME_BALANCE.PROBABILITIES.ITEM_DROP
-    ) {
-      const randomItem =
-        passenger.items[Math.floor(Math.random() * passenger.items.length)];
-      const newItemResult = ItemService.createInventoryItem(
-        randomItem,
-        passenger.name,
-        false,
-      );
+    const itemsReceived: import('../types/game').InventoryItem[] = [];
+    if (passenger.items && Math.random() < GAME_BALANCE.PROBABILITIES.ITEM_DROP) {
+      const randomItem = passenger.items[Math.floor(Math.random() * passenger.items.length)];
+      const newItemResult = ItemService.createInventoryItem(randomItem, passenger.name, false);
 
       if (newItemResult.success) {
         itemsReceived.push(newItemResult.data);
@@ -360,7 +318,7 @@ export const useGameActions = () => {
     let backstoryUnlocked: { passenger: string; backstory: string } | undefined;
     const backstoryChance = PassengerService.calculateBackstoryChance(
       passenger.id,
-      gameState.passengerBackstories || {},
+      gameState.passengerBackstories || {}
     );
     if (Math.random() < backstoryChance) {
       backstoryUnlocked = {
@@ -372,7 +330,7 @@ export const useGameActions = () => {
     }
 
     // Update game state with earnings and completion data
-    setGameState((prev) => ({
+    setGameState(prev => ({
       ...prev,
       earnings: prev.earnings + actualEarnings,
       ridesCompleted: prev.ridesCompleted + 1,
@@ -389,7 +347,7 @@ export const useGameActions = () => {
 
     // Add backstory to unlocked collection if applicable
     if (backstoryUnlocked) {
-      setGameState((prev) => ({
+      setGameState(prev => ({
         ...prev,
         passengerBackstories: {
           ...prev.passengerBackstories,
@@ -401,13 +359,13 @@ export const useGameActions = () => {
 
   const useItem = useCallback(
     (itemId: string) => {
-      const item = gameState.inventory.find((i) => i.id === itemId);
+      const item = gameState.inventory.find(i => i.id === itemId);
       if (!item || !item.canUse) return;
 
       // Apply item effects
       const newGameStateResult = ItemService.applyItemEffects(gameState, item);
       if (newGameStateResult.success) {
-        setGameState((prev) => {
+        setGameState(prev => {
           let newState = newGameStateResult.data;
 
           // Update item uses if it has limited uses
@@ -422,12 +380,12 @@ export const useGameActions = () => {
             newState = {
               ...newState,
               inventory: prev.inventory
-                .map((i) => (i.id === itemId ? updatedItem : i))
+                .map(i => (i.id === itemId ? updatedItem : i))
                 .filter(
-                  (i) =>
+                  i =>
                     !i.protectiveProperties ||
                     (i.protectiveProperties.usesRemaining &&
-                      i.protectiveProperties.usesRemaining > 0),
+                      i.protectiveProperties.usesRemaining > 0)
                 ),
             };
           }
@@ -436,12 +394,12 @@ export const useGameActions = () => {
         });
       }
     },
-    [gameState, setGameState],
+    [gameState, setGameState]
   );
 
   const tradeItem = useCallback(
     (itemId: string, passenger: Passenger) => {
-      const item = gameState.inventory.find((i) => i.id === itemId);
+      const item = gameState.inventory.find(i => i.id === itemId);
       if (!item || !ItemService.canTradeWith(item, passenger)) return;
 
       const tradeOptions = ItemService.getTradeOptions(item, passenger);
@@ -450,8 +408,8 @@ export const useGameActions = () => {
       // Execute the first available trade
       const trade = tradeOptions[0];
 
-      setGameState((prev) => {
-        let newInventory = prev.inventory.filter((i) => i.id !== itemId);
+      setGameState(prev => {
+        let newInventory = prev.inventory.filter(i => i.id !== itemId);
 
         // Add received item if any
         if (trade.receive) {
@@ -468,10 +426,7 @@ export const useGameActions = () => {
             newState = {
               ...newState,
               hiddenRules: prev.hiddenRules.slice(1),
-              revealedHiddenRules: [
-                ...(prev.revealedHiddenRules || []),
-                revealedRule,
-              ],
+              revealedHiddenRules: [...(prev.revealedHiddenRules || []), revealedRule],
             };
           }
         }
@@ -479,16 +434,14 @@ export const useGameActions = () => {
         return newState;
       });
     },
-    [gameState, setGameState],
+    [gameState, setGameState]
   );
 
   // Process item deterioration and cursed effects periodically
   const processItemEffects = useCallback(() => {
-    setGameState((prev) => {
+    setGameState(prev => {
       // Apply deterioration
-      const deterioratedInventory = ItemService.processItemDeterioration(
-        prev.inventory,
-      );
+      const deterioratedInventory = ItemService.processItemDeterioration(prev.inventory);
 
       // Apply cursed effects
       const cursedEffectsResult = ItemService.applyCursedEffects({
@@ -505,7 +458,7 @@ export const useGameActions = () => {
     const cost = Math.ceil(fuelNeeded * GAME_BALANCE.FUEL_COSTS.PER_PERCENT);
 
     if (gameState.earnings >= cost && gameState.fuel < 100) {
-      setGameState((prev) => ({
+      setGameState(prev => ({
         ...prev,
         fuel: 100,
         earnings: prev.earnings - cost,
@@ -518,7 +471,7 @@ export const useGameActions = () => {
     const cost = Math.ceil(fuelToAdd * GAME_BALANCE.FUEL_COSTS.PER_PERCENT);
 
     if (gameState.earnings >= cost && gameState.fuel < 75) {
-      setGameState((prev) => ({
+      setGameState(prev => ({
         ...prev,
         fuel: prev.fuel + fuelToAdd,
         earnings: prev.earnings - cost,
@@ -528,7 +481,7 @@ export const useGameActions = () => {
 
   const continueFromDropOff = useCallback(() => {
     // Clear the completed ride data and return to waiting phase
-    setGameState((prev) => {
+    setGameState(prev => {
       return {
         ...prev,
         gamePhase: GAME_PHASES.WAITING,
@@ -547,7 +500,7 @@ export const useGameActions = () => {
           showRideRequest();
         }
       },
-      2500 + Math.random() * 2500,
+      2500 + Math.random() * 2500
     ); // Single timeout with random delay
   }, [gameState, setGameState, endShift, showRideRequest]);
 

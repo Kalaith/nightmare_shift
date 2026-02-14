@@ -1,17 +1,17 @@
-import { gameData } from "../data/gameData";
-import { GAME_CONSTANTS } from "../data/constants";
-import { GAME_BALANCE } from "../constants/gameBalance";
-import { RouteService } from "../services/reputationService";
-import type { Passenger } from "../types/game";
+import { gameData } from '../data/gameData';
+import { GAME_CONSTANTS } from '../data/constants';
+import { GAME_BALANCE } from '../constants/gameBalance';
+import { RouteService } from '../services/reputationService';
+import type { Passenger } from '../types/game';
 
-export type RouteChoice = "shortcut" | "normal" | "scenic" | "police";
+export type RouteChoice = 'shortcut' | 'normal' | 'scenic' | 'police';
 export type Strategy =
-  | "shortcut_spam"
-  | "balanced"
-  | "strategic"
-  | "perfect"
-  | "scenic_only"
-  | "random";
+  | 'shortcut_spam'
+  | 'balanced'
+  | 'strategic'
+  | 'perfect'
+  | 'scenic_only'
+  | 'random';
 
 export interface SimulationResult {
   strategy: Strategy;
@@ -44,10 +44,7 @@ export interface SimulationStats {
 }
 
 export class GameSimulator {
-  static simulateShift(
-    strategy: Strategy,
-    verbose: boolean = false,
-  ): SimulationResult {
+  static simulateShift(strategy: Strategy, verbose: boolean = false): SimulationResult {
     let fuel = GAME_CONSTANTS.INITIAL_FUEL;
     let timeRemaining = GAME_CONSTANTS.INITIAL_TIME;
     let earnings = 0;
@@ -58,29 +55,20 @@ export class GameSimulator {
       scenic: 0,
       police: 0,
     };
-    let consecutiveRouteStreak: { type: RouteChoice; count: number } | null =
-      null;
+    let consecutiveRouteStreak: { type: RouteChoice; count: number } | null = null;
     let gameOverReason: string | undefined;
     const REFUEL_THRESHOLD = 30; // Refuel when below 30%
     const FUEL_COST_PER_PERCENT = 0.5; // $0.50 per percent
 
     while (timeRemaining > 0 && fuel > 5) {
       const passenger = this.selectRandomPassenger();
-      const routeChoice = this.chooseRoute(
-        strategy,
-        passenger,
-        consecutiveRouteStreak,
-      );
+      const routeChoice = this.chooseRoute(strategy, passenger, consecutiveRouteStreak);
 
-      if (
-        consecutiveRouteStreak &&
-        consecutiveRouteStreak.type === routeChoice
-      ) {
+      if (consecutiveRouteStreak && consecutiveRouteStreak.type === routeChoice) {
         consecutiveRouteStreak.count++;
         if (
-          routeChoice === "shortcut" &&
-          consecutiveRouteStreak.count >=
-            GAME_BALANCE.CONSECUTIVE_ROUTE.VIOLATION_THRESHOLD
+          routeChoice === 'shortcut' &&
+          consecutiveRouteStreak.count >= GAME_BALANCE.CONSECUTIVE_ROUTE.VIOLATION_THRESHOLD
         ) {
           gameOverReason = `Consecutive shortcut violation (${consecutiveRouteStreak.count} shortcuts)`;
           break;
@@ -96,7 +84,7 @@ export class GameSimulator {
         undefined,
         undefined,
         undefined,
-        passenger,
+        passenger
       );
 
       if (fuel < routeCosts.fuelCost) {
@@ -112,11 +100,7 @@ export class GameSimulator {
 
       fuel -= routeCosts.fuelCost;
       timeRemaining -= routeCosts.timeCost;
-      const fare = this.calculateFare(
-        passenger,
-        routeChoice,
-        consecutiveRouteStreak.count,
-      );
+      const fare = this.calculateFare(passenger, routeChoice, consecutiveRouteStreak.count);
       earnings += fare;
       ridesCompleted++;
       routeDistribution[routeChoice]++;
@@ -136,21 +120,16 @@ export class GameSimulator {
       }
     }
 
-    const success =
-      !gameOverReason && earnings >= GAME_CONSTANTS.MINIMUM_EARNINGS;
+    const success = !gameOverReason && earnings >= GAME_CONSTANTS.MINIMUM_EARNINGS;
 
     if (!success && verbose) {
       console.log(`\n${strategy} FAILED:`);
-      console.log(
-        `  Rides: ${ridesCompleted}, Earnings: $${Math.round(earnings)}`,
-      );
-      console.log(
-        `  Fuel: ${Math.round(fuel)}, Time: ${Math.round(timeRemaining)}min`,
-      );
+      console.log(`  Rides: ${ridesCompleted}, Earnings: $${Math.round(earnings)}`);
+      console.log(`  Fuel: ${Math.round(fuel)}, Time: ${Math.round(timeRemaining)}min`);
       if (gameOverReason) console.log(`  Reason: ${gameOverReason}`);
       else
         console.log(
-          `  Reason: Insufficient earnings ($${Math.round(earnings)} < $${GAME_CONSTANTS.MINIMUM_EARNINGS})`,
+          `  Reason: Insufficient earnings ($${Math.round(earnings)} < $${GAME_CONSTANTS.MINIMUM_EARNINGS})`
         );
     }
 
@@ -170,70 +149,63 @@ export class GameSimulator {
   }
 
   private static selectRandomPassenger(): Passenger {
-    return gameData.passengers[
-      Math.floor(Math.random() * gameData.passengers.length)
-    ];
+    return gameData.passengers[Math.floor(Math.random() * gameData.passengers.length)];
   }
 
   private static chooseRoute(
     strategy: Strategy,
     passenger: Passenger,
-    streak: { type: RouteChoice; count: number } | null,
+    streak: { type: RouteChoice; count: number } | null
   ): RouteChoice {
-    const routes: RouteChoice[] = ["shortcut", "normal", "scenic", "police"];
+    const routes: RouteChoice[] = ['shortcut', 'normal', 'scenic', 'police'];
 
     switch (strategy) {
-      case "shortcut_spam":
-        return "shortcut";
-      case "scenic_only":
-        return "scenic";
-      case "random":
+      case 'shortcut_spam':
+        return 'shortcut';
+      case 'scenic_only':
+        return 'scenic';
+      case 'random':
         return routes[Math.floor(Math.random() * routes.length)];
 
-      case "balanced":
+      case 'balanced':
         if (streak && streak.count >= 2) {
-          const alts = routes.filter((r) => r !== streak.type);
+          const alts = routes.filter(r => r !== streak.type);
           return alts[Math.floor(Math.random() * alts.length)];
         }
-        return "normal";
+        return 'normal';
 
-      case "strategic": {
+      case 'strategic': {
         const prefs = passenger.routePreferences;
-        if (!prefs || prefs.length === 0) return "normal";
+        if (!prefs || prefs.length === 0) return 'normal';
 
-        const feared = prefs.find((p) => p.preference === "fears");
-        const disliked = prefs.find((p) => p.preference === "dislikes");
+        const feared = prefs.find(p => p.preference === 'fears');
+        const disliked = prefs.find(p => p.preference === 'dislikes');
         const avoided = [feared?.route, disliked?.route].filter(
-          (r): r is RouteChoice => r !== undefined,
+          (r): r is RouteChoice => r !== undefined
         );
 
         const loved = prefs.find(
-          (p) =>
-            p.preference === "loves" &&
-            !avoided.includes(p.route as RouteChoice),
+          p => p.preference === 'loves' && !avoided.includes(p.route as RouteChoice)
         );
         if (loved) return loved.route as RouteChoice;
 
         const liked = prefs.find(
-          (p) =>
-            p.preference === "likes" &&
-            !avoided.includes(p.route as RouteChoice),
+          p => p.preference === 'likes' && !avoided.includes(p.route as RouteChoice)
         );
         if (liked) return liked.route as RouteChoice;
 
         if (avoided.length > 0) {
-          const alts = routes.filter((r) => !avoided.includes(r));
-          if (alts.length > 0)
-            return alts[Math.floor(Math.random() * alts.length)];
+          const alts = routes.filter(r => !avoided.includes(r));
+          if (alts.length > 0) return alts[Math.floor(Math.random() * alts.length)];
         }
-        return "normal";
+        return 'normal';
       }
 
-      case "perfect": {
+      case 'perfect': {
         const prefs = passenger.routePreferences;
-        if (!prefs || prefs.length === 0) return "normal";
+        if (!prefs || prefs.length === 0) return 'normal';
 
-        let bestRoute: RouteChoice = "normal";
+        let bestRoute: RouteChoice = 'normal';
         let bestScore = 0;
 
         // Get fuel costs for each route type from constants
@@ -247,11 +219,11 @@ export class GameSimulator {
         for (const pref of prefs) {
           const route = pref.route as RouteChoice;
           const routeMult =
-            route === "shortcut"
+            route === 'shortcut'
               ? GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SHORTCUT
-              : route === "scenic"
+              : route === 'scenic'
                 ? GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SCENIC
-                : route === "police"
+                : route === 'police'
                   ? GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.POLICE
                   : GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.NORMAL;
           const passengerMult = pref.fareModifier || 1.0;
@@ -271,41 +243,37 @@ export class GameSimulator {
       }
 
       default:
-        return "normal";
+        return 'normal';
     }
   }
 
   private static calculateFare(
     passenger: Passenger,
     routeChoice: RouteChoice,
-    consecutiveCount: number,
+    consecutiveCount: number
   ): number {
     let routeMultiplier = 1.0;
     switch (routeChoice) {
-      case "shortcut":
+      case 'shortcut':
         routeMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SHORTCUT;
         break;
-      case "scenic":
+      case 'scenic':
         routeMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SCENIC;
         break;
-      case "police":
+      case 'police':
         routeMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.POLICE;
         break;
-      case "normal":
+      case 'normal':
         routeMultiplier = GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.NORMAL;
         break;
     }
 
     if (consecutiveCount >= 2) {
-      const penalty =
-        (consecutiveCount - 1) *
-        GAME_BALANCE.CONSECUTIVE_ROUTE.PENALTY_PER_REPEAT;
+      const penalty = (consecutiveCount - 1) * GAME_BALANCE.CONSECUTIVE_ROUTE.PENALTY_PER_REPEAT;
       routeMultiplier *= 1 - penalty;
     }
 
-    const preference = passenger.routePreferences?.find(
-      (p) => p.route === routeChoice,
-    );
+    const preference = passenger.routePreferences?.find(p => p.route === routeChoice);
     const passengerModifier = preference?.fareModifier || 1.0;
     const fare = passenger.fare * routeMultiplier * passengerModifier;
 
@@ -313,59 +281,57 @@ export class GameSimulator {
   }
 
   static printReport(stats: SimulationStats): void {
-    console.log("\n" + "=".repeat(80));
-    console.log("📊 NIGHTMARE SHIFT - BALANCE TEST REPORT");
-    console.log("=".repeat(80));
+    console.log('\n' + '='.repeat(80));
+    console.log('📊 NIGHTMARE SHIFT - BALANCE TEST REPORT');
+    console.log('='.repeat(80));
     console.log(`\nTotal Simulations: ${stats.totalRuns}`);
     console.log(`Overall Success Rate: ${stats.successRate.toFixed(1)}%`);
     console.log(`Average Earnings: $${stats.averageEarnings}`);
     console.log(`Average Rides: ${stats.averageRides}`);
     console.log(`Minimum Required: $${GAME_CONSTANTS.MINIMUM_EARNINGS}`);
 
-    console.log("\n" + "-".repeat(80));
-    console.log("STRATEGY BREAKDOWN");
-    console.log("-".repeat(80));
+    console.log('\n' + '-'.repeat(80));
+    console.log('STRATEGY BREAKDOWN');
+    console.log('-'.repeat(80));
 
     Object.entries(stats.strategyResults).forEach(([strategy, result]) => {
       if (result.runs > 0) {
         const successRate = (result.successes / result.runs) * 100;
         const avgFarePerRide =
-          result.avgRides > 0
-            ? Math.round(result.avgEarnings / result.avgRides)
-            : 0;
-        console.log(`\n${strategy.toUpperCase().replace("_", " ")}:`);
+          result.avgRides > 0 ? Math.round(result.avgEarnings / result.avgRides) : 0;
+        console.log(`\n${strategy.toUpperCase().replace('_', ' ')}:`);
         console.log(`  Runs: ${result.runs}`);
         console.log(`  Success Rate: ${successRate.toFixed(1)}%`);
         console.log(`  Avg Earnings: $${result.avgEarnings}`);
         console.log(`  Avg Rides: ${result.avgRides}`);
         console.log(`  Avg Fare/Ride: $${avgFarePerRide}`);
         console.log(
-          `  ${result.avgEarnings >= GAME_CONSTANTS.MINIMUM_EARNINGS ? "✅ PASS" : "❌ FAIL"}`,
+          `  ${result.avgEarnings >= GAME_CONSTANTS.MINIMUM_EARNINGS ? '✅ PASS' : '❌ FAIL'}`
         );
       }
     });
 
-    console.log("\n" + "=".repeat(80));
-    console.log("ROUTE ECONOMICS");
-    console.log("=".repeat(80));
+    console.log('\n' + '='.repeat(80));
+    console.log('ROUTE ECONOMICS');
+    console.log('='.repeat(80));
 
-    console.log("\nBase Costs (no modifiers):");
+    console.log('\nBase Costs (no modifiers):');
     console.log(
-      `  Shortcut: ${GAME_CONSTANTS.FUEL_COST_SHORTCUT}f, ${GAME_CONSTANTS.TIME_COST_SHORTCUT}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SHORTCUT}x fare`,
+      `  Shortcut: ${GAME_CONSTANTS.FUEL_COST_SHORTCUT}f, ${GAME_CONSTANTS.TIME_COST_SHORTCUT}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SHORTCUT}x fare`
     );
     console.log(
-      `  Normal:   ${GAME_CONSTANTS.FUEL_COST_NORMAL}f, ${GAME_CONSTANTS.TIME_COST_NORMAL}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.NORMAL}x fare`,
+      `  Normal:   ${GAME_CONSTANTS.FUEL_COST_NORMAL}f, ${GAME_CONSTANTS.TIME_COST_NORMAL}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.NORMAL}x fare`
     );
     console.log(
-      `  Scenic:   ${GAME_CONSTANTS.FUEL_COST_SCENIC}f, ${GAME_CONSTANTS.TIME_COST_SCENIC}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SCENIC}x fare`,
+      `  Scenic:   ${GAME_CONSTANTS.FUEL_COST_SCENIC}f, ${GAME_CONSTANTS.TIME_COST_SCENIC}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.SCENIC}x fare`
     );
     console.log(
-      `  Police:   ${GAME_CONSTANTS.FUEL_COST_POLICE}f, ${GAME_CONSTANTS.TIME_COST_POLICE}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.POLICE}x fare`,
+      `  Police:   ${GAME_CONSTANTS.FUEL_COST_POLICE}f, ${GAME_CONSTANTS.TIME_COST_POLICE}m → ${GAME_BALANCE.ROUTE_FARE_MULTIPLIERS.POLICE}x fare`
     );
 
-    console.log("\n" + "=".repeat(80));
-    console.log("BALANCE ANALYSIS");
-    console.log("=".repeat(80));
+    console.log('\n' + '='.repeat(80));
+    console.log('BALANCE ANALYSIS');
+    console.log('='.repeat(80));
 
     const perfect = stats.strategyResults.perfect;
     const strategic = stats.strategyResults.strategic;
@@ -373,36 +339,24 @@ export class GameSimulator {
     const scenic = stats.strategyResults.scenic_only;
 
     if (perfect && strategic && shortcut && scenic) {
-      console.log(
-        `\n✓ Perfect: ${((perfect.successes / perfect.runs) * 100).toFixed(1)}%`,
-      );
-      console.log(
-        `✓ Strategic: ${((strategic.successes / strategic.runs) * 100).toFixed(1)}%`,
-      );
-      console.log(
-        `✓ Shortcut spam: ${((shortcut.successes / shortcut.runs) * 100).toFixed(1)}%`,
-      );
-      console.log(
-        `✓ Scenic only: ${((scenic.successes / scenic.runs) * 100).toFixed(1)}%`,
-      );
+      console.log(`\n✓ Perfect: ${((perfect.successes / perfect.runs) * 100).toFixed(1)}%`);
+      console.log(`✓ Strategic: ${((strategic.successes / strategic.runs) * 100).toFixed(1)}%`);
+      console.log(`✓ Shortcut spam: ${((shortcut.successes / shortcut.runs) * 100).toFixed(1)}%`);
+      console.log(`✓ Scenic only: ${((scenic.successes / scenic.runs) * 100).toFixed(1)}%`);
 
       if (strategic.successes / strategic.runs >= 0.75) {
-        console.log(
-          "\n✅ BALANCE GOOD: Strategic play is highly successful (75%+)",
-        );
+        console.log('\n✅ BALANCE GOOD: Strategic play is highly successful (75%+)');
       } else {
-        console.log(
-          "\n⚠️  BALANCE ISSUE: Strategic play should be 75%+ successful",
-        );
+        console.log('\n⚠️  BALANCE ISSUE: Strategic play should be 75%+ successful');
       }
 
       if (shortcut.successes / shortcut.runs <= 0.1) {
-        console.log("✅ BALANCE GOOD: Shortcut spam is not viable");
+        console.log('✅ BALANCE GOOD: Shortcut spam is not viable');
       } else {
-        console.log("⚠️  BALANCE ISSUE: Shortcut spam too successful");
+        console.log('⚠️  BALANCE ISSUE: Shortcut spam too successful');
       }
     }
 
-    console.log("\n" + "=".repeat(80) + "\n");
+    console.log('\n' + '='.repeat(80) + '\n');
   }
 }

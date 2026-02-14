@@ -7,17 +7,17 @@ import type {
   GuidelineDecision,
   DetectedTell,
   GuidelineException,
-} from "./rules";
-import type { Passenger, RouteChoice, PassengerReputation } from "./passenger";
+} from './rules';
+import type { Passenger, RouteChoice, PassengerReputation } from './passenger';
 import type {
   WeatherCondition,
   TimeOfDay,
   Season,
   EnvironmentalHazard,
   WeatherEffect,
-} from "./environment";
-import type { Location } from "./location";
-import type { InventoryItem } from "./inventory";
+} from './environment';
+import type { Location } from './location';
+import type { InventoryItem } from './inventory';
 
 export interface GameState {
   currentScreen: string;
@@ -33,18 +33,18 @@ export interface GameState {
   currentPassenger: Passenger | null;
   currentRide: CurrentRide | null;
   gamePhase:
-    | "waiting"
-    | "rideRequest"
-    | "driving"
-    | "interaction"
-    | "dropOff"
-    | "gameOver"
-    | "success";
+    | 'waiting'
+    | 'rideRequest'
+    | 'driving'
+    | 'interaction'
+    | 'dropOff'
+    | 'gameOver'
+    | 'success';
   usedPassengers: number[];
   shiftStartTime: number | null;
   sessionStartTime: number;
   currentDialogue?: Dialogue;
-  currentDrivingPhase?: "pickup" | "destination";
+  currentDrivingPhase?: 'pickup' | 'destination';
   currentLocation?: Location;
   lastRideCompletion?: {
     passenger: Passenger;
@@ -96,14 +96,14 @@ export interface CurrentRide {
   startTime: number;
   estimatedDuration: number;
   actualFare: number;
-  routeType: "normal" | "shortcut" | "scenic" | "police";
+  routeType: 'normal' | 'shortcut' | 'scenic' | 'police';
 }
 
 export interface Dialogue {
   text: string;
-  speaker: "passenger" | "driver" | "system";
+  speaker: 'passenger' | 'driver' | 'system';
   timestamp: number;
-  type: "normal" | "supernatural" | "rule_related" | "backstory";
+  type: 'normal' | 'supernatural' | 'rule_related' | 'backstory';
 }
 
 export interface GameEngineResult {

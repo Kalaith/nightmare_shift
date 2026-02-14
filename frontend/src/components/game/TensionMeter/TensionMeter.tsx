@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
-import type { GameState, Passenger, DetectedTell } from "../../../types/game";
-import { GuidelineEngine } from "../../../services/guidelineEngine";
-import styles from "./TensionMeter.module.css";
+import React, { useState, useEffect } from 'react';
+import type { GameState, Passenger, DetectedTell } from '../../../types/game';
+import { GuidelineEngine } from '../../../services/guidelineEngine';
+import styles from './TensionMeter.module.css';
 
 interface TensionMeterProps {
   gameState: GameState;
   passenger?: Passenger;
   detectedTells?: DetectedTell[];
   currentDecision?: {
-    type: "pending" | "made" | "none";
+    type: 'pending' | 'made' | 'none';
     confidence?: number;
     timeRemaining?: number;
   };
@@ -66,19 +66,12 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
 
     // Passenger deception factor
     const deceptionLevel = passenger.deceptionLevel || 0;
-    const passengerDeception = Math.min(
-      1,
-      deceptionLevel + (passenger.stressLevel || 0) * 0.3,
-    );
+    const passengerDeception = Math.min(1, deceptionLevel + (passenger.stressLevel || 0) * 0.3);
 
     // Tell conflict factor
-    const obviousTells = detectedTells.filter(
-      (t) => t.tell.intensity === "obvious",
-    );
-    const subtleTells = detectedTells.filter(
-      (t) => t.tell.intensity === "subtle",
-    );
-    const missedTells = detectedTells.filter((t) => !t.playerNoticed);
+    const obviousTells = detectedTells.filter(t => t.tell.intensity === 'obvious');
+    const subtleTells = detectedTells.filter(t => t.tell.intensity === 'subtle');
+    const missedTells = detectedTells.filter(t => !t.playerNoticed);
     const conflictingTells = obviousTells.length > 0 && subtleTells.length > 0;
     const tellConflict = conflictingTells
       ? 0.8
@@ -86,18 +79,12 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
 
     // Time pressure factor
     let timePresssure = 0;
-    if (
-      currentDecision?.type === "pending" &&
-      currentDecision.timeRemaining !== undefined
-    ) {
+    if (currentDecision?.type === 'pending' && currentDecision.timeRemaining !== undefined) {
       timePresssure = Math.max(0, (30 - currentDecision.timeRemaining) / 30);
     }
 
     // Player uncertainty factor (based on reading difficulty)
-    const readingDifficulty = GuidelineEngine.calculateReadingDifficulty(
-      passenger,
-      gameState,
-    );
+    const readingDifficulty = GuidelineEngine.calculateReadingDifficulty(passenger, gameState);
     const playerTrust = gameState.playerTrust || 0;
     const playerUncertainty = readingDifficulty * (1 - playerTrust);
 
@@ -111,7 +98,7 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
         tellConflict * 0.25 +
         timePresssure * 0.2 +
         playerUncertainty * 0.2 +
-        environmentalStress * 0.1,
+        environmentalStress * 0.1
     );
 
     return {
@@ -130,20 +117,20 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
     // Weather conditions
     if (gameState.currentWeather) {
       switch (gameState.currentWeather.type) {
-        case "thunderstorm":
+        case 'thunderstorm':
           stress += 0.4;
           break;
-        case "fog":
+        case 'fog':
           stress += 0.3;
           break;
-        case "rain":
+        case 'rain':
           stress += 0.2;
           break;
       }
     }
 
     // Time of day
-    if (gameState.timeOfDay?.phase === "latenight") {
+    if (gameState.timeOfDay?.phase === 'latenight') {
       stress += 0.3;
     }
 
@@ -168,8 +155,8 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
         1,
         factors.tellConflict * 0.4 +
           factors.playerUncertainty * 0.4 +
-          factors.passengerDeception * 0.2,
-      ),
+          factors.passengerDeception * 0.2
+      )
     );
     setDoubtLevel(newDoubtLevel);
 
@@ -177,7 +164,7 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
     const decisionConfidence = currentDecision?.confidence || 0.5;
     const newConfidenceLevel = Math.max(
       0.1,
-      Math.min(0.9, decisionConfidence * (1 - factors.playerUncertainty)),
+      Math.min(0.9, decisionConfidence * (1 - factors.playerUncertainty))
     );
     setConfidenceLevel(newConfidenceLevel);
   };
@@ -186,27 +173,27 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
     const indicators: string[] = [];
 
     if (factors.passengerDeception > 0.6) {
-      indicators.push("Passenger seems deceptive");
+      indicators.push('Passenger seems deceptive');
     }
 
     if (factors.tellConflict > 0.5) {
-      indicators.push("Conflicting behavioral signals detected");
+      indicators.push('Conflicting behavioral signals detected');
     }
 
     if (factors.timePresssure > 0.7) {
-      indicators.push("Decision time running out");
+      indicators.push('Decision time running out');
     }
 
     if (factors.playerUncertainty > 0.7) {
-      indicators.push("Difficult to read this passenger");
+      indicators.push('Difficult to read this passenger');
     }
 
     if (factors.environmentalStress > 0.5) {
-      indicators.push("Hazardous driving conditions");
+      indicators.push('Hazardous driving conditions');
     }
 
     if (doubtLevel > 0.8) {
-      indicators.push("Overwhelming uncertainty");
+      indicators.push('Overwhelming uncertainty');
     }
 
     setStressIndicators(indicators);
@@ -221,19 +208,19 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
   };
 
   const getTensionLabel = (level: number) => {
-    if (level >= 0.8) return "CRITICAL";
-    if (level >= 0.6) return "HIGH";
-    if (level >= 0.4) return "MODERATE";
-    if (level >= 0.2) return "LOW";
-    return "CALM";
+    if (level >= 0.8) return 'CRITICAL';
+    if (level >= 0.6) return 'HIGH';
+    if (level >= 0.4) return 'MODERATE';
+    if (level >= 0.2) return 'LOW';
+    return 'CALM';
   };
 
   const getDoubtMessage = () => {
-    if (doubtLevel >= 0.8) return "Should I trust my instincts or the rules?";
+    if (doubtLevel >= 0.8) return 'Should I trust my instincts or the rules?';
     if (doubtLevel >= 0.6) return "Something doesn't feel right...";
-    if (doubtLevel >= 0.4) return "Mixed signals from this passenger";
-    if (doubtLevel >= 0.2) return "Minor inconsistencies noticed";
-    return "Passenger seems straightforward";
+    if (doubtLevel >= 0.4) return 'Mixed signals from this passenger';
+    if (doubtLevel >= 0.2) return 'Minor inconsistencies noticed';
+    return 'Passenger seems straightforward';
   };
 
   if (!isVisible) return null;
@@ -245,9 +232,7 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
           <span className={styles.titleIcon}>🧠</span>
           Psychological State
         </h4>
-        <div
-          className={`${styles.tensionLevel} ${getTensionColor(tensionFactors.overallTension)}`}
-        >
+        <div className={`${styles.tensionLevel} ${getTensionColor(tensionFactors.overallTension)}`}>
           {getTensionLabel(tensionFactors.overallTension)}
         </div>
       </div>
@@ -261,7 +246,7 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
             style={{ width: `${tensionFactors.overallTension * 100}%` }}
           />
           <div className={styles.meterMarkers}>
-            {[0.2, 0.4, 0.6, 0.8].map((marker) => (
+            {[0.2, 0.4, 0.6, 0.8].map(marker => (
               <div
                 key={marker}
                 className={styles.meterMarker}
@@ -270,9 +255,7 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
             ))}
           </div>
         </div>
-        <div className={styles.meterValue}>
-          {Math.round(tensionFactors.overallTension * 100)}%
-        </div>
+        <div className={styles.meterValue}>{Math.round(tensionFactors.overallTension * 100)}%</div>
       </div>
 
       {/* Psychological Indicators */}
@@ -302,9 +285,7 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
               style={{ width: `${confidenceLevel * 100}%` }}
             />
           </div>
-          <div className={styles.confidenceValue}>
-            {Math.round(confidenceLevel * 100)}% certain
-          </div>
+          <div className={styles.confidenceValue}>{Math.round(confidenceLevel * 100)}% certain</div>
         </div>
       </div>
 
@@ -313,14 +294,11 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
         <h5 className={styles.breakdownTitle}>Stress Factors:</h5>
         <div className={styles.factorList}>
           {Object.entries(tensionFactors)
-            .filter(([key]) => key !== "overallTension")
+            .filter(([key]) => key !== 'overallTension')
             .map(([key, value]) => (
               <div key={key} className={styles.factor}>
                 <span className={styles.factorLabel}>
-                  {key
-                    .replace(/([A-Z])/g, " $1")
-                    .replace(/^./, (str) => str.toUpperCase())}
-                  :
+                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
                 </span>
                 <div className={styles.factorBar}>
                   <div
@@ -328,17 +306,11 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
                     style={{
                       width: `${value * 100}%`,
                       backgroundColor:
-                        value > 0.6
-                          ? "#ef4444"
-                          : value > 0.3
-                            ? "#fbbf24"
-                            : "#22c55e",
+                        value > 0.6 ? '#ef4444' : value > 0.3 ? '#fbbf24' : '#22c55e',
                     }}
                   />
                 </div>
-                <span className={styles.factorValue}>
-                  {Math.round(value * 100)}%
-                </span>
+                <span className={styles.factorValue}>{Math.round(value * 100)}%</span>
               </div>
             ))}
         </div>

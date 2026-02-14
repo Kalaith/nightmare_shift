@@ -1,9 +1,9 @@
 // Passenger related types
-import type { PassengerTell, PassengerStateProfile } from "./rules";
+import type { PassengerTell, PassengerStateProfile } from './rules';
 
 export interface RoutePreference {
-  route: "normal" | "shortcut" | "scenic" | "police";
-  preference: "loves" | "likes" | "neutral" | "dislikes" | "fears";
+  route: 'normal' | 'shortcut' | 'scenic' | 'police';
+  preference: 'loves' | 'likes' | 'neutral' | 'dislikes' | 'fears';
   reason: string;
   fareModifier: number; // Multiplier for fare (0.5 = 50% fare, 1.5 = 150% fare)
   stressModifier: number; // How much this route affects their stress (-0.3 to +0.5)
@@ -21,7 +21,7 @@ export interface Passenger {
   personalRule: string;
   supernatural: string;
   fare: number;
-  rarity: "common" | "uncommon" | "rare" | "legendary";
+  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
   items: string[];
   dialogue: string[];
   relationships: number[];
@@ -35,13 +35,13 @@ export interface Passenger {
   routePreferences?: RoutePreference[]; // How they feel about different route choices
   ruleModification?: {
     canModify: boolean;
-    type: "remove_rule" | "reveal_hidden" | "add_temporary";
+    type: 'remove_rule' | 'reveal_hidden' | 'add_temporary';
     description: string;
     newRule?: {
       id: number;
       title: string;
       description: string;
-      difficulty: "easy" | "medium" | "hard" | "expert" | "nightmare";
+      difficulty: 'easy' | 'medium' | 'hard' | 'expert' | 'nightmare';
       temporary: boolean;
       duration: number;
     };
@@ -54,13 +54,13 @@ export interface PassengerReputation {
   positiveChoices: number;
   negativeChoices: number;
   lastEncounter: number;
-  relationshipLevel: "hostile" | "neutral" | "friendly" | "trusted";
+  relationshipLevel: 'hostile' | 'neutral' | 'friendly' | 'trusted';
   specialUnlocks?: string[];
 }
 
 export interface RouteChoice {
-  choice: "normal" | "shortcut" | "scenic" | "police";
-  phase: "pickup" | "destination";
+  choice: 'normal' | 'shortcut' | 'scenic' | 'police';
+  phase: 'pickup' | 'destination';
   fuelCost: number;
   timeCost: number;
   riskLevel: number;

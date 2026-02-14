@@ -407,7 +407,7 @@
   cursor: pointer;
 }
 
-.optionToggle input[type="checkbox"] {
+.optionToggle input[type='checkbox'] {
   width: 16px;
   height: 16px;
 }

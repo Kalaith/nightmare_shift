@@ -204,11 +204,7 @@
   padding: 20px;
   overflow-y: auto;
   border-right: 2px solid #334155;
-  background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 0.5) 0%,
-    rgba(30, 41, 59, 0.5) 100%
-  );
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
 }
 
 .characterCard {
@@ -300,11 +296,7 @@
 }
 
 .rarityLegendary {
-  background: linear-gradient(
-    45deg,
-    rgba(251, 191, 36, 0.2),
-    rgba(239, 68, 68, 0.2)
-  );
+  background: linear-gradient(45deg, rgba(251, 191, 36, 0.2), rgba(239, 68, 68, 0.2));
   color: #fbbf24;
 }
 

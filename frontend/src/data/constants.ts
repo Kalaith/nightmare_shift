@@ -1,14 +1,10 @@
-import type {
-  StorageKeys,
-  GameConstants,
-  RarityWeights,
-} from "../types/constants";
+import type { StorageKeys, GameConstants, RarityWeights } from '../types/constants';
 
 export const STORAGE_KEYS: StorageKeys = {
-  PLAYER_STATS: "nightshift_player_stats",
-  LEADERBOARD: "nightshift_leaderboard",
-  SAVE_GAME: "nightshift_saved_game",
-  BACKSTORY_PROGRESS: "nightshift_backstories",
+  PLAYER_STATS: 'nightshift_player_stats',
+  LEADERBOARD: 'nightshift_leaderboard',
+  SAVE_GAME: 'nightshift_saved_game',
+  BACKSTORY_PROGRESS: 'nightshift_backstories',
 };
 
 export const GAME_CONSTANTS: GameConstants = {
@@ -43,20 +39,20 @@ export const RARITY_WEIGHTS: RarityWeights = {
 };
 
 export const SCREENS = {
-  LOADING: "loading",
-  LEADERBOARD: "leaderboard",
-  BRIEFING: "briefing",
-  GAME: "game",
-  GAME_OVER: "gameOver",
-  SUCCESS: "success",
-  SKILL_TREE: "skillTree",
-  ALMANAC: "almanac",
+  LOADING: 'loading',
+  LEADERBOARD: 'leaderboard',
+  BRIEFING: 'briefing',
+  GAME: 'game',
+  GAME_OVER: 'gameOver',
+  SUCCESS: 'success',
+  SKILL_TREE: 'skillTree',
+  ALMANAC: 'almanac',
 } as const;
 
 export const GAME_PHASES = {
-  WAITING: "waiting",
-  RIDE_REQUEST: "rideRequest",
-  DRIVING: "driving",
-  INTERACTION: "interaction",
-  DROP_OFF: "dropOff",
+  WAITING: 'waiting',
+  RIDE_REQUEST: 'rideRequest',
+  DRIVING: 'driving',
+  INTERACTION: 'interaction',
+  DROP_OFF: 'dropOff',
 } as const;

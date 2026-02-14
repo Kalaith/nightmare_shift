@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
-import type { PlayerStats, LeaderboardEntry } from "../types/game";
-import { STORAGE_KEYS } from "../data/constants";
-import LocalStorage, { LeaderboardService } from "../services/storageService";
+import { useState, useCallback } from 'react';
+import type { PlayerStats, LeaderboardEntry } from '../types/game';
+import { STORAGE_KEYS } from '../data/constants';
+import LocalStorage, { LeaderboardService } from '../services/storageService';
 
 const getDefaultPlayerStats = (): PlayerStats => ({
   totalShiftsCompleted: 0,
@@ -29,23 +29,15 @@ const getDefaultPlayerStats = (): PlayerStats => ({
 
 export const usePlayerStats = () => {
   const [playerStats, setPlayerStats] = useState<PlayerStats>(() => {
-    const loaded = LocalStorage.load(
-      STORAGE_KEYS.PLAYER_STATS,
-      getDefaultPlayerStats(),
-    );
+    const loaded = LocalStorage.load(STORAGE_KEYS.PLAYER_STATS, getDefaultPlayerStats());
     // Merge with defaults to ensure new fields exist in old saves
     return { ...getDefaultPlayerStats(), ...loaded };
   });
 
   const updatePlayerStats = useCallback(
-    (
-      updates:
-        | Partial<PlayerStats>
-        | ((prev: PlayerStats) => Partial<PlayerStats>),
-    ) => {
-      setPlayerStats((prev) => {
-        const derivedUpdates =
-          typeof updates === "function" ? updates(prev) : updates;
+    (updates: Partial<PlayerStats> | ((prev: PlayerStats) => Partial<PlayerStats>)) => {
+      setPlayerStats(prev => {
+        const derivedUpdates = typeof updates === 'function' ? updates(prev) : updates;
         // If no updates, return prev to avoid unnecessary re-renders
         if (Object.keys(derivedUpdates).length === 0) return prev;
 
@@ -59,7 +51,7 @@ export const usePlayerStats = () => {
         return newStats;
       });
     },
-    [],
+    []
   );
 
   const addToLeaderboard = (entry: {
@@ -72,8 +64,7 @@ export const usePlayerStats = () => {
     difficultyLevel: number;
   }) => {
     const leaderboardEntry: LeaderboardEntry = {
-      score:
-        entry.earnings + entry.ridesCompleted * 10 - entry.rulesViolated * 5,
+      score: entry.earnings + entry.ridesCompleted * 10 - entry.rulesViolated * 5,
       timeRemaining: 0, // This would need to be calculated from game state
       date: new Date().toLocaleDateString(),
       survived: entry.survived,
@@ -88,7 +79,7 @@ export const usePlayerStats = () => {
   // Almanac functions
   const trackPassengerEncounter = useCallback(
     (passengerId: number) => {
-      updatePlayerStats((prev) => {
+      updatePlayerStats(prev => {
         const currentProgress = prev.almanacProgress[passengerId] || {
           passengerId,
           encountered: false,
@@ -110,12 +101,12 @@ export const usePlayerStats = () => {
         };
       });
     },
-    [updatePlayerStats],
+    [updatePlayerStats]
   );
 
   const upgradeKnowledge = useCallback(
     (passengerId: number) => {
-      updatePlayerStats((prev) => {
+      updatePlayerStats(prev => {
         const currentProgress = prev.almanacProgress[passengerId];
         if (!currentProgress || currentProgress.knowledgeLevel >= 3) return {};
 
@@ -129,11 +120,7 @@ export const usePlayerStats = () => {
               ...prev.almanacProgress,
               [passengerId]: {
                 ...currentProgress,
-                knowledgeLevel: (currentProgress.knowledgeLevel + 1) as
-                  | 0
-                  | 1
-                  | 2
-                  | 3,
+                knowledgeLevel: (currentProgress.knowledgeLevel + 1) as 0 | 1 | 2 | 3,
               },
             },
           };
@@ -141,32 +128,32 @@ export const usePlayerStats = () => {
         return {};
       });
     },
-    [updatePlayerStats],
+    [updatePlayerStats]
   );
 
   const awardLoreFragments = useCallback(
     (amount: number) => {
-      updatePlayerStats((prev) => ({
+      updatePlayerStats(prev => ({
         loreFragments: prev.loreFragments + amount,
       }));
     },
-    [updatePlayerStats],
+    [updatePlayerStats]
   );
 
   // Skill Tree functions
   const purchaseSkill = useCallback(
     (skillId: string) => {
       // Import skill data to get cost
-      import("../data/skillTreeData").then(({ SKILL_TREE }) => {
-        updatePlayerStats((prev) => {
+      import('../data/skillTreeData').then(({ SKILL_TREE }) => {
+        updatePlayerStats(prev => {
           if (prev.unlockedSkills.includes(skillId)) return {};
 
-          const skill = SKILL_TREE.find((s) => s.id === skillId);
+          const skill = SKILL_TREE.find(s => s.id === skillId);
           if (!skill) return {};
 
           // Check prerequisites
-          const hasPrereqs = skill.prerequisites.every((prereqId) =>
-            prev.unlockedSkills.includes(prereqId),
+          const hasPrereqs = skill.prerequisites.every(prereqId =>
+            prev.unlockedSkills.includes(prereqId)
           );
 
           if (hasPrereqs && prev.bankBalance >= skill.cost) {
@@ -179,16 +166,16 @@ export const usePlayerStats = () => {
         });
       });
     },
-    [updatePlayerStats],
+    [updatePlayerStats]
   );
 
   const addToBankBalance = useCallback(
     (amount: number) => {
-      updatePlayerStats((prev) => ({
+      updatePlayerStats(prev => ({
         bankBalance: prev.bankBalance + amount,
       }));
     },
-    [updatePlayerStats],
+    [updatePlayerStats]
   );
 
   return {

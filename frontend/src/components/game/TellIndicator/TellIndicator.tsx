@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from "react";
-import type {
-  PassengerTell,
-  DetectedTell,
-  Passenger,
-} from "../../../types/game";
-import styles from "./TellIndicator.module.css";
+import React, { useState, useEffect } from 'react';
+import type { PassengerTell, DetectedTell, Passenger } from '../../../types/game';
+import styles from './TellIndicator.module.css';
 
 interface TellIndicatorProps {
   detectedTells: DetectedTell[];
@@ -35,9 +31,7 @@ export const TellIndicator: React.FC<TellIndicatorProps> = ({
       const sortedTells = [...detectedTells].sort((a, b) => {
         // Show obvious tells first, then moderate, then subtle
         const intensityOrder = { obvious: 0, moderate: 1, subtle: 2 };
-        return (
-          intensityOrder[a.tell.intensity] - intensityOrder[b.tell.intensity]
-        );
+        return intensityOrder[a.tell.intensity] - intensityOrder[b.tell.intensity];
       });
 
       sortedTells.forEach((tell, index) => {
@@ -45,15 +39,13 @@ export const TellIndicator: React.FC<TellIndicatorProps> = ({
         const perceptionDelay = tell.playerNoticed ? 0 : 2000; // Delay unnoticed tells
 
         setTimeout(() => {
-          setVisibleTells((prev) => {
-            if (!prev.some((t) => t.detectionTime === tell.detectionTime)) {
-              setAnimatingTells((prev) =>
-                new Set(prev).add(tell.detectionTime),
-              );
+          setVisibleTells(prev => {
+            if (!prev.some(t => t.detectionTime === tell.detectionTime)) {
+              setAnimatingTells(prev => new Set(prev).add(tell.detectionTime));
 
               // Remove animation flag after animation completes
               setTimeout(() => {
-                setAnimatingTells((prev) => {
+                setAnimatingTells(prev => {
                   const newSet = new Set(prev);
                   newSet.delete(tell.detectionTime);
                   return newSet;
@@ -73,16 +65,16 @@ export const TellIndicator: React.FC<TellIndicatorProps> = ({
 
   const getTellIcon = (tell: PassengerTell) => {
     const typeIcons = {
-      verbal: "💬",
-      behavioral: "🎭",
-      visual: "👁️",
-      environmental: "🌫️",
+      verbal: '💬',
+      behavioral: '🎭',
+      visual: '👁️',
+      environmental: '🌫️',
     };
 
     const intensityIcons = {
-      obvious: "🔴",
-      moderate: "🟡",
-      subtle: "🔵",
+      obvious: '🔴',
+      moderate: '🟡',
+      subtle: '🔵',
     };
 
     return {
@@ -99,9 +91,9 @@ export const TellIndicator: React.FC<TellIndicatorProps> = ({
 
   const getPlayerNoticeStatus = (detected: DetectedTell) => {
     if (detected.playerNoticed) {
-      return { icon: "✓", className: styles.noticed, text: "Noticed" };
+      return { icon: '✓', className: styles.noticed, text: 'Noticed' };
     } else {
-      return { icon: "?", className: styles.missed, text: "Missed" };
+      return { icon: '?', className: styles.missed, text: 'Missed' };
     }
   };
 
@@ -130,23 +122,16 @@ export const TellIndicator: React.FC<TellIndicatorProps> = ({
         <div className={styles.trustLevel}>
           <span className={styles.trustLabel}>Perception:</span>
           <div className={styles.trustBar}>
-            <div
-              className={styles.trustFill}
-              style={{ width: `${playerTrust * 100}%` }}
-            />
+            <div className={styles.trustFill} style={{ width: `${playerTrust * 100}%` }} />
           </div>
-          <span className={styles.trustValue}>
-            {Math.round(playerTrust * 100)}%
-          </span>
+          <span className={styles.trustValue}>{Math.round(playerTrust * 100)}%</span>
         </div>
       </div>
 
       <div className={styles.tellsList}>
-        {visibleTells.map((detectedTell) => {
+        {visibleTells.map(detectedTell => {
           const icons = getTellIcon(detectedTell.tell);
-          const reliability = getTellReliabilityColor(
-            detectedTell.tell.reliability,
-          );
+          const reliability = getTellReliabilityColor(detectedTell.tell.reliability);
           const noticeStatus = getPlayerNoticeStatus(detectedTell);
           const isAnimating = animatingTells.has(detectedTell.detectionTime);
 
@@ -156,51 +141,37 @@ export const TellIndicator: React.FC<TellIndicatorProps> = ({
               className={`
                 ${styles.tellItem} 
                 ${styles[`intensity${detectedTell.tell.intensity}`]}
-                ${isAnimating ? styles.animating : ""}
-                ${!detectedTell.playerNoticed ? styles.faded : ""}
+                ${isAnimating ? styles.animating : ''}
+                ${!detectedTell.playerNoticed ? styles.faded : ''}
               `}
               onClick={() => handleTellClick(detectedTell)}
               role="button"
               tabIndex={0}
             >
               <div className={styles.tellIcons}>
-                <span
-                  className={styles.typeIcon}
-                  title={detectedTell.tell.type}
-                >
+                <span className={styles.typeIcon} title={detectedTell.tell.type}>
                   {icons.type}
                 </span>
-                <span
-                  className={styles.intensityIcon}
-                  title={detectedTell.tell.intensity}
-                >
+                <span className={styles.intensityIcon} title={detectedTell.tell.intensity}>
                   {icons.intensity}
                 </span>
               </div>
 
               <div className={styles.tellContent}>
-                <div className={styles.tellDescription}>
-                  {detectedTell.tell.description}
-                </div>
+                <div className={styles.tellDescription}>{detectedTell.tell.description}</div>
 
                 {detectedTell.tell.triggerPhrase && (
-                  <div className={styles.tellPhrase}>
-                    "{detectedTell.tell.triggerPhrase}"
-                  </div>
+                  <div className={styles.tellPhrase}>"{detectedTell.tell.triggerPhrase}"</div>
                 )}
 
                 <div className={styles.tellMeta}>
-                  <span className={styles.tellType}>
-                    {detectedTell.tell.type}
-                  </span>
+                  <span className={styles.tellType}>{detectedTell.tell.type}</span>
                   <span className={styles.separator}>•</span>
                   <span className={`${styles.reliability} ${reliability}`}>
                     {Math.round(detectedTell.tell.reliability * 100)}% reliable
                   </span>
                   <span className={styles.separator}>•</span>
-                  <span
-                    className={`${styles.noticeStatus} ${noticeStatus.className}`}
-                  >
+                  <span className={`${styles.noticeStatus} ${noticeStatus.className}`}>
                     {noticeStatus.icon} {noticeStatus.text}
                   </span>
                 </div>
@@ -230,13 +201,13 @@ export const TellIndicator: React.FC<TellIndicatorProps> = ({
         <div className={styles.summaryItem}>
           <span className={styles.summaryLabel}>Noticed:</span>
           <span className={styles.summaryValue}>
-            {visibleTells.filter((t) => t.playerNoticed).length}
+            {visibleTells.filter(t => t.playerNoticed).length}
           </span>
         </div>
         <div className={styles.summaryItem}>
           <span className={styles.summaryLabel}>Exceptions:</span>
           <span className={styles.summaryValue}>
-            {visibleTells.filter((t) => t.exceptionId).length}
+            {visibleTells.filter(t => t.exceptionId).length}
           </span>
         </div>
       </div>

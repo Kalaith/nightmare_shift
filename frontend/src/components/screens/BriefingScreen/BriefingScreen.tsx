@@ -1,25 +1,22 @@
-import React from "react";
-import type { GameState } from "../../../types/game";
+import React from 'react';
+import type { GameState } from '../../../types/game';
 
 interface BriefingScreenProps {
   gameState: GameState;
   onStartShift: () => void;
 }
 
-const BriefingScreen: React.FC<BriefingScreenProps> = ({
-  gameState,
-  onStartShift,
-}) => {
+const BriefingScreen: React.FC<BriefingScreenProps> = ({ gameState, onStartShift }) => {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case "easy":
-        return "text-green-400 bg-green-900/20 border-green-500/30";
-      case "medium":
-        return "text-yellow-400 bg-yellow-900/20 border-yellow-500/30";
-      case "hard":
-        return "text-red-400 bg-red-900/20 border-red-500/30";
+      case 'easy':
+        return 'text-green-400 bg-green-900/20 border-green-500/30';
+      case 'medium':
+        return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30';
+      case 'hard':
+        return 'text-red-400 bg-red-900/20 border-red-500/30';
       default:
-        return "text-gray-400 bg-gray-900/20 border-gray-500/30";
+        return 'text-gray-400 bg-gray-900/20 border-gray-500/30';
     }
   };
 
@@ -30,9 +27,7 @@ const BriefingScreen: React.FC<BriefingScreenProps> = ({
           <h1 className="text-4xl font-bold text-teal-300 mb-2 drop-shadow-lg">
             📋 Night Shift Briefing
           </h1>
-          <p className="text-lg text-gray-300">
-            Your rules for tonight's shift
-          </p>
+          <p className="text-lg text-gray-300">Your rules for tonight's shift</p>
         </div>
 
         <div className="space-y-4 mb-8">
@@ -46,18 +41,14 @@ const BriefingScreen: React.FC<BriefingScreenProps> = ({
               </div>
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-xl font-semibold text-teal-300">
-                    {rule.title}
-                  </h3>
+                  <h3 className="text-xl font-semibold text-teal-300">{rule.title}</h3>
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded border ${getDifficultyColor(rule.difficulty)}`}
                   >
                     {rule.difficulty.toUpperCase()}
                   </span>
                 </div>
-                <p className="text-gray-300 leading-relaxed">
-                  {rule.description}
-                </p>
+                <p className="text-gray-300 leading-relaxed">{rule.description}</p>
               </div>
             </div>
           ))}

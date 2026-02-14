@@ -1,23 +1,23 @@
 export const ALMANAC_LEVELS = {
   0: {
-    name: "Unknown",
-    description: "You have not encountered this entity.",
+    name: 'Unknown',
+    description: 'You have not encountered this entity.',
     rewards: [],
   },
   1: {
-    name: "Observed",
-    description: "You have seen this entity and know its basic nature.",
-    rewards: ["Name", "Description", "Basic Needs"],
+    name: 'Observed',
+    description: 'You have seen this entity and know its basic nature.',
+    rewards: ['Name', 'Description', 'Basic Needs'],
   },
   2: {
-    name: "Studied",
-    description: "You understand the behavioral patterns of this entity.",
-    rewards: ["Route Preferences", "Common Tells", "Likes/Dislikes"],
+    name: 'Studied',
+    description: 'You understand the behavioral patterns of this entity.',
+    rewards: ['Route Preferences', 'Common Tells', 'Likes/Dislikes'],
   },
   3: {
-    name: "Mastered",
-    description: "You know the deepest secrets of this entity.",
-    rewards: ["Hidden Rules", "True Nature", "Backstory"],
+    name: 'Mastered',
+    description: 'You know the deepest secrets of this entity.',
+    rewards: ['Hidden Rules', 'True Nature', 'Backstory'],
   },
 };
 

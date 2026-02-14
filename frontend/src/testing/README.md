@@ -84,8 +84,8 @@ Edit `src/testing/runBalanceTests.ts` to adjust:
 const TOTAL_RUNS = 100; // Number of simulations
 const STRATEGIES: Strategy[] = [
   // Which strategies to test
-  "shortcut_spam",
-  "strategic",
+  'shortcut_spam',
+  'strategic',
   // ... add or remove strategies
 ];
 ```

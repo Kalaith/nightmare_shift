@@ -6,10 +6,10 @@ export class GameError extends Error {
   constructor(
     message: string,
     public code: string,
-    public recoverable: boolean = true,
+    public recoverable: boolean = true
   ) {
     super(message);
-    this.name = "GameError";
+    this.name = 'GameError';
   }
 }
 
@@ -17,10 +17,10 @@ export class ServiceError extends GameError {
   constructor(
     message: string,
     public serviceName: string,
-    public operation: string,
+    public operation: string
   ) {
     super(message, `${serviceName.toLowerCase()}_${operation}_failed`, true);
-    this.name = "ServiceError";
+    this.name = 'ServiceError';
   }
 }
 
@@ -48,9 +48,9 @@ export const ErrorHandling = {
         error instanceof GameError
           ? error
           : new GameError(
-              error instanceof Error ? error.message : "Unknown error",
+              error instanceof Error ? error.message : 'Unknown error',
               errorCode,
-              true,
+              true
             );
 
       return {
@@ -68,7 +68,7 @@ export const ErrorHandling = {
     value: T | null | undefined,
     errorMessage: string,
     errorCode: string,
-    fallback?: T,
+    fallback?: T
   ): GameResult<T> => {
     if (value !== null && value !== undefined) {
       return { success: true, data: value };
@@ -93,11 +93,7 @@ export const ErrorHandling = {
   /**
    * Creates a service error
    */
-  serviceError: (
-    serviceName: string,
-    operation: string,
-    message: string,
-  ): ServiceError => {
+  serviceError: (serviceName: string, operation: string, message: string): ServiceError => {
     return new ServiceError(message, serviceName, operation);
   },
 };
@@ -136,7 +132,7 @@ export const GameResultHelpers = {
           error:
             error instanceof GameError
               ? error
-              : new GameError("Mapping function failed", "map_error"),
+              : new GameError('Mapping function failed', 'map_error'),
         };
       }
     }

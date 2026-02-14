@@ -1,6 +1,6 @@
 // Player stats and progression types
 
-import type { Rule } from "./rules";
+import type { Rule } from './rules';
 
 export interface PlayerStats {
   totalShiftsCompleted: number;
@@ -39,13 +39,13 @@ export interface Skill {
   description: string;
   cost: number;
   icon: string;
-  category: "survival" | "occult" | "efficiency";
+  category: 'survival' | 'occult' | 'efficiency';
   prerequisites: string[];
   effect: SkillEffect;
 }
 
 export interface SkillEffect {
-  type: "stat_boost" | "mechanic_unlock" | "passive_bonus";
+  type: 'stat_boost' | 'mechanic_unlock' | 'passive_bonus';
   target: string;
   value: number;
 }

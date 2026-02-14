@@ -1,15 +1,12 @@
-import React from "react";
-import type { LeaderboardEntry } from "../../../types/game";
+import React from 'react';
+import type { LeaderboardEntry } from '../../../types/game';
 
 interface LeaderboardScreenProps {
   leaderboard: LeaderboardEntry[];
   onBack: () => void;
 }
 
-const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
-  leaderboard = [],
-  onBack,
-}) => {
+const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ leaderboard = [], onBack }) => {
   const safeLeaderboard = Array.isArray(leaderboard) ? leaderboard : [];
 
   return (
@@ -44,12 +41,12 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
                 <div
                   className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${
                     index === 0
-                      ? "bg-yellow-500 text-gray-900"
+                      ? 'bg-yellow-500 text-gray-900'
                       : index === 1
-                        ? "bg-gray-400 text-gray-900"
+                        ? 'bg-gray-400 text-gray-900'
                         : index === 2
-                          ? "bg-orange-600 text-white"
-                          : "bg-gray-600 text-gray-300"
+                          ? 'bg-orange-600 text-white'
+                          : 'bg-gray-600 text-gray-300'
                   }`}
                 >
                   #{index + 1}
@@ -59,17 +56,11 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
                     <div className="text-2xl font-bold text-teal-300">
                       {entry.score.toLocaleString()} pts
                     </div>
-                    <div className="text-right text-sm text-gray-400">
-                      {entry.date}
-                    </div>
+                    <div className="text-right text-sm text-gray-400">{entry.date}</div>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-300">
-                    <span
-                      className={
-                        entry.survived ? "text-green-400" : "text-red-400"
-                      }
-                    >
-                      {entry.survived ? "✅ Survived" : "💀 Failed"}
+                    <span className={entry.survived ? 'text-green-400' : 'text-red-400'}>
+                      {entry.survived ? '✅ Survived' : '💀 Failed'}
                     </span>
                     <span>🚗 {entry.passengersTransported} rides</span>
                     <span>⚡ Level {entry.difficultyLevel}</span>

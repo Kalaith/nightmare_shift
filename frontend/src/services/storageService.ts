@@ -1,5 +1,5 @@
-import { STORAGE_KEYS } from "../data/constants";
-import type { PlayerStats, LeaderboardEntry, SaveData } from "../types/game";
+import { STORAGE_KEYS } from '../data/constants';
+import type { PlayerStats, LeaderboardEntry, SaveData } from '../types/game';
 
 const LocalStorage = {
   save: (key: string, data: unknown): void => {
@@ -29,7 +29,7 @@ const LocalStorage = {
 
   clear: (): void => {
     try {
-      Object.values(STORAGE_KEYS).forEach((key) => {
+      Object.values(STORAGE_KEYS).forEach(key => {
         localStorage.removeItem(key);
       });
     } catch {
@@ -63,10 +63,7 @@ const getDefaultPlayerStats = (): PlayerStats => ({
 
 export class PlayerStatsService {
   static getStats(): PlayerStats {
-    return LocalStorage.load(
-      STORAGE_KEYS.PLAYER_STATS,
-      getDefaultPlayerStats(),
-    );
+    return LocalStorage.load(STORAGE_KEYS.PLAYER_STATS, getDefaultPlayerStats());
   }
 
   static updateStats(updates: Partial<PlayerStats>): void {

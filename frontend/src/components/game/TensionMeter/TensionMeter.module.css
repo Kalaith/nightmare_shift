@@ -1,10 +1,6 @@
 /* TensionMeter Component Styles */
 .tensionContainer {
-  background: linear-gradient(
-    135deg,
-    rgba(15, 23, 42, 0.95) 0%,
-    rgba(30, 41, 59, 0.95) 100%
-  );
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 12px;
   padding: 20px;
@@ -71,52 +67,32 @@
 
 /* Tension Level Colors */
 .tensionMinimal {
-  background: linear-gradient(
-    45deg,
-    rgba(34, 197, 94, 0.2),
-    rgba(34, 197, 94, 0.3)
-  );
+  background: linear-gradient(45deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.3));
   color: #22c55e;
   border: 1px solid rgba(34, 197, 94, 0.4);
 }
 
 .tensionLow {
-  background: linear-gradient(
-    45deg,
-    rgba(251, 191, 36, 0.2),
-    rgba(251, 191, 36, 0.3)
-  );
+  background: linear-gradient(45deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.3));
   color: #fbbf24;
   border: 1px solid rgba(251, 191, 36, 0.4);
 }
 
 .tensionModerate {
-  background: linear-gradient(
-    45deg,
-    rgba(249, 115, 22, 0.2),
-    rgba(249, 115, 22, 0.3)
-  );
+  background: linear-gradient(45deg, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0.3));
   color: #f97316;
   border: 1px solid rgba(249, 115, 22, 0.4);
 }
 
 .tensionHigh {
-  background: linear-gradient(
-    45deg,
-    rgba(239, 68, 68, 0.2),
-    rgba(239, 68, 68, 0.3)
-  );
+  background: linear-gradient(45deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.3));
   color: #ef4444;
   border: 1px solid rgba(239, 68, 68, 0.4);
   animation: highTensionFlicker 1.5s ease-in-out infinite;
 }
 
 .tensionCritical {
-  background: linear-gradient(
-    45deg,
-    rgba(220, 38, 38, 0.3),
-    rgba(127, 29, 29, 0.4)
-  );
+  background: linear-gradient(45deg, rgba(220, 38, 38, 0.3), rgba(127, 29, 29, 0.4));
   color: #fee2e2;
   border: 1px solid rgba(220, 38, 38, 0.6);
   animation: criticalTensionFlicker 1s ease-in-out infinite;
@@ -177,18 +153,13 @@
 }
 
 .meterFill::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -449,11 +420,7 @@
 }
 
 .phaseexpert {
-  background: linear-gradient(
-    45deg,
-    rgba(220, 38, 38, 0.2),
-    rgba(127, 29, 29, 0.2)
-  );
+  background: linear-gradient(45deg, rgba(220, 38, 38, 0.2), rgba(127, 29, 29, 0.2));
   color: #fee2e2;
   animation: expertPhaseGlow 2s ease-in-out infinite;
 }

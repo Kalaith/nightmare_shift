@@ -1,5 +1,5 @@
-import React from "react";
-import type { GameState } from "../../../types/game";
+import React from 'react';
+import type { GameState } from '../../../types/game';
 
 interface SuccessScreenProps {
   gameState: GameState;
@@ -17,9 +17,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({
   return (
     <div className="min-h-screen p-5 flex items-center justify-center bg-gradient-to-b from-gray-800 to-slate-900">
       <div className="text-center max-w-md mx-auto py-8">
-        <h2 className="text-3xl font-semibold text-teal-300 mb-6">
-          Shift Complete
-        </h2>
+        <h2 className="text-3xl font-semibold text-teal-300 mb-6">Shift Complete</h2>
         <p className="text-teal-300 text-lg mb-6">
           You survived the night and completed your shift!
         </p>
@@ -35,9 +33,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({
           </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-400">Bonus:</span>
-            <span className="text-gray-200">
-              ${gameState.survivalBonus || 50}
-            </span>
+            <span className="text-gray-200">${gameState.survivalBonus || 50}</span>
           </div>
         </div>
 

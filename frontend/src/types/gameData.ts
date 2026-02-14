@@ -1,7 +1,7 @@
 // Game data structure types
-import type { Rule } from "./rules";
-import type { Passenger } from "./passenger";
-import type { Location } from "./location";
+import type { Rule } from './rules';
+import type { Passenger } from './passenger';
+import type { Location } from './location';
 
 export interface GameData {
   shift_rules: Rule[];

@@ -4,12 +4,12 @@ import type {
   TimeOfDay,
   EnvironmentalHazard,
   PlayerStats,
-} from "../types/game";
-import { GAME_CONSTANTS } from "../data/constants";
-import { GAME_BALANCE, BalanceHelpers } from "../constants/gameBalance";
-import { WeatherService } from "./weatherService";
-import { ErrorHandling, type GameResult } from "../utils/errorHandling";
-import { AlmanacHelper } from "../utils/almanacHelper";
+} from '../types/game';
+import { GAME_CONSTANTS } from '../data/constants';
+import { GAME_BALANCE, BalanceHelpers } from '../constants/gameBalance';
+import { WeatherService } from './weatherService';
+import { ErrorHandling, type GameResult } from '../utils/errorHandling';
+import { AlmanacHelper } from '../utils/almanacHelper';
 
 export class ReputationService {
   static initializeReputation(): Record<number, PassengerReputation> {
@@ -18,7 +18,7 @@ export class ReputationService {
 
   static getPassengerReputation(
     passengerReputation: Record<number, PassengerReputation>,
-    passengerId: number,
+    passengerId: number
   ): PassengerReputation {
     if (!passengerReputation[passengerId]) {
       passengerReputation[passengerId] = {
@@ -26,7 +26,7 @@ export class ReputationService {
         positiveChoices: 0,
         negativeChoices: 0,
         lastEncounter: 0,
-        relationshipLevel: "neutral",
+        relationshipLevel: 'neutral',
         specialUnlocks: [],
       };
     }
@@ -37,12 +37,9 @@ export class ReputationService {
     passengerReputation: Record<number, PassengerReputation>,
     passengerId: number,
     isPositive: boolean,
-    timestamp: number = Date.now(),
+    timestamp: number = Date.now()
   ): Record<number, PassengerReputation> {
-    const reputation = this.getPassengerReputation(
-      passengerReputation,
-      passengerId,
-    );
+    const reputation = this.getPassengerReputation(passengerReputation, passengerId);
 
     reputation.interactions++;
     reputation.lastEncounter = timestamp;
@@ -58,20 +55,15 @@ export class ReputationService {
 
     if (
       positiveRatio >= GAME_BALANCE.REPUTATION.THRESHOLDS.TRUSTED_RATIO &&
-      reputation.interactions >=
-        GAME_BALANCE.REPUTATION.THRESHOLDS.MINIMUM_INTERACTIONS_FOR_TRUSTED
+      reputation.interactions >= GAME_BALANCE.REPUTATION.THRESHOLDS.MINIMUM_INTERACTIONS_FOR_TRUSTED
     ) {
-      reputation.relationshipLevel = "trusted";
-    } else if (
-      positiveRatio >= GAME_BALANCE.REPUTATION.THRESHOLDS.FRIENDLY_RATIO
-    ) {
-      reputation.relationshipLevel = "friendly";
-    } else if (
-      positiveRatio <= GAME_BALANCE.REPUTATION.THRESHOLDS.HOSTILE_RATIO
-    ) {
-      reputation.relationshipLevel = "hostile";
+      reputation.relationshipLevel = 'trusted';
+    } else if (positiveRatio >= GAME_BALANCE.REPUTATION.THRESHOLDS.FRIENDLY_RATIO) {
+      reputation.relationshipLevel = 'friendly';
+    } else if (positiveRatio <= GAME_BALANCE.REPUTATION.THRESHOLDS.HOSTILE_RATIO) {
+      reputation.relationshipLevel = 'hostile';
     } else {
-      reputation.relationshipLevel = "neutral";
+      reputation.relationshipLevel = 'neutral';
     }
 
     return { ...passengerReputation, [passengerId]: reputation };
@@ -83,24 +75,23 @@ export class ReputationService {
     specialOptions: string[];
   } {
     switch (reputation.relationshipLevel) {
-      case "trusted":
+      case 'trusted':
         return {
           fareMultiplier: GAME_BALANCE.REPUTATION.MULTIPLIERS.TRUSTED_FARE,
           riskModifier: GAME_BALANCE.REPUTATION.RISK_MODIFIERS.TRUSTED_MODIFIER,
-          specialOptions: ["protective_charm", "safe_route_info"],
+          specialOptions: ['protective_charm', 'safe_route_info'],
         };
-      case "friendly":
+      case 'friendly':
         return {
           fareMultiplier: GAME_BALANCE.REPUTATION.MULTIPLIERS.FRIENDLY_FARE,
-          riskModifier:
-            GAME_BALANCE.REPUTATION.RISK_MODIFIERS.FRIENDLY_MODIFIER,
-          specialOptions: ["warning_about_dangers"],
+          riskModifier: GAME_BALANCE.REPUTATION.RISK_MODIFIERS.FRIENDLY_MODIFIER,
+          specialOptions: ['warning_about_dangers'],
         };
-      case "hostile":
+      case 'hostile':
         return {
           fareMultiplier: GAME_BALANCE.REPUTATION.MULTIPLIERS.HOSTILE_FARE,
           riskModifier: GAME_BALANCE.REPUTATION.RISK_MODIFIERS.HOSTILE_MODIFIER,
-          specialOptions: ["makes_demands", "threatens_driver"],
+          specialOptions: ['makes_demands', 'threatens_driver'],
         };
       default:
         return {
@@ -114,35 +105,35 @@ export class ReputationService {
 
 export class RouteService {
   static calculateRouteCosts(
-    routeType: "normal" | "shortcut" | "scenic" | "police",
+    routeType: 'normal' | 'shortcut' | 'scenic' | 'police',
     passengerRiskLevel: number = 1,
     weather?: WeatherCondition,
     timeOfDay?: TimeOfDay,
     hazards?: EnvironmentalHazard[],
     routeMastery?: Record<string, number>,
-    passenger?: import("../types/game").Passenger,
+    passenger?: import('../types/game').Passenger
   ): { fuelCost: number; timeCost: number; riskLevel: number } {
     let baseFuelCost: number;
     let baseTimeCost: number;
     let baseRiskLevel: number;
 
     switch (routeType) {
-      case "normal":
+      case 'normal':
         baseFuelCost = GAME_CONSTANTS.FUEL_COST_NORMAL;
         baseTimeCost = GAME_CONSTANTS.TIME_COST_NORMAL;
         baseRiskLevel = GAME_CONSTANTS.RISK_NORMAL;
         break;
-      case "shortcut":
+      case 'shortcut':
         baseFuelCost = GAME_CONSTANTS.FUEL_COST_SHORTCUT;
         baseTimeCost = GAME_CONSTANTS.TIME_COST_SHORTCUT;
         baseRiskLevel = GAME_CONSTANTS.RISK_SHORTCUT;
         break;
-      case "scenic":
+      case 'scenic':
         baseFuelCost = GAME_CONSTANTS.FUEL_COST_SCENIC;
         baseTimeCost = GAME_CONSTANTS.TIME_COST_SCENIC;
         baseRiskLevel = GAME_CONSTANTS.RISK_SCENIC;
         break;
-      case "police":
+      case 'police':
         baseFuelCost = GAME_CONSTANTS.FUEL_COST_POLICE;
         baseTimeCost = GAME_CONSTANTS.TIME_COST_POLICE;
         baseRiskLevel = GAME_CONSTANTS.RISK_POLICE;
@@ -150,17 +141,13 @@ export class RouteService {
     }
 
     // Add some randomness and passenger risk influence
-    const fuelVariation =
-      BalanceHelpers.getFuelCostWithVariation(baseFuelCost) - baseFuelCost;
-    const timeVariation =
-      BalanceHelpers.getTimeCostWithVariation(baseTimeCost) - baseTimeCost;
+    const fuelVariation = BalanceHelpers.getFuelCostWithVariation(baseFuelCost) - baseFuelCost;
+    const timeVariation = BalanceHelpers.getTimeCostWithVariation(baseTimeCost) - baseTimeCost;
 
     let finalFuelCost = baseFuelCost + fuelVariation;
     let finalTimeCost = baseTimeCost + timeVariation;
     let finalRiskLevel =
-      baseRiskLevel +
-      (passengerRiskLevel -
-        GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL);
+      baseRiskLevel + (passengerRiskLevel - GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL);
 
     // Apply weather effects if provided
     if (weather && timeOfDay) {
@@ -169,7 +156,7 @@ export class RouteService {
         finalTimeCost,
         finalRiskLevel,
         weather,
-        timeOfDay,
+        timeOfDay
       );
       finalFuelCost = weatherEffects.fuel;
       finalTimeCost = weatherEffects.time;
@@ -180,18 +167,16 @@ export class RouteService {
     if (weather) {
       // Heavy weather makes routes more dangerous but not impossible
       if (
-        routeType === "shortcut" &&
-        weather.intensity === "heavy" &&
-        (weather.type === "rain" ||
-          weather.type === "fog" ||
-          weather.type === "snow")
+        routeType === 'shortcut' &&
+        weather.intensity === 'heavy' &&
+        (weather.type === 'rain' || weather.type === 'fog' || weather.type === 'snow')
       ) {
         finalFuelCost += 8; // Extra fuel for careful driving
         finalTimeCost += 10; // Extra time for safety
         finalRiskLevel = Math.min(5, finalRiskLevel + 2); // Much more dangerous
       }
 
-      if (routeType === "scenic" && weather.type === "thunderstorm") {
+      if (routeType === 'scenic' && weather.type === 'thunderstorm') {
         finalFuelCost += 5; // Extra fuel for detours around storm damage
         finalTimeCost += 15; // Much slower due to conditions
         finalRiskLevel = Math.min(5, finalRiskLevel + 1); // More dangerous
@@ -200,7 +185,7 @@ export class RouteService {
 
     // Apply time-based penalties
     if (timeOfDay) {
-      if (routeType === "scenic" && timeOfDay.phase === "latenight") {
+      if (routeType === 'scenic' && timeOfDay.phase === 'latenight') {
         finalFuelCost += 3; // Need headlights and careful driving
         finalTimeCost += 8; // Slower speeds for safety
         finalRiskLevel = Math.min(5, finalRiskLevel + 1); // Higher crime risk at night
@@ -210,7 +195,7 @@ export class RouteService {
     // Apply passenger fear penalties instead of random blocking
     if (passenger) {
       const strongFear = passenger.routePreferences?.find(
-        (pref) => pref.route === routeType && pref.preference === "fears",
+        pref => pref.route === routeType && pref.preference === 'fears'
       );
       if (strongFear) {
         // Passenger fear makes routes slightly more expensive
@@ -251,16 +236,13 @@ export class RouteService {
 
       finalFuelCost = Math.max(
         GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST,
-        finalFuelCost - fuelReduction,
+        finalFuelCost - fuelReduction
       );
       finalTimeCost = Math.max(
         GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST,
-        finalTimeCost - timeReduction,
+        finalTimeCost - timeReduction
       );
-      finalRiskLevel = Math.max(
-        GAME_BALANCE.RISK_LEVELS.SAFE,
-        finalRiskLevel - riskReduction,
-      );
+      finalRiskLevel = Math.max(GAME_BALANCE.RISK_LEVELS.SAFE, finalRiskLevel - riskReduction);
     }
 
     // Apply severe penalties for previously blocked conditions (instead of making routes unavailable)
@@ -270,16 +252,13 @@ export class RouteService {
     return {
       fuelCost: Math.max(
         GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST,
-        Math.round(finalFuelCost),
+        Math.round(finalFuelCost)
       ),
       timeCost: Math.max(
         GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST,
-        Math.round(finalTimeCost),
+        Math.round(finalTimeCost)
       ),
-      riskLevel: Math.max(
-        GAME_BALANCE.RISK_LEVELS.SAFE,
-        Math.min(5, Math.round(finalRiskLevel)),
-      ),
+      riskLevel: Math.max(GAME_BALANCE.RISK_LEVELS.SAFE, Math.min(5, Math.round(finalRiskLevel))),
     };
   }
 
@@ -290,13 +269,13 @@ export class RouteService {
     weather?: WeatherCondition,
     timeOfDay?: TimeOfDay,
     hazards?: EnvironmentalHazard[],
-    passenger?: import("../types/game").Passenger,
+    passenger?: import('../types/game').Passenger,
     routeMastery?: Record<string, number>,
     routeConsequences?: string[],
-    playerStats?: PlayerStats,
+    playerStats?: PlayerStats
   ): GameResult<
     Array<{
-      type: "normal" | "shortcut" | "scenic" | "police";
+      type: 'normal' | 'shortcut' | 'scenic' | 'police';
       name: string;
       description: string;
       fuelCost: number;
@@ -304,7 +283,7 @@ export class RouteService {
       riskLevel: number;
       available: boolean;
       bonusInfo?: string;
-      passengerReaction?: "positive" | "negative" | "neutral";
+      passengerReaction?: 'positive' | 'negative' | 'neutral';
       fareModifier?: number;
     }>
   > {
@@ -316,30 +295,28 @@ export class RouteService {
 
         const routes = [
           {
-            type: "normal" as const,
-            name: "Take Normal Route",
-            description: "Safe and reliable, follows GPS exactly",
+            type: 'normal' as const,
+            name: 'Take Normal Route',
+            description: 'Safe and reliable, follows GPS exactly',
           },
           {
-            type: "shortcut" as const,
-            name: "Take Shortcut",
-            description:
-              "Faster and saves fuel, but higher risk of supernatural encounters",
+            type: 'shortcut' as const,
+            name: 'Take Shortcut',
+            description: 'Faster and saves fuel, but higher risk of supernatural encounters',
           },
           {
-            type: "scenic" as const,
-            name: "Take Scenic Route",
-            description:
-              "Longer route through beautiful areas, passenger pays bonus",
+            type: 'scenic' as const,
+            name: 'Take Scenic Route',
+            description: 'Longer route through beautiful areas, passenger pays bonus',
           },
           {
-            type: "police" as const,
-            name: "Police-Patrolled Route",
-            description: "Safest option, but uses more fuel and time",
+            type: 'police' as const,
+            name: 'Police-Patrolled Route',
+            description: 'Safest option, but uses more fuel and time',
           },
         ];
 
-        const resultRoutes = routes.map((route) => {
+        const resultRoutes = routes.map(route => {
           try {
             const costs = this.calculateRouteCosts(
               route.type,
@@ -348,7 +325,7 @@ export class RouteService {
               timeOfDay,
               hazards,
               routeMastery,
-              passenger,
+              passenger
             );
 
             // ALL ROUTES ARE ALWAYS AVAILABLE - no fuel/time restrictions
@@ -362,16 +339,16 @@ export class RouteService {
                 weather,
                 timeOfDay,
                 routeConsequences,
-                passenger,
+                passenger
               );
 
             // Get passenger preference for this route
             const passengerPreference = passenger?.routePreferences?.find(
-              (pref) => pref.route === route.type,
+              pref => pref.route === route.type
             );
             const passengerReaction = passengerPreference
               ? this.getReactionFromPreference(passengerPreference.preference)
-              : "neutral";
+              : 'neutral';
             const fareModifier = passengerPreference?.fareModifier || 1.0;
 
             let bonusInfo = this.buildRouteInfo(
@@ -382,7 +359,7 @@ export class RouteService {
               hazards,
               timeOfDay,
               passenger,
-              playerStats,
+              playerStats
             );
 
             const routeResult = {
@@ -403,8 +380,8 @@ export class RouteService {
               timeCost: 20,
               riskLevel: 1,
               available: safeFuel >= 15 && safeTime >= 20,
-              bonusInfo: "Basic route (error recovery)",
-              passengerReaction: "neutral" as const,
+              bonusInfo: 'Basic route (error recovery)',
+              passengerReaction: 'neutral' as const,
               fareModifier: 1.0,
             };
           }
@@ -412,8 +389,8 @@ export class RouteService {
 
         return resultRoutes;
       },
-      "route_options_failed",
-      [], // Empty array as fallback
+      'route_options_failed',
+      [] // Empty array as fallback
     );
   }
 
@@ -422,11 +399,11 @@ export class RouteService {
    * ALL ROUTES ARE ALWAYS AVAILABLE - no route blocking, only penalties
    */
   static checkRouteAvailability(
-    _routeType: "normal" | "shortcut" | "scenic" | "police",
+    _routeType: 'normal' | 'shortcut' | 'scenic' | 'police',
     _weather?: WeatherCondition,
     _timeOfDay?: TimeOfDay,
     _routeConsequences?: string[],
-    _passenger?: import("../types/game").Passenger,
+    _passenger?: import('../types/game').Passenger
   ): boolean {
     // ALL ROUTES ARE ALWAYS AVAILABLE
     // Former blocking conditions now just add severe penalties instead of disabling routes
@@ -438,14 +415,14 @@ export class RouteService {
    * Information is hidden based on Almanac knowledge level
    */
   static buildRouteInfo(
-    routeType: "normal" | "shortcut" | "scenic" | "police",
-    passengerPreference?: import("../types/game").RoutePreference,
+    routeType: 'normal' | 'shortcut' | 'scenic' | 'police',
+    passengerPreference?: import('../types/game').RoutePreference,
     routeMastery?: Record<string, number>,
     weather?: WeatherCondition,
     hazards?: EnvironmentalHazard[],
-    timeOfDay?: import("../types/game").TimeOfDay,
-    passenger?: import("../types/game").Passenger,
-    playerStats?: PlayerStats,
+    timeOfDay?: import('../types/game').TimeOfDay,
+    passenger?: import('../types/game').Passenger,
+    playerStats?: PlayerStats
   ): string {
     const infoSections: string[] = [];
 
@@ -462,7 +439,7 @@ export class RouteService {
 
     // Base route benefits - only show fare modifiers if knowledge level >= 2
     switch (routeType) {
-      case "scenic":
+      case 'scenic':
         if (canSeeFareModifiers) {
           const bonus = passengerPreference?.fareModifier
             ? Math.round((passengerPreference.fareModifier - 1) * 100)
@@ -470,39 +447,34 @@ export class RouteService {
           infoSections.push(`+${bonus}% fare bonus`);
         } else if (passengerId && playerStats) {
           // Show locked indicator
-          infoSections.push("🔒 Fare bonus (Unlock in Almanac)");
+          infoSections.push('🔒 Fare bonus (Unlock in Almanac)');
         }
         break;
-      case "police":
-        infoSections.push("No supernatural encounters");
+      case 'police':
+        infoSections.push('No supernatural encounters');
         break;
-      case "shortcut":
-        infoSections.push("Risk of supernatural encounters");
+      case 'shortcut':
+        infoSections.push('Risk of supernatural encounters');
         break;
     }
 
     // Passenger reaction - only show if knowledge level >= 2
     if (passengerPreference && canSeePreferences) {
       const reactionText = {
-        loves: "😍 Passenger loves this route",
-        likes: "😊 Passenger likes this route",
-        neutral: "😐 Passenger is indifferent",
-        dislikes: "😒 Passenger dislikes this route",
-        fears: "😨 PASSENGER FEAR: +2 fuel, +3 min, +1 risk",
+        loves: '😍 Passenger loves this route',
+        likes: '😊 Passenger likes this route',
+        neutral: '😐 Passenger is indifferent',
+        dislikes: '😒 Passenger dislikes this route',
+        fears: '😨 PASSENGER FEAR: +2 fuel, +3 min, +1 risk',
       }[passengerPreference.preference];
 
-      if (reactionText && passengerPreference.preference !== "neutral") {
+      if (reactionText && passengerPreference.preference !== 'neutral') {
         infoSections.push(reactionText);
       }
-    } else if (
-      passengerPreference &&
-      passengerId &&
-      playerStats &&
-      !canSeePreferences
-    ) {
+    } else if (passengerPreference && passengerId && playerStats && !canSeePreferences) {
       // Show locked indicator for preferences
-      if (passengerPreference.preference !== "neutral") {
-        infoSections.push("🔒 Passenger preference (Unlock in Almanac)");
+      if (passengerPreference.preference !== 'neutral') {
+        infoSections.push('🔒 Passenger preference (Unlock in Almanac)');
       }
     }
 
@@ -510,7 +482,7 @@ export class RouteService {
     if (routeMastery && routeMastery[routeType] >= 5) {
       const level = routeMastery[routeType];
       if (level >= 10) {
-        infoSections.push("⭐ Master level - Max bonuses");
+        infoSections.push('⭐ Master level - Max bonuses');
       } else {
         infoSections.push(`✨ Experienced (${level} uses) - Reduced costs`);
       }
@@ -518,20 +490,14 @@ export class RouteService {
 
     // Weather warnings - always visible (environmental conditions)
     if (weather) {
-      if (weather.intensity === "heavy") {
+      if (weather.intensity === 'heavy') {
         if (
-          routeType === "shortcut" &&
-          (weather.type === "rain" ||
-            weather.type === "fog" ||
-            weather.type === "snow")
+          routeType === 'shortcut' &&
+          (weather.type === 'rain' || weather.type === 'fog' || weather.type === 'snow')
         ) {
-          infoSections.push(
-            `⚠️ DANGEROUS: Heavy ${weather.type} (+8 fuel, +10 min, +2 risk)`,
-          );
-        } else if (routeType === "scenic" && weather.type === "thunderstorm") {
-          infoSections.push(
-            `⚠️ RISKY: Storm damage (+5 fuel, +15 min, +1 risk)`,
-          );
+          infoSections.push(`⚠️ DANGEROUS: Heavy ${weather.type} (+8 fuel, +10 min, +2 risk)`);
+        } else if (routeType === 'scenic' && weather.type === 'thunderstorm') {
+          infoSections.push(`⚠️ RISKY: Storm damage (+5 fuel, +15 min, +1 risk)`);
         } else {
           infoSections.push(`🌦️ Heavy ${weather.type} conditions`);
         }
@@ -539,42 +505,34 @@ export class RouteService {
     }
 
     // Time-based warnings - always visible
-    if (
-      timeOfDay &&
-      routeType === "scenic" &&
-      timeOfDay.phase === "latenight"
-    ) {
-      infoSections.push("🌙 NIGHT RISK: +3 fuel, +8 min, +1 risk");
+    if (timeOfDay && routeType === 'scenic' && timeOfDay.phase === 'latenight') {
+      infoSections.push('🌙 NIGHT RISK: +3 fuel, +8 min, +1 risk');
     }
 
     // Hazard warnings - always visible
     if (hazards && hazards.length > 0) {
-      const routeHazards = hazards.filter((h) =>
-        h.effects.routeBlocked?.includes(routeType),
-      );
+      const routeHazards = hazards.filter(h => h.effects.routeBlocked?.includes(routeType));
       if (routeHazards.length > 0) {
-        infoSections.push("⚠️ Route affected by hazards - increased costs");
+        infoSections.push('⚠️ Route affected by hazards - increased costs');
       }
     }
 
-    return infoSections.join(" • ");
+    return infoSections.join(' • ');
   }
 
   /**
    * Convert preference level to reaction type
    */
-  static getReactionFromPreference(
-    preference: string,
-  ): "positive" | "negative" | "neutral" {
+  static getReactionFromPreference(preference: string): 'positive' | 'negative' | 'neutral' {
     switch (preference) {
-      case "loves":
-      case "likes":
-        return "positive";
-      case "dislikes":
-      case "fears":
-        return "negative";
+      case 'loves':
+      case 'likes':
+        return 'positive';
+      case 'dislikes':
+      case 'fears':
+        return 'negative';
       default:
-        return "neutral";
+        return 'neutral';
     }
   }
 }

@@ -1,7 +1,7 @@
-import React from "react";
-import { SaveGameService } from "../../../services/storageService";
-import type { PlayerStats } from "../../../types/game";
-import bannerImg from "../../../assets/banner.png";
+import React from 'react';
+import { SaveGameService } from '../../../services/storageService';
+import type { PlayerStats } from '../../../types/game';
+import bannerImg from '../../../assets/banner.png';
 
 interface LoadingScreenProps {
   playerStats: PlayerStats;
@@ -30,9 +30,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           alt="Nightmare Shift Banner"
           className="w-full max-w-md mx-auto rounded-lg shadow-lg mb-4"
         />
-        <h1 className="text-4xl font-bold text-teal-300 mb-2 drop-shadow-lg">
-          🚗 Nightmare Shift
-        </h1>
+        <h1 className="text-4xl font-bold text-teal-300 mb-2 drop-shadow-lg">🚗 Nightmare Shift</h1>
         <p className="text-lg text-gray-300">
           Drive the supernatural. Follow the rules. Survive the shift.
         </p>
@@ -43,9 +41,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-400">Shifts Completed:</span>
-            <span className="text-gray-200">
-              {playerStats.totalShiftsCompleted}
-            </span>
+            <span className="text-gray-200">{playerStats.totalShiftsCompleted}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Total Earnings:</span>
@@ -53,9 +49,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Best Shift:</span>
-            <span className="text-gray-200">
-              ${playerStats.bestShiftEarnings}
-            </span>
+            <span className="text-gray-200">${playerStats.bestShiftEarnings}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Max Rides:</span>
@@ -63,15 +57,11 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Bank Balance:</span>
-            <span className="text-green-400 font-semibold">
-              ${playerStats.bankBalance}
-            </span>
+            <span className="text-green-400 font-semibold">${playerStats.bankBalance}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Lore Fragments:</span>
-            <span className="text-purple-400 font-semibold">
-              {playerStats.loreFragments}
-            </span>
+            <span className="text-purple-400 font-semibold">{playerStats.loreFragments}</span>
           </div>
         </div>
       </div>
@@ -126,7 +116,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
             onClick={() => {
               if (
                 window.confirm(
-                  "⚠️ ARE YOU SURE? ⚠️\n\nThis will wipe ALL progress including:\n- Bank Balance\n- Lore Fragments\n- Unlocked Skills\n- Almanac Data\n\nThis cannot be undone!",
+                  '⚠️ ARE YOU SURE? ⚠️\n\nThis will wipe ALL progress including:\n- Bank Balance\n- Lore Fragments\n- Unlocked Skills\n- Almanac Data\n\nThis cannot be undone!'
                 )
               ) {
                 localStorage.clear();

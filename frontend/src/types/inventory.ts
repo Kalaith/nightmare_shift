@@ -5,8 +5,8 @@ export interface InventoryItem {
   name: string;
   source: string;
   backstoryItem: boolean;
-  type: "protective" | "cursed" | "consumable" | "tradeable" | "story";
-  rarity: "common" | "uncommon" | "rare" | "legendary";
+  type: 'protective' | 'cursed' | 'consumable' | 'tradeable' | 'story';
+  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
   description: string;
   effects?: ItemEffect[];
   durability?: number;
@@ -20,25 +20,21 @@ export interface InventoryItem {
 
 export interface ItemEffect {
   type:
-    | "fuel_bonus"
-    | "time_bonus"
-    | "rule_immunity"
-    | "supernatural_protection"
-    | "fuel_drain"
-    | "time_penalty"
-    | "rule_trigger"
-    | "reputation_modifier";
+    | 'fuel_bonus'
+    | 'time_bonus'
+    | 'rule_immunity'
+    | 'supernatural_protection'
+    | 'fuel_drain'
+    | 'time_penalty'
+    | 'rule_trigger'
+    | 'reputation_modifier';
   value: number;
   duration?: number; // in minutes, 0 = permanent while held
   condition?: string; // when this effect applies
 }
 
 export interface CursedProperties {
-  penaltyType:
-    | "fuel_drain"
-    | "time_acceleration"
-    | "forced_choices"
-    | "attracting_danger";
+  penaltyType: 'fuel_drain' | 'time_acceleration' | 'forced_choices' | 'attracting_danger';
   penaltyValue: number;
   triggersAfter: number; // minutes of possession
   canBeRemoved: boolean;
@@ -47,10 +43,10 @@ export interface CursedProperties {
 
 export interface ProtectiveProperties {
   protectionType:
-    | "supernatural_immunity"
-    | "rule_forgiveness"
-    | "safe_passage"
-    | "lucky_encounters";
+    | 'supernatural_immunity'
+    | 'rule_forgiveness'
+    | 'safe_passage'
+    | 'lucky_encounters';
   protectionStrength: number;
   usesRemaining?: number;
   protectsAgainst?: string[]; // specific passenger IDs or rule IDs

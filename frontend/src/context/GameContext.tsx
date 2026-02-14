@@ -1,8 +1,8 @@
-import React, { createContext, useContext, ReactNode } from "react";
-import { useGameState } from "../hooks/useGameState";
-import { usePlayerContext } from "./PlayerContext";
-import type { GameState } from "../types/game";
-import { createStatsUpdater } from "../utils/statsHandler";
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useGameState } from '../hooks/useGameState';
+import { usePlayerContext } from './PlayerContext';
+import type { GameState } from '../types/game';
+import { createStatsUpdater } from '../utils/statsHandler';
 
 interface GameContextType {
   gameState: GameState;
@@ -22,9 +22,7 @@ interface GameContextType {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-export const GameProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const {
     playerStats,
     updatePlayerStats,
@@ -38,11 +36,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
 
   const handleEndShift = (successful: boolean, overrideReason?: string) => {
     const shiftData = gameStateLogic.endShift(successful, overrideReason);
-    const updateStats = createStatsUpdater(
-      playerStats,
-      updatePlayerStats,
-      addToLeaderboard,
-    );
+    const updateStats = createStatsUpdater(playerStats, updatePlayerStats, addToLeaderboard);
     updateStats(shiftData.survived, shiftData);
 
     // Track all passengers encountered during this shift (always, even on failure)
@@ -61,8 +55,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
       const backstoriesThisShift = gameStateLogic.gameState.passengerBackstories
         ? Object.keys(gameStateLogic.gameState.passengerBackstories).length
         : 0;
-      const loreReward =
-        backstoriesThisShift + (gameStateLogic.gameState.difficultyLevel || 1);
+      const loreReward = backstoriesThisShift + (gameStateLogic.gameState.difficultyLevel || 1);
       awardLoreFragments(loreReward);
 
       // Transfer 20% of earnings to permanent bank balance
@@ -75,9 +68,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
         ? Object.keys(gameStateLogic.gameState.passengerBackstories).length
         : 0;
       const loreReward = Math.floor(
-        (backstoriesThisShift +
-          (gameStateLogic.gameState.difficultyLevel || 1)) /
-          2,
+        (backstoriesThisShift + (gameStateLogic.gameState.difficultyLevel || 1)) / 2
       );
       if (loreReward > 0) {
         awardLoreFragments(loreReward);
@@ -107,7 +98,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
 export const useGameContext = () => {
   const context = useContext(GameContext);
   if (context === undefined) {
-    throw new Error("useGameContext must be used within a GameProvider");
+    throw new Error('useGameContext must be used within a GameProvider');
   }
   return context;
 };

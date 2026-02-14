@@ -9,21 +9,21 @@ export class PortraitService {
    * Based on imagePrompts.json structure
    */
   private static readonly passengerIdMap: Record<string, number> = {
-    "Mrs. Chen": 1,
-    "Jake Morrison": 2,
-    "Sarah Woods": 3,
-    "Dr. Hollow": 4,
-    "The Collector": 5,
-    "Tommy Sullivan": 6,
-    "Elena Vasquez": 7,
-    "Marcus Thompson": 8,
-    "Nurse Catherine": 9,
-    "Old Pete": 10,
-    "Madame Zelda": 11,
-    "Frank the Pianist": 12,
-    "Sister Agnes": 13,
-    "Detective Morrison": 14,
-    "The Midnight Mayor": 15,
+    'Mrs. Chen': 1,
+    'Jake Morrison': 2,
+    'Sarah Woods': 3,
+    'Dr. Hollow': 4,
+    'The Collector': 5,
+    'Tommy Sullivan': 6,
+    'Elena Vasquez': 7,
+    'Marcus Thompson': 8,
+    'Nurse Catherine': 9,
+    'Old Pete': 10,
+    'Madame Zelda': 11,
+    'Frank the Pianist': 12,
+    'Sister Agnes': 13,
+    'Detective Morrison': 14,
+    'The Midnight Mayor': 15,
     "Death's Taxi Driver": 16,
   };
 
@@ -34,7 +34,7 @@ export class PortraitService {
   static getPortraitPath(passengerName: string): string {
     const id = this.passengerIdMap[passengerName];
     if (!id) {
-      return "";
+      return '';
     }
     return `/nightmare_shift/assets/${id}.png`;
   }
@@ -44,7 +44,7 @@ export class PortraitService {
    */
   static getPortraitWithFallback(
     passengerName: string,
-    emoji: string,
+    emoji: string
   ): {
     imageSrc: string;
     alt: string;
@@ -69,7 +69,7 @@ export class PortraitService {
    */
   static getThumbnailPath(passengerName: string): string {
     const id = this.passengerIdMap[passengerName];
-    if (!id) return "";
+    if (!id) return '';
     return `/nightmare_shift/assets/${id}_thumb.png`;
   }
 
@@ -78,7 +78,7 @@ export class PortraitService {
    */
   static getFullSizePath(passengerName: string): string {
     const id = this.passengerIdMap[passengerName];
-    if (!id) return "";
+    if (!id) return '';
     return `/nightmare_shift/assets/${id}_full.png`;
   }
 

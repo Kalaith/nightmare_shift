@@ -1,7 +1,7 @@
-import React from "react";
-import type { GameState } from "../../../types/game";
-import { GAME_BALANCE } from "../../../constants/gameBalance";
-import styles from "./WaitingState.module.css";
+import React from 'react';
+import type { GameState } from '../../../types/game';
+import { GAME_BALANCE } from '../../../constants/gameBalance';
+import styles from './WaitingState.module.css';
 
 interface WaitingStateProps {
   gameState: GameState;
@@ -19,26 +19,22 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
   onRefuelPartial,
 }) => {
   const fuelPercentage = gameState.fuel;
-  const isLowFuel =
-    fuelPercentage <= GAME_BALANCE.FUEL_THRESHOLDS.LOW_FUEL_WARNING;
-  const isCriticalFuel =
-    fuelPercentage <= GAME_BALANCE.FUEL_THRESHOLDS.CRITICAL_FUEL;
+  const isLowFuel = fuelPercentage <= GAME_BALANCE.FUEL_THRESHOLDS.LOW_FUEL_WARNING;
+  const isCriticalFuel = fuelPercentage <= GAME_BALANCE.FUEL_THRESHOLDS.CRITICAL_FUEL;
 
   // Fuel costs
   const fuelNeeded = 100 - fuelPercentage;
   const fullRefuelCost = Math.ceil(fuelNeeded * 0.5); // $0.50 per fuel %
   const partialRefuelCost = Math.ceil(25 * 0.5); // Refuel 25% for $12-13
 
-  const canAffordFull =
-    gameState.earnings >= fullRefuelCost && fuelPercentage < 100;
-  const canAffordPartial =
-    gameState.earnings >= partialRefuelCost && fuelPercentage < 75;
+  const canAffordFull = gameState.earnings >= fullRefuelCost && fuelPercentage < 100;
+  const canAffordPartial = gameState.earnings >= partialRefuelCost && fuelPercentage < 75;
 
   const getFuelStatusText = () => {
-    if (isCriticalFuel) return "⚠️ CRITICAL FUEL LEVEL";
-    if (isLowFuel) return "🔴 Low Fuel Warning";
-    if (fuelPercentage <= 50) return "🟡 Fuel Getting Low";
-    return "🟢 Fuel Level Good";
+    if (isCriticalFuel) return '⚠️ CRITICAL FUEL LEVEL';
+    if (isLowFuel) return '🔴 Low Fuel Warning';
+    if (fuelPercentage <= 50) return '🟡 Fuel Getting Low';
+    return '🟢 Fuel Level Good';
   };
 
   const getFuelBarColor = () => {
@@ -54,14 +50,12 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
         <h2 className={styles.title}>🚗 Waiting for passengers...</h2>
         <p className={styles.description}>
           Your taxi is parked under a flickering streetlight.
-          {isLowFuel && " You notice the fuel gauge is getting low..."}
+          {isLowFuel && ' You notice the fuel gauge is getting low...'}
         </p>
       </div>
 
       {/* Fuel Status Display */}
-      <div
-        className={`${styles.fuelStatus} ${isCriticalFuel ? styles.fuelStatusCritical : ""}`}
-      >
+      <div className={`${styles.fuelStatus} ${isCriticalFuel ? styles.fuelStatusCritical : ''}`}>
         <div className={styles.fuelHeader}>
           <span className={styles.fuelLabel}>{getFuelStatusText()}</span>
           <span className={styles.fuelValue}>{fuelPercentage}%</span>
@@ -90,9 +84,7 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
           title="View collected items"
         >
           <span className={styles.buttonIcon}>🎒</span>
-          <span className={styles.buttonText}>
-            Inventory ({gameState.inventory.length})
-          </span>
+          <span className={styles.buttonText}>Inventory ({gameState.inventory.length})</span>
         </button>
 
         {/* Fuel Buttons */}
@@ -104,11 +96,7 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
               onClick={onRefuelFull}
               disabled={!canAffordFull}
               className={`${styles.fuelButton} ${styles.fullRefuel}`}
-              title={
-                canAffordFull
-                  ? `Fill tank completely`
-                  : `Need $${fullRefuelCost} to refuel`
-              }
+              title={canAffordFull ? `Fill tank completely` : `Need $${fullRefuelCost} to refuel`}
             >
               <span className={styles.buttonIcon}>🏁</span>
               <div className={styles.fuelButtonContent}>
@@ -117,9 +105,7 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
                   +{fuelNeeded}% fuel • ${fullRefuelCost}
                 </span>
                 {!canAffordFull && (
-                  <span className={styles.buttonDisabled}>
-                    Need ${fullRefuelCost}
-                  </span>
+                  <span className={styles.buttonDisabled}>Need ${fullRefuelCost}</span>
                 )}
               </div>
             </button>
@@ -129,22 +115,14 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
                 onClick={onRefuelPartial}
                 disabled={!canAffordPartial}
                 className={`${styles.fuelButton} ${styles.partialRefuel}`}
-                title={
-                  canAffordPartial
-                    ? `Add 25% fuel`
-                    : `Need $${partialRefuelCost} to refuel`
-                }
+                title={canAffordPartial ? `Add 25% fuel` : `Need $${partialRefuelCost} to refuel`}
               >
                 <span className={styles.buttonIcon}>⛽</span>
                 <div className={styles.fuelButtonContent}>
                   <span className={styles.buttonText}>Quick Fill</span>
-                  <span className={styles.buttonDetails}>
-                    +25% fuel • ${partialRefuelCost}
-                  </span>
+                  <span className={styles.buttonDetails}>+25% fuel • ${partialRefuelCost}</span>
                   {!canAffordPartial && (
-                    <span className={styles.buttonDisabled}>
-                      Need ${partialRefuelCost}
-                    </span>
+                    <span className={styles.buttonDisabled}>Need ${partialRefuelCost}</span>
                   )}
                 </div>
               </button>
@@ -156,9 +134,7 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
         {fuelPercentage === 100 && (
           <div className={styles.fuelFullMessage}>
             <span className={styles.fuelFullIcon}>✅</span>
-            <span className={styles.fuelFullText}>
-              Tank is full - ready for the night!
-            </span>
+            <span className={styles.fuelFullText}>Tank is full - ready for the night!</span>
           </div>
         )}
       </div>

@@ -1,17 +1,17 @@
-import { useState, useEffect, useRef, type SetStateAction } from "react";
-import type { GameState, PlayerStats } from "../types/game";
-import type { ShiftData } from "../utils/statsHandler";
-import { GAME_CONSTANTS, SCREENS, GAME_PHASES } from "../data/constants";
-import { ReputationService } from "../services/reputationService";
-import { GameEngine } from "../services/gameEngine";
-import { PassengerService } from "../services/passengerService";
-import { PassengerStateMachine } from "../services/passengerStateMachine";
-import { SaveGameService } from "../services/storageService";
-import { WeatherService } from "../services/weatherService";
-import { gameData } from "../data/gameData";
-import { useUIContext } from "../context/UIContext";
+import { useState, useEffect, useRef, type SetStateAction } from 'react';
+import type { GameState, PlayerStats } from '../types/game';
+import type { ShiftData } from '../utils/statsHandler';
+import { GAME_CONSTANTS, SCREENS, GAME_PHASES } from '../data/constants';
+import { ReputationService } from '../services/reputationService';
+import { GameEngine } from '../services/gameEngine';
+import { PassengerService } from '../services/passengerService';
+import { PassengerStateMachine } from '../services/passengerStateMachine';
+import { SaveGameService } from '../services/storageService';
+import { WeatherService } from '../services/weatherService';
+import { gameData } from '../data/gameData';
+import { useUIContext } from '../context/UIContext';
 
-const getInitialGameState = (): Omit<GameState, "currentScreen"> => {
+const getInitialGameState = (): Omit<GameState, 'currentScreen'> => {
   const season = WeatherService.getCurrentSeason();
   const initialWeather = WeatherService.generateInitialWeather(season);
 
@@ -36,11 +36,11 @@ const getInitialGameState = (): Omit<GameState, "currentScreen"> => {
     currentWeather: initialWeather.success
       ? initialWeather.data
       : {
-          type: "clear",
-          intensity: "light",
-          description: "A calm night with clear skies",
+          type: 'clear',
+          intensity: 'light',
+          description: 'A calm night with clear skies',
           visibility: 100,
-          icon: "🌙",
+          icon: '🌙',
           effects: [],
           duration: 120,
           startTime: Date.now(),
@@ -52,7 +52,7 @@ const getInitialGameState = (): Omit<GameState, "currentScreen"> => {
     // Route mastery and consequence tracking
     routeMastery: { normal: 0, shortcut: 0, scenic: 0, police: 0 },
     routeConsequences: [],
-    consecutiveRouteStreak: { type: "", count: 0 },
+    consecutiveRouteStreak: { type: '', count: 0 },
     detectedTells: [],
     ruleConfidence: 0.5,
     currentPassengerNeedState: null,
@@ -62,10 +62,9 @@ const getInitialGameState = (): Omit<GameState, "currentScreen"> => {
 export const useGameState = (playerStats: PlayerStats) => {
   // We cast the initial state to GameState internally, but we'll override currentScreen
   const [localGameState, setLocalGameState] =
-    useState<Omit<GameState, "currentScreen">>(getInitialGameState);
+    useState<Omit<GameState, 'currentScreen'>>(getInitialGameState);
 
-  const { currentScreen, showScreen, showInventory, setShowInventory } =
-    useUIContext();
+  const { currentScreen, showScreen, showInventory, setShowInventory } = useUIContext();
 
   // Construct the full GameState object by merging local state with UI context state
   const gameState: GameState = {
@@ -81,15 +80,12 @@ export const useGameState = (playerStats: PlayerStats) => {
 
   // Game timer effect
   useEffect(() => {
-    if (
-      currentScreen !== SCREENS.GAME ||
-      gameState.gamePhase === GAME_PHASES.WAITING
-    ) {
+    if (currentScreen !== SCREENS.GAME || gameState.gamePhase === GAME_PHASES.WAITING) {
       return;
     }
 
     const timer = setInterval(() => {
-      setLocalGameState((prev) => {
+      setLocalGameState(prev => {
         const newTime = prev.timeRemaining - 1;
         if (newTime <= 0) {
           setTimeout(() => endShift(false), 100);
@@ -102,10 +98,8 @@ export const useGameState = (playerStats: PlayerStats) => {
   }, [currentScreen, gameState.timeRemaining, gameState.gamePhase]);
 
   const generateShiftRules = () => {
-    const engineResult = GameEngine.generateShiftRules(
-      playerStats.totalShiftsCompleted || 0,
-    );
-    setLocalGameState((prev) => ({
+    const engineResult = GameEngine.generateShiftRules(playerStats.totalShiftsCompleted || 0);
+    setLocalGameState(prev => ({
       ...prev,
       currentRules: engineResult.visibleRules,
       hiddenRules: engineResult.hiddenRules,
@@ -119,7 +113,7 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const startShift = () => {
-    setLocalGameState((prev) => ({
+    setLocalGameState(prev => ({
       ...prev,
       shiftStartTime: Date.now(),
       fuel: GAME_CONSTANTS.INITIAL_FUEL, // Reset fuel to 100% at start of each shift
@@ -138,11 +132,11 @@ export const useGameState = (playerStats: PlayerStats) => {
       gameState,
       playerStats,
       timestamp: Date.now(),
-      version: "1.0.0",
+      version: '1.0.0',
     });
-    setLocalGameState((prev) => ({ ...prev, showSaveNotification: true }));
+    setLocalGameState(prev => ({ ...prev, showSaveNotification: true }));
     setTimeout(() => {
-      setLocalGameState((prev) => ({ ...prev, showSaveNotification: false }));
+      setLocalGameState(prev => ({ ...prev, showSaveNotification: false }));
     }, 2000);
   };
 
@@ -182,7 +176,7 @@ export const useGameState = (playerStats: PlayerStats) => {
 
     // Check if all passengers have been used and reset if necessary
     const availablePassengers = gameData.passengers.filter(
-      (passenger) => !currentGameState.usedPassengers.includes(passenger.id),
+      passenger => !currentGameState.usedPassengers.includes(passenger.id)
     );
 
     // If no passengers available, either reset the used passenger list or select from all
@@ -198,7 +192,7 @@ export const useGameState = (playerStats: PlayerStats) => {
       currentGameState.difficultyLevel || 1,
       currentGameState.currentWeather,
       currentGameState.timeOfDay,
-      currentGameState.season,
+      currentGameState.season
     );
 
     let passenger = passengerResult.success ? passengerResult.data : null;
@@ -208,16 +202,13 @@ export const useGameState = (playerStats: PlayerStats) => {
       passenger = PassengerService.getRandomPassenger(
         gameData.passengers,
         currentUsedPassengers,
-        currentGameState.difficultyLevel || 1,
+        currentGameState.difficultyLevel || 1
       );
     }
 
     // If we still don't have a passenger, force select one from all available
     if (!passenger && gameData.passengers.length > 0) {
-      passenger =
-        gameData.passengers[
-          Math.floor(Math.random() * gameData.passengers.length)
-        ];
+      passenger = gameData.passengers[Math.floor(Math.random() * gameData.passengers.length)];
     }
 
     // Only end shift if there are truly no passengers available (should never happen)
@@ -229,12 +220,12 @@ export const useGameState = (playerStats: PlayerStats) => {
     // Apply weather-triggered rules
     const weatherTriggeredRules = WeatherService.getWeatherTriggeredRules(
       currentGameState.currentWeather,
-      currentGameState.timeOfDay,
+      currentGameState.timeOfDay
     );
 
     const passengerNeedState = PassengerStateMachine.initialize(passenger);
 
-    setLocalGameState((prev) => ({
+    setLocalGameState(prev => ({
       ...prev,
       currentPassenger: passenger,
       gamePhase: GAME_PHASES.RIDE_REQUEST,
@@ -242,9 +233,7 @@ export const useGameState = (playerStats: PlayerStats) => {
       // Add weather-triggered rules to current rules
       currentRules: [
         ...prev.currentRules,
-        ...gameData.shift_rules.filter((rule) =>
-          weatherTriggeredRules.includes(rule.id),
-        ),
+        ...gameData.shift_rules.filter(rule => weatherTriggeredRules.includes(rule.id)),
       ],
       currentPassengerNeedState: passengerNeedState,
       detectedTells: prev.detectedTells || [],
@@ -254,7 +243,7 @@ export const useGameState = (playerStats: PlayerStats) => {
   const updateWeatherAndEnvironment = () => {
     const currentTime = Date.now();
 
-    setLocalGameState((prev) => {
+    setLocalGameState(prev => {
       // Update time of day
       const newTimeOfDay = prev.shiftStartTime
         ? WeatherService.updateTimeOfDay(prev.shiftStartTime, currentTime)
@@ -264,7 +253,7 @@ export const useGameState = (playerStats: PlayerStats) => {
       const weatherUpdateResult = WeatherService.updateWeather(
         prev.currentWeather,
         currentTime,
-        prev.season,
+        prev.season
       );
       const newWeather = weatherUpdateResult.success
         ? weatherUpdateResult.data
@@ -274,12 +263,12 @@ export const useGameState = (playerStats: PlayerStats) => {
       const hazardsResult = WeatherService.generateEnvironmentalHazards(
         newWeather,
         newTimeOfDay,
-        prev.season,
+        prev.season
       );
       const newHazards = hazardsResult.success ? hazardsResult.data : [];
 
       // Filter out expired hazards
-      const activeHazards = prev.environmentalHazards.filter((hazard) => {
+      const activeHazards = prev.environmentalHazards.filter(hazard => {
         const elapsed = (currentTime - hazard.startTime) / (60 * 1000); // minutes
         return elapsed < hazard.duration;
       });
@@ -295,7 +284,7 @@ export const useGameState = (playerStats: PlayerStats) => {
   };
 
   const gameOver = (reason: string) => {
-    setLocalGameState((prev) => ({
+    setLocalGameState(prev => ({
       ...prev,
       rulesViolated: prev.rulesViolated + 1,
       gameOverReason: reason,
@@ -303,10 +292,7 @@ export const useGameState = (playerStats: PlayerStats) => {
     showScreen(SCREENS.GAME_OVER);
   };
 
-  const endShift = (
-    successful: boolean,
-    overrideReason?: string,
-  ): ShiftData => {
+  const endShift = (successful: boolean, overrideReason?: string): ShiftData => {
     const shiftEndTime = Date.now();
     const shiftDuration = gameState.shiftStartTime
       ? Math.round((shiftEndTime - gameState.shiftStartTime) / (1000 * 60))
@@ -320,7 +306,7 @@ export const useGameState = (playerStats: PlayerStats) => {
       const survivalBonus = GAME_CONSTANTS.SURVIVAL_BONUS;
       const finalEarnings = gameState.earnings + survivalBonus;
 
-      setLocalGameState((prev) => ({
+      setLocalGameState(prev => ({
         ...prev,
         earnings: finalEarnings,
         survivalBonus,
@@ -334,12 +320,11 @@ export const useGameState = (playerStats: PlayerStats) => {
       if (overrideReason) {
         failureReason = overrideReason;
       } else if (!successful) {
-        failureReason =
-          "Time ran out or you ran out of fuel. The night shift waits for no one...";
+        failureReason = 'Time ran out or you ran out of fuel. The night shift waits for no one...';
       } else if (!earnedEnough) {
         failureReason = `Shift failed: You only earned $${gameState.earnings} but needed $${gameState.minimumEarnings}. The company expects better performance.`;
       } else {
-        failureReason = "The night shift has ended in failure...";
+        failureReason = 'The night shift has ended in failure...';
       }
 
       gameOver(failureReason);
@@ -349,9 +334,7 @@ export const useGameState = (playerStats: PlayerStats) => {
       ? gameState.earnings + GAME_CONSTANTS.SURVIVAL_BONUS
       : gameState.earnings;
     const calculatedScore =
-      finalEarningsForScore +
-      gameState.ridesCompleted * 10 -
-      (gameState.rulesViolated || 0) * 5;
+      finalEarningsForScore + gameState.ridesCompleted * 10 - (gameState.rulesViolated || 0) * 5;
 
     return {
       earnings: finalEarningsForScore,
@@ -369,12 +352,11 @@ export const useGameState = (playerStats: PlayerStats) => {
   // We need to be careful here. If updater tries to set currentScreen, it will be ignored by local state
   // But since we are merging it back in the return, it should be fine as long as we don't expect setGameState to update screen
   const updateGameState = (updater: SetStateAction<GameState>) => {
-    setLocalGameState((prev) => {
+    setLocalGameState(prev => {
       // If updater is a function, call it with the FULL state (including screen)
       // but only use the result to update local state (excluding screen)
       const fullPrev: GameState = { ...prev, currentScreen } as GameState;
-      const result =
-        typeof updater === "function" ? updater(fullPrev) : updater;
+      const result = typeof updater === 'function' ? updater(fullPrev) : updater;
 
       const { currentScreen: _, ...rest } = result;
       return rest;

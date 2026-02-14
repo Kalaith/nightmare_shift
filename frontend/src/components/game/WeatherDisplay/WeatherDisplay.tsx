@@ -1,11 +1,6 @@
-import React from "react";
-import type {
-  WeatherCondition,
-  TimeOfDay,
-  Season,
-  EnvironmentalHazard,
-} from "../../../types/game";
-import styles from "./WeatherDisplay.module.css";
+import React from 'react';
+import type { WeatherCondition, TimeOfDay, Season, EnvironmentalHazard } from '../../../types/game';
+import styles from './WeatherDisplay.module.css';
 
 interface WeatherDisplayProps {
   weather: WeatherCondition;
@@ -22,47 +17,47 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
   hazards,
   showDetails = false,
 }) => {
-  const getIntensityColor = (intensity: WeatherCondition["intensity"]) => {
+  const getIntensityColor = (intensity: WeatherCondition['intensity']) => {
     switch (intensity) {
-      case "light":
+      case 'light':
         return styles.intensityLight;
-      case "moderate":
+      case 'moderate':
         return styles.intensityModerate;
-      case "heavy":
+      case 'heavy':
         return styles.intensityHeavy;
       default:
         return styles.intensityLight;
     }
   };
 
-  const getTimeColor = (phase: TimeOfDay["phase"]) => {
+  const getTimeColor = (phase: TimeOfDay['phase']) => {
     switch (phase) {
-      case "dawn":
+      case 'dawn':
         return styles.timeDawn;
-      case "morning":
+      case 'morning':
         return styles.timeMorning;
-      case "afternoon":
+      case 'afternoon':
         return styles.timeAfternoon;
-      case "dusk":
+      case 'dusk':
         return styles.timeDusk;
-      case "night":
+      case 'night':
         return styles.timeNight;
-      case "latenight":
+      case 'latenight':
         return styles.timeLateNight;
       default:
         return styles.timeNight;
     }
   };
 
-  const getSeasonColor = (seasonType: Season["type"]) => {
+  const getSeasonColor = (seasonType: Season['type']) => {
     switch (seasonType) {
-      case "spring":
+      case 'spring':
         return styles.seasonSpring;
-      case "summer":
+      case 'summer':
         return styles.seasonSummer;
-      case "fall":
+      case 'fall':
         return styles.seasonFall;
-      case "winter":
+      case 'winter':
         return styles.seasonWinter;
       default:
         return styles.seasonSpring;
@@ -71,18 +66,16 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
 
   const formatTime = (hour: number) => {
     const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    const period = hour < 12 ? "AM" : "PM";
+    const period = hour < 12 ? 'AM' : 'PM';
     return `${displayHour}:00 ${period}`;
   };
 
   const getVisibilityStatus = (visibility: number) => {
-    if (visibility >= 80)
-      return { text: "Excellent", color: styles.visibilityGood };
-    if (visibility >= 60) return { text: "Good", color: styles.visibilityOk };
-    if (visibility >= 40) return { text: "Poor", color: styles.visibilityPoor };
-    if (visibility >= 20)
-      return { text: "Very Poor", color: styles.visibilityBad };
-    return { text: "Dangerous", color: styles.visibilityDangerous };
+    if (visibility >= 80) return { text: 'Excellent', color: styles.visibilityGood };
+    if (visibility >= 60) return { text: 'Good', color: styles.visibilityOk };
+    if (visibility >= 40) return { text: 'Poor', color: styles.visibilityPoor };
+    if (visibility >= 20) return { text: 'Very Poor', color: styles.visibilityBad };
+    return { text: 'Dangerous', color: styles.visibilityDangerous };
   };
 
   const visibilityStatus = getVisibilityStatus(weather.visibility);
@@ -94,9 +87,7 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
         <div className={styles.weatherIcon}>
           <span className={styles.icon}>{weather.icon}</span>
           <div className={styles.weatherInfo}>
-            <div
-              className={`${styles.weatherType} ${getIntensityColor(weather.intensity)}`}
-            >
+            <div className={`${styles.weatherType} ${getIntensityColor(weather.intensity)}`}>
               {weather.type.charAt(0).toUpperCase() + weather.type.slice(1)}
             </div>
             <div className={styles.weatherIntensity}>{weather.intensity}</div>
@@ -104,18 +95,14 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
         </div>
 
         <div className={styles.timeInfo}>
-          <div
-            className={`${styles.timePhase} ${getTimeColor(timeOfDay.phase)}`}
-          >
+          <div className={`${styles.timePhase} ${getTimeColor(timeOfDay.phase)}`}>
             {timeOfDay.phase.charAt(0).toUpperCase() + timeOfDay.phase.slice(1)}
           </div>
           <div className={styles.timeHour}>{formatTime(timeOfDay.hour)}</div>
         </div>
 
         <div className={styles.seasonInfo}>
-          <div
-            className={`${styles.seasonType} ${getSeasonColor(season.type)}`}
-          >
+          <div className={`${styles.seasonType} ${getSeasonColor(season.type)}`}>
             {season.type.charAt(0).toUpperCase() + season.type.slice(1)}
           </div>
           <div className={styles.seasonTemp}>{season.temperature}</div>
@@ -139,9 +126,7 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
             <div className={styles.effectsGrid}>
               <div className={styles.effectItem}>
                 <span className={styles.effectLabel}>Visibility:</span>
-                <span
-                  className={`${styles.effectValue} ${visibilityStatus.color}`}
-                >
+                <span className={`${styles.effectValue} ${visibilityStatus.color}`}>
                   {weather.visibility}% ({visibilityStatus.text})
                 </span>
               </div>
@@ -160,11 +145,9 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
                 <ul className={styles.effectsList}>
                   {weather.effects.map((effect, index) => (
                     <li key={index} className={styles.effectListItem}>
-                      <span className={styles.effectDescription}>
-                        {effect.description}
-                      </span>
+                      <span className={styles.effectDescription}>{effect.description}</span>
                       <span className={styles.effectValue}>
-                        {effect.value > 0 ? "+" : ""}
+                        {effect.value > 0 ? '+' : ''}
                         {effect.value}%
                       </span>
                     </li>
@@ -186,16 +169,12 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
                     className={styles.lightFill}
                     style={{ width: `${timeOfDay.ambientLight}%` }}
                   />
-                  <span className={styles.lightValue}>
-                    {timeOfDay.ambientLight}%
-                  </span>
+                  <span className={styles.lightValue}>{timeOfDay.ambientLight}%</span>
                 </div>
               </div>
 
               <div className={styles.atmosphereItem}>
-                <span className={styles.atmosphereLabel}>
-                  Supernatural Activity:
-                </span>
+                <span className={styles.atmosphereLabel}>Supernatural Activity:</span>
                 <div className={styles.supernaturalMeter}>
                   <div
                     className={styles.supernaturalFill}
@@ -213,11 +192,11 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
             <div className={styles.hazardDetails}>
               <h3 className={styles.sectionTitle}>Environmental Hazards</h3>
               <div className={styles.hazardList}>
-                {hazards.map((hazard) => (
+                {hazards.map(hazard => (
                   <div key={hazard.id} className={styles.hazardItem}>
                     <div className={styles.hazardHeader}>
                       <span className={styles.hazardType}>
-                        {hazard.type.replace("_", " ").toUpperCase()}
+                        {hazard.type.replace('_', ' ').toUpperCase()}
                       </span>
                       <span
                         className={`${styles.hazardSeverity} ${styles[`severity${hazard.severity.charAt(0).toUpperCase() + hazard.severity.slice(1)}`]}`}
@@ -225,12 +204,8 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
                         {hazard.severity}
                       </span>
                     </div>
-                    <div className={styles.hazardLocation}>
-                      {hazard.location}
-                    </div>
-                    <div className={styles.hazardDescription}>
-                      {hazard.description}
-                    </div>
+                    <div className={styles.hazardLocation}>{hazard.location}</div>
+                    <div className={styles.hazardDescription}>{hazard.description}</div>
 
                     {hazard.effects.timeDelay && (
                       <div className={styles.hazardEffect}>
@@ -249,8 +224,7 @@ export const WeatherDisplay: React.FC<WeatherDisplayProps> = ({
                     )}
                     {hazard.effects.routeBlocked && (
                       <div className={styles.hazardEffect}>
-                        🚫 Blocks: {hazard.effects.routeBlocked.join(", ")}{" "}
-                        routes
+                        🚫 Blocks: {hazard.effects.routeBlocked.join(', ')} routes
                       </div>
                     )}
                   </div>

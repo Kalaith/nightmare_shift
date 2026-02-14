@@ -171,7 +171,7 @@ export const GAME_BALANCE = {
     MINUTES_PER_HOUR: 60,
     HOURS_DISPLAY_THRESHOLD: 60, // Show hours when >= 60 minutes
     PAD_START_LENGTH: 2,
-    PAD_CHARACTER: "0",
+    PAD_CHARACTER: '0',
   },
 
   // ===== VALIDATION THRESHOLDS =====
@@ -207,13 +207,9 @@ export const BalanceHelpers = {
    */
   getFuelCostWithVariation: (baseCost: number): number => {
     const variation =
-      Math.floor(
-        Math.random() * GAME_BALANCE.ROUTE_VARIATIONS.FUEL_VARIATION_RANGE,
-      ) - GAME_BALANCE.ROUTE_VARIATIONS.FUEL_VARIATION_OFFSET;
-    return Math.max(
-      GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST,
-      baseCost + variation,
-    );
+      Math.floor(Math.random() * GAME_BALANCE.ROUTE_VARIATIONS.FUEL_VARIATION_RANGE) -
+      GAME_BALANCE.ROUTE_VARIATIONS.FUEL_VARIATION_OFFSET;
+    return Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_FUEL_COST, baseCost + variation);
   },
 
   /**
@@ -221,13 +217,9 @@ export const BalanceHelpers = {
    */
   getTimeCostWithVariation: (baseCost: number): number => {
     const variation =
-      Math.floor(
-        Math.random() * GAME_BALANCE.ROUTE_VARIATIONS.TIME_VARIATION_RANGE,
-      ) - GAME_BALANCE.ROUTE_VARIATIONS.TIME_VARIATION_OFFSET;
-    return Math.max(
-      GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST,
-      baseCost + variation,
-    );
+      Math.floor(Math.random() * GAME_BALANCE.ROUTE_VARIATIONS.TIME_VARIATION_RANGE) -
+      GAME_BALANCE.ROUTE_VARIATIONS.TIME_VARIATION_OFFSET;
+    return Math.max(GAME_BALANCE.ROUTE_VARIATIONS.MINIMUM_TIME_COST, baseCost + variation);
   },
 
   /**
@@ -274,11 +266,11 @@ export const BalanceHelpers = {
   getReputationFareMultiplier: (relationshipLevel: string): number => {
     const multipliers = GAME_BALANCE.REPUTATION.MULTIPLIERS;
     switch (relationshipLevel) {
-      case "trusted":
+      case 'trusted':
         return multipliers.TRUSTED_FARE;
-      case "friendly":
+      case 'friendly':
         return multipliers.FRIENDLY_FARE;
-      case "hostile":
+      case 'hostile':
         return multipliers.HOSTILE_FARE;
       default:
         return multipliers.DEFAULT_FARE;
@@ -295,14 +287,10 @@ export const BalanceHelpers = {
   /**
    * Calculate player experience from stats
    */
-  calculateExperience: (
-    ridesCompleted: number,
-    shiftsCompleted: number,
-  ): number => {
+  calculateExperience: (ridesCompleted: number, shiftsCompleted: number): number => {
     const multipliers = GAME_BALANCE.SCORING.PLAYER_EXPERIENCE_MULTIPLIERS;
     return (
-      ridesCompleted * multipliers.RIDES_COMPLETED +
-      shiftsCompleted * multipliers.SHIFTS_COMPLETED
+      ridesCompleted * multipliers.RIDES_COMPLETED + shiftsCompleted * multipliers.SHIFTS_COMPLETED
     );
   },
 };

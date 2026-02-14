@@ -1,18 +1,18 @@
 // Rule and Guideline related types
-import type { GameState } from "./gameState";
-import type { Passenger } from "./passenger";
+import type { GameState } from './gameState';
+import type { Passenger } from './passenger';
 
 export interface Rule {
   id: number;
   title: string;
   description: string;
-  difficulty: "easy" | "medium" | "hard" | "expert" | "nightmare";
-  type: "basic" | "conditional" | "conflicting" | "hidden" | "weather";
+  difficulty: 'easy' | 'medium' | 'hard' | 'expert' | 'nightmare';
+  type: 'basic' | 'conditional' | 'conflicting' | 'hidden' | 'weather';
   visible: boolean;
   actionKey?: string;
-  actionType?: "forbidden" | "required";
+  actionType?: 'forbidden' | 'required';
   relatedGuidelineId?: number;
-  defaultSafety?: "safe" | "risky" | "dangerous";
+  defaultSafety?: 'safe' | 'risky' | 'dangerous';
   defaultOutcome?: string;
   exceptions?: GuidelineException[];
   followConsequences?: GuidelineConsequence[];
@@ -34,7 +34,7 @@ export interface Rule {
 export interface Guideline extends Rule {
   isGuideline: true;
   exceptions: GuidelineException[];
-  defaultSafety: "safe" | "risky" | "dangerous";
+  defaultSafety: 'safe' | 'risky' | 'dangerous';
   breakConsequences: GuidelineConsequence[];
   followConsequences: GuidelineConsequence[];
   exceptionRewards?: GuidelineConsequence[];
@@ -53,20 +53,15 @@ export interface GuidelineException {
 }
 
 export interface ExceptionCondition {
-  type:
-    | "passenger_dialogue"
-    | "passenger_behavior"
-    | "environmental"
-    | "time_based"
-    | "weather";
+  type: 'passenger_dialogue' | 'passenger_behavior' | 'environmental' | 'time_based' | 'weather';
   value: string | number;
-  operator?: "equals" | "contains" | "greater_than" | "less_than";
+  operator?: 'equals' | 'contains' | 'greater_than' | 'less_than';
   description: string;
 }
 
 export interface PassengerTell {
-  type: "verbal" | "behavioral" | "visual" | "environmental";
-  intensity: "subtle" | "moderate" | "obvious";
+  type: 'verbal' | 'behavioral' | 'visual' | 'environmental';
+  intensity: 'subtle' | 'moderate' | 'obvious';
   description: string;
   triggerPhrase?: string;
   animationCue?: string;
@@ -75,21 +70,13 @@ export interface PassengerTell {
 }
 
 export interface GuidelineConsequence {
-  type:
-    | "death"
-    | "survival"
-    | "reputation"
-    | "money"
-    | "fuel"
-    | "time"
-    | "item"
-    | "story_unlock";
+  type: 'death' | 'survival' | 'reputation' | 'money' | 'fuel' | 'time' | 'item' | 'story_unlock';
   value: number;
   description: string;
   probability: number;
 }
 
-export type PassengerNeedStage = "calm" | "warning" | "critical" | "meltdown";
+export type PassengerNeedStage = 'calm' | 'warning' | 'critical' | 'meltdown';
 
 export interface NeedChangeProfile {
   passive: number;
@@ -99,7 +86,7 @@ export interface NeedChangeProfile {
 }
 
 export interface PassengerStateProfile {
-  needType: "hunger" | "fear" | "wrath" | "decay" | "loneliness" | "unknown";
+  needType: 'hunger' | 'fear' | 'wrath' | 'decay' | 'loneliness' | 'unknown';
   initialLevel: number; // 0-100 scale
   thresholds: {
     warning: number;
@@ -108,9 +95,7 @@ export interface PassengerStateProfile {
   };
   needChange: NeedChangeProfile;
   exceptionId?: string;
-  tellIntensities?: Partial<
-    Record<PassengerNeedStage, Array<"subtle" | "moderate" | "obvious">>
-  >;
+  tellIntensities?: Partial<Record<PassengerNeedStage, Array<'subtle' | 'moderate' | 'obvious'>>>;
   dialogueByStage?: Partial<Record<PassengerNeedStage, string[]>>;
   trustImpact?: Partial<Record<PassengerNeedStage, number>>;
   confidenceImpact?: Partial<Record<PassengerNeedStage, number>>;
@@ -118,7 +103,7 @@ export interface PassengerStateProfile {
 
 export interface PassengerNeedState {
   passengerId: number;
-  needType: PassengerStateProfile["needType"];
+  needType: PassengerStateProfile['needType'];
   level: number;
   stage: PassengerNeedStage;
   stability: number; // 0-1 scale
@@ -141,7 +126,7 @@ export interface RuleEvaluationResult {
 export interface RuleConflict {
   rule1: Rule;
   rule2: Rule;
-  conflictType: "direct" | "indirect" | "conditional";
+  conflictType: 'direct' | 'indirect' | 'conditional';
   description: string;
 }
 
@@ -152,7 +137,7 @@ export interface HiddenRuleViolation {
 export interface GuidelineDecision {
   guidelineId: number;
   passengerId: number;
-  action: "follow" | "break";
+  action: 'follow' | 'break';
   outcome: GuidelineConsequence[];
   wasCorrect: boolean;
   tellsPresent: PassengerTell[];
