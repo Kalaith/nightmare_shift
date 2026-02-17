@@ -351,7 +351,7 @@ export class RouteService {
               : 'neutral';
             const fareModifier = passengerPreference?.fareModifier || 1.0;
 
-            let bonusInfo = this.buildRouteInfo(
+            const bonusInfo = this.buildRouteInfo(
               route.type,
               passengerPreference,
               routeMastery,

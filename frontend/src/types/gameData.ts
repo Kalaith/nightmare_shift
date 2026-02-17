@@ -10,8 +10,8 @@ export interface GameData {
 }
 
 export interface SaveData {
-  gameState: any; // Will be properly typed when needed
-  playerStats: any; // Will be properly typed when needed
+  gameState: unknown; // Will be properly typed when needed
+  playerStats: unknown; // Will be properly typed when needed
   timestamp: number;
   version: string;
 }

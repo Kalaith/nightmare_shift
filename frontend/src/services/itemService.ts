@@ -45,7 +45,7 @@ export class ItemService {
       () => {
         if (!item.effects) return gameState;
 
-        let newState = { ...gameState };
+        const newState = { ...gameState };
 
         for (const effect of item.effects) {
           switch (effect.type) {

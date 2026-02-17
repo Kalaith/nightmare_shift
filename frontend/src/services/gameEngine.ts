@@ -28,7 +28,7 @@ export class GameEngine {
     const basicRules = gameData.shift_rules.filter(rule => rule.type === 'basic');
     const conditionalRules = gameData.shift_rules.filter(rule => rule.type === 'conditional');
 
-    let selectedRules: Rule[] = [];
+    const selectedRules: Rule[] = [];
 
     // Always include 2-3 basic rules
     const shuffledBasic = [...basicRules].sort(() => 0.5 - Math.random());

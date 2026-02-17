@@ -1,6 +1,5 @@
-/* eslint-env node */
-import { GameSimulator, type Strategy } from './gameSimulator';
-import * as fs from 'fs';
+import { GameSimulator, type SimulationResult, type SimulationStats, type Strategy } from './gameSimulator';
+import * as fs from 'node:fs';
 
 const TOTAL_RUNS = 120;
 const STRATEGIES: Strategy[] = [
@@ -73,12 +72,22 @@ console.log(
 console.log(colors.bright + '🎮 Starting simulations...' + colors.reset + '\n');
 
 let completedRuns = 0;
-const strategyProgress: Record<Strategy, { runs: number; successes: number }> = {} as any;
-STRATEGIES.forEach(s => (strategyProgress[s] = { runs: 0, successes: 0 }));
+const strategyProgress: Record<Strategy, { runs: number; successes: number }> = STRATEGIES.reduce(
+  (acc, strategy) => {
+    acc[strategy] = { runs: 0, successes: 0 };
+    return acc;
+  },
+  {} as Record<Strategy, { runs: number; successes: number }>
+);
 
-const results: any[] = [];
-const failureReasons: Record<Strategy, Record<string, number>> = {} as any;
-STRATEGIES.forEach(s => (failureReasons[s] = {}));
+const results: SimulationResult[] = [];
+const failureReasons: Record<Strategy, Record<string, number>> = STRATEGIES.reduce(
+  (acc, strategy) => {
+    acc[strategy] = {};
+    return acc;
+  },
+  {} as Record<Strategy, Record<string, number>>
+);
 
 const startTime = Date.now();
 
@@ -114,24 +123,24 @@ console.log(
   `   Average: ${colors.cyan}${((parseFloat(elapsedTime) / TOTAL_RUNS) * 1000).toFixed(0)}ms${colors.reset} per simulation\n`
 );
 
-const strategyStats: Record<
-  Strategy,
-  { runs: number; successes: number; avgEarnings: number; avgRides: number }
-> = {} as any;
-STRATEGIES.forEach(strategy => {
-  const stratResults = results.filter(r => r.strategy === strategy);
-  strategyStats[strategy] = {
-    runs: stratResults.length,
-    successes: stratResults.filter(r => r.success).length,
-    avgEarnings: Math.round(
-      stratResults.reduce((sum, r) => sum + r.finalEarnings, 0) / stratResults.length
-    ),
-    avgRides:
-      Math.round(
-        (stratResults.reduce((sum, r) => sum + r.ridesCompleted, 0) / stratResults.length) * 10
-      ) / 10,
-  };
-});
+const strategyStats: SimulationStats['strategyResults'] = STRATEGIES.reduce(
+  (acc, strategy) => {
+    const stratResults = results.filter(r => r.strategy === strategy);
+    acc[strategy] = {
+      runs: stratResults.length,
+      successes: stratResults.filter(r => r.success).length,
+      avgEarnings: Math.round(
+        stratResults.reduce((sum, r) => sum + r.finalEarnings, 0) / stratResults.length
+      ),
+      avgRides:
+        Math.round(
+          (stratResults.reduce((sum, r) => sum + r.ridesCompleted, 0) / stratResults.length) * 10
+        ) / 10,
+    };
+    return acc;
+  },
+  {} as SimulationStats['strategyResults']
+);
 
 const stats = {
   totalRuns: TOTAL_RUNS,

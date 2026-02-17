@@ -358,7 +358,8 @@ export const useGameState = (playerStats: PlayerStats) => {
       const fullPrev: GameState = { ...prev, currentScreen } as GameState;
       const result = typeof updater === 'function' ? updater(fullPrev) : updater;
 
-      const { currentScreen: _, ...rest } = result;
+      const { currentScreen: ignoredCurrentScreen, ...rest } = result;
+      void ignoredCurrentScreen;
       return rest;
     });
   };

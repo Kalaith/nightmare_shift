@@ -154,7 +154,7 @@ export const useGameActions = () => {
       }
 
       // Apply route effects - no more flat bonuses, use passenger multipliers
-      let bonusEarnings = 0;
+      const bonusEarnings = 0;
 
       // Record route choice in history
       const routeHistoryEntry = {
@@ -409,7 +409,7 @@ export const useGameActions = () => {
       const trade = tradeOptions[0];
 
       setGameState(prev => {
-        let newInventory = prev.inventory.filter(i => i.id !== itemId);
+        const newInventory = prev.inventory.filter(i => i.id !== itemId);
 
         // Add received item if any
         if (trade.receive) {
