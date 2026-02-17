@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useGameContext } from '../context/GameContext';
+import { useGameContext } from './useGameContext';
 import { GAME_PHASES } from '../data/constants';
 import { GAME_BALANCE } from '../constants/gameBalance';
 import type { PassengerNeedState, RuleEvaluationResult, Passenger } from '../types/game';
@@ -14,14 +14,6 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
 
 export const useGameActions = () => {
   const { gameState, updateGameState: setGameState, showRideRequest, endShift } = useGameContext();
-
-  const acceptRide = useCallback(() => {
-    if (gameState.fuel < 5) {
-      endShift(false, 'You ran out of fuel with a passenger in the car. They were not pleased...');
-      return;
-    }
-    startDriving('pickup');
-  }, [gameState.fuel, endShift]);
 
   const declineRide = useCallback(() => {
     // Reset to waiting state after declining
@@ -56,8 +48,15 @@ export const useGameActions = () => {
     [gameState.currentPassenger, setGameState]
   );
 
-  const handleDrivingChoice = useCallback(
-    (choice: string, phase: string) => {
+  const acceptRide = useCallback(() => {
+    if (gameState.fuel < 5) {
+      endShift(false, 'You ran out of fuel with a passenger in the car. They were not pleased...');
+      return;
+    }
+    startDriving('pickup');
+  }, [gameState.fuel, endShift, startDriving]);
+
+  const handleDrivingChoice = (choice: string, phase: string) => {
       const routeChoice = choice as 'normal' | 'shortcut' | 'scenic' | 'police';
       const passengerRiskLevel = gameState.currentPassenger
         ? gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)
@@ -214,9 +213,7 @@ export const useGameActions = () => {
       } else {
         completeRide();
       }
-    },
-    [gameState, setGameState, endShift]
-  );
+  };
 
   const startPassengerInteraction = useCallback(
     (_nextNeedState?: PassengerNeedState | null) => {
@@ -242,7 +239,6 @@ export const useGameActions = () => {
     },
     [
       gameState.currentPassenger,
-      gameState.currentPassengerNeedState,
       gameState.pendingRouteDialogue,
       setGameState,
     ]

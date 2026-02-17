@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { GameState, Passenger, DetectedTell } from '../../../types/game';
 import { GuidelineEngine } from '../../../services/guidelineEngine';
 import styles from './TensionMeter.module.css';
@@ -44,16 +44,43 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
   const [confidenceLevel, setConfidenceLevel] = useState(0.5);
   const [stressIndicators, setStressIndicators] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (!isVisible || !passenger) return;
+  const calculateEnvironmentalStress = useCallback((): number => {
+    let stress = 0;
 
-    const factors = calculateTensionFactors();
-    setTensionFactors(factors);
-    updatePsychologicalState(factors);
-    updateStressIndicators(factors);
-  }, [gameState, passenger, detectedTells, currentDecision, isVisible]);
+    // Weather conditions
+    if (gameState.currentWeather) {
+      switch (gameState.currentWeather.type) {
+        case 'thunderstorm':
+          stress += 0.4;
+          break;
+        case 'fog':
+          stress += 0.3;
+          break;
+        case 'rain':
+          stress += 0.2;
+          break;
+      }
+    }
 
-  const calculateTensionFactors = (): TensionFactors => {
+    // Time of day
+    if (gameState.timeOfDay?.phase === 'latenight') {
+      stress += 0.3;
+    }
+
+    // Fuel level
+    if (gameState.fuel < 10) {
+      stress += 0.2;
+    }
+
+    // Time remaining in shift
+    if (gameState.timeRemaining < 60) {
+      stress += 0.2;
+    }
+
+    return Math.min(1, stress);
+  }, [gameState.currentWeather, gameState.timeOfDay, gameState.fuel, gameState.timeRemaining]);
+
+  const calculateTensionFactors = useCallback((): TensionFactors => {
     if (!passenger)
       return {
         passengerDeception: 0,
@@ -109,55 +136,21 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
       environmentalStress,
       overallTension,
     };
-  };
+  }, [passenger, detectedTells, currentDecision, gameState, calculateEnvironmentalStress]);
 
-  const calculateEnvironmentalStress = (): number => {
-    let stress = 0;
-
-    // Weather conditions
-    if (gameState.currentWeather) {
-      switch (gameState.currentWeather.type) {
-        case 'thunderstorm':
-          stress += 0.4;
-          break;
-        case 'fog':
-          stress += 0.3;
-          break;
-        case 'rain':
-          stress += 0.2;
-          break;
-      }
-    }
-
-    // Time of day
-    if (gameState.timeOfDay?.phase === 'latenight') {
-      stress += 0.3;
-    }
-
-    // Fuel level
-    if (gameState.fuel < 10) {
-      stress += 0.2;
-    }
-
-    // Time remaining in shift
-    if (gameState.timeRemaining < 60) {
-      stress += 0.2;
-    }
-
-    return Math.min(1, stress);
-  };
-
-  const updatePsychologicalState = (factors: TensionFactors) => {
-    // Update doubt level based on conflicting information
-    const newDoubtLevel = Math.max(
+  const calculateDoubtLevel = useCallback((factors: TensionFactors): number => {
+    return Math.max(
       0,
       Math.min(
         1,
-        factors.tellConflict * 0.4 +
-          factors.playerUncertainty * 0.4 +
-          factors.passengerDeception * 0.2
+        factors.tellConflict * 0.4 + factors.playerUncertainty * 0.4 + factors.passengerDeception * 0.2
       )
     );
+  }, []);
+
+  const updatePsychologicalState = useCallback((factors: TensionFactors) => {
+    // Update doubt level based on conflicting information
+    const newDoubtLevel = calculateDoubtLevel(factors);
     setDoubtLevel(newDoubtLevel);
 
     // Update confidence level (inverse relationship with uncertainty)
@@ -167,9 +160,9 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
       Math.min(0.9, decisionConfidence * (1 - factors.playerUncertainty))
     );
     setConfidenceLevel(newConfidenceLevel);
-  };
+  }, [currentDecision, calculateDoubtLevel]);
 
-  const updateStressIndicators = (factors: TensionFactors) => {
+  const updateStressIndicators = useCallback((factors: TensionFactors) => {
     const indicators: string[] = [];
 
     if (factors.passengerDeception > 0.6) {
@@ -192,12 +185,27 @@ export const TensionMeter: React.FC<TensionMeterProps> = ({
       indicators.push('Hazardous driving conditions');
     }
 
-    if (doubtLevel > 0.8) {
+    if (calculateDoubtLevel(factors) > 0.8) {
       indicators.push('Overwhelming uncertainty');
     }
 
     setStressIndicators(indicators);
-  };
+  }, [calculateDoubtLevel]);
+
+  useEffect(() => {
+    if (!isVisible || !passenger) return;
+
+    const factors = calculateTensionFactors();
+    setTensionFactors(factors);
+    updatePsychologicalState(factors);
+    updateStressIndicators(factors);
+  }, [
+    isVisible,
+    passenger,
+    calculateTensionFactors,
+    updatePsychologicalState,
+    updateStressIndicators,
+  ]);
 
   const getTensionColor = (level: number) => {
     if (level >= 0.8) return styles.tensionCritical;

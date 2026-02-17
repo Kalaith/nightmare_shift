@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useGameContext } from '../../../context/GameContext';
-import { usePlayerContext } from '../../../context/PlayerContext';
+import { useGameContext } from '../../../hooks/useGameContext';
+import { usePlayerContext } from '../../../hooks/usePlayerContext';
 import { useGameActions } from '../../../hooks/useGameActions';
 import { RouteService } from '../../../services/reputationService';
 import { gameData } from '../../../data/gameData';

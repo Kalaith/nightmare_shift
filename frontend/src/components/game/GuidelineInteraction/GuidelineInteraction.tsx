@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type {
   GameState,
   Passenger,
@@ -46,38 +46,26 @@ export const GuidelineInteraction: React.FC<GuidelineInteractionProps> = ({
     observationTime: 10,
   });
 
-  useEffect(() => {
-    if (!isActive) {
-      setInteraction(prev => ({ ...prev, phase: 'completed' }));
-      return;
-    }
+  const findRelevantGuideline = useCallback(
+    (action?: string): Guideline | null => {
+      if (!action) return null;
 
-    // Initialize interaction when becoming active
-    if (interaction.phase === 'completed') {
-      startInteraction();
-    }
-  }, [isActive]);
+      const actionToGuidelineMap: Record<string, number> = {
+        eye_contact: 1001,
+        take_shortcut: 1002,
+        accept_tip: 1003,
+        speak_first: 1004,
+        stop_car: 1005,
+        open_window: 1006,
+      };
 
-  useEffect(() => {
-    if (interaction.phase === 'observing' && interaction.observationTime > 0) {
-      const timer = setTimeout(() => {
-        setInteraction(prev => ({
-          ...prev,
-          observationTime: prev.observationTime - 1,
-        }));
-      }, 1000);
+      const guidelineId = actionToGuidelineMap[action];
+      return guidelines.find(g => g.id === guidelineId) || null;
+    },
+    [guidelines]
+  );
 
-      return () => clearTimeout(timer);
-    } else if (interaction.phase === 'observing' && interaction.observationTime === 0) {
-      // Move to decision phase
-      setInteraction(prev => ({
-        ...prev,
-        phase: 'deciding',
-      }));
-    }
-  }, [interaction.phase, interaction.observationTime]);
-
-  const startInteraction = () => {
+  const startInteraction = useCallback(() => {
     // Find the relevant guideline for the current action
     const relevantGuideline = findRelevantGuideline(currentAction);
 
@@ -101,23 +89,38 @@ export const GuidelineInteraction: React.FC<GuidelineInteractionProps> = ({
         }));
       }
     }, 1500);
-  };
+  }, [currentAction, findRelevantGuideline, passenger, gameState]);
 
-  const findRelevantGuideline = (action?: string): Guideline | null => {
-    if (!action) return null;
+  useEffect(() => {
+    if (!isActive) {
+      setInteraction(prev => ({ ...prev, phase: 'completed' }));
+      return;
+    }
 
-    const actionToGuidelineMap: Record<string, number> = {
-      eye_contact: 1001,
-      take_shortcut: 1002,
-      accept_tip: 1003,
-      speak_first: 1004,
-      stop_car: 1005,
-      open_window: 1006,
-    };
+    // Initialize interaction when becoming active
+    if (interaction.phase === 'completed') {
+      startInteraction();
+    }
+  }, [isActive, interaction.phase, startInteraction]);
 
-    const guidelineId = actionToGuidelineMap[action];
-    return guidelines.find(g => g.id === guidelineId) || null;
-  };
+  useEffect(() => {
+    if (interaction.phase === 'observing' && interaction.observationTime > 0) {
+      const timer = setTimeout(() => {
+        setInteraction(prev => ({
+          ...prev,
+          observationTime: prev.observationTime - 1,
+        }));
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    } else if (interaction.phase === 'observing' && interaction.observationTime === 0) {
+      // Move to decision phase
+      setInteraction(prev => ({
+        ...prev,
+        phase: 'deciding',
+      }));
+    }
+  }, [interaction.phase, interaction.observationTime]);
 
   const handleChoice = (choice: 'follow' | 'break', reasoning?: string) => {
     if (!interaction.activeGuideline) return;

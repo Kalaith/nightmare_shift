@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type SetStateAction } from 'react';
+import { useState, useEffect, useRef, useMemo, type SetStateAction } from 'react';
 import type { GameState, PlayerStats } from '../types/game';
 import type { ShiftData } from '../utils/statsHandler';
 import { GAME_CONSTANTS, SCREENS, GAME_PHASES } from '../data/constants';
@@ -9,7 +9,7 @@ import { PassengerStateMachine } from '../services/passengerStateMachine';
 import { SaveGameService } from '../services/storageService';
 import { WeatherService } from '../services/weatherService';
 import { gameData } from '../data/gameData';
-import { useUIContext } from '../context/UIContext';
+import { useUIContext } from './useUIContext';
 
 const getInitialGameState = (): Omit<GameState, 'currentScreen'> => {
   const season = WeatherService.getCurrentSeason();
@@ -67,10 +67,14 @@ export const useGameState = (playerStats: PlayerStats) => {
   const { currentScreen, showScreen, showInventory, setShowInventory } = useUIContext();
 
   // Construct the full GameState object by merging local state with UI context state
-  const gameState: GameState = {
-    ...localGameState,
-    currentScreen,
-  } as GameState;
+  const gameState: GameState = useMemo(
+    () =>
+      ({
+        ...localGameState,
+        currentScreen,
+      }) as GameState,
+    [localGameState, currentScreen]
+  );
 
   // Ref to access latest game state in async callbacks
   const gameStateRef = useRef(gameState);
@@ -88,14 +92,22 @@ export const useGameState = (playerStats: PlayerStats) => {
       setLocalGameState(prev => {
         const newTime = prev.timeRemaining - 1;
         if (newTime <= 0) {
-          setTimeout(() => endShift(false), 100);
+          setTimeout(() => {
+            setLocalGameState(current => ({
+              ...current,
+              rulesViolated: current.rulesViolated + 1,
+              gameOverReason:
+                'Time ran out or you ran out of fuel. The night shift waits for no one...',
+            }));
+            showScreen(SCREENS.GAME_OVER);
+          }, 100);
         }
         return { ...prev, timeRemaining: newTime };
       });
     }, 30000);
 
     return () => clearInterval(timer);
-  }, [currentScreen, gameState.timeRemaining, gameState.gamePhase]);
+  }, [currentScreen, gameState.gamePhase, showScreen]);
 
   const generateShiftRules = () => {
     const engineResult = GameEngine.generateShiftRules(playerStats.totalShiftsCompleted || 0);

@@ -2,9 +2,9 @@ import React from 'react';
 import { SCREENS } from '../data/constants';
 import { LeaderboardService } from '../services/storageService';
 import { gameData } from '../data/gameData';
-import { useGameContext } from '../context/GameContext';
-import { usePlayerContext } from '../context/PlayerContext';
-import { useUIContext } from '../context/UIContext';
+import { useGameContext } from '../hooks/useGameContext';
+import { usePlayerContext } from '../hooks/usePlayerContext';
+import { useUIContext } from '../hooks/useUIContext';
 
 import LoadingScreen from './screens/LoadingScreen/LoadingScreen';
 import LeaderboardScreen from './screens/LeaderboardScreen/LeaderboardScreen';

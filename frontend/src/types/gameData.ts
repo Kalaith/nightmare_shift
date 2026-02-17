@@ -2,6 +2,8 @@
 import type { Rule } from './rules';
 import type { Passenger } from './passenger';
 import type { Location } from './location';
+import type { GameState } from './gameState';
+import type { PlayerStats } from './playerStats';
 
 export interface GameData {
   shift_rules: Rule[];
@@ -10,8 +12,8 @@ export interface GameData {
 }
 
 export interface SaveData {
-  gameState: unknown; // Will be properly typed when needed
-  playerStats: unknown; // Will be properly typed when needed
+  gameState: GameState;
+  playerStats: PlayerStats;
   timestamp: number;
   version: string;
 }

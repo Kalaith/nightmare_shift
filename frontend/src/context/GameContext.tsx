@@ -1,26 +1,8 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { useGameState } from '../hooks/useGameState';
-import { usePlayerContext } from './PlayerContext';
-import type { GameState } from '../types/game';
+import { usePlayerContext } from '../hooks/usePlayerContext';
+import { GameContext } from './gameContextObject';
 import { createStatsUpdater } from '../utils/statsHandler';
-
-interface GameContextType {
-  gameState: GameState;
-  updateGameState: (updater: React.SetStateAction<GameState>) => void;
-  showInventory: boolean;
-  setShowInventory: (show: boolean) => void;
-  showScreen: (screenName: string) => void;
-  startGame: () => void;
-  startShift: () => void;
-  resetGame: () => void;
-  saveGame: () => void;
-  loadGame: () => void;
-  showRideRequest: () => void;
-  gameOver: (reason: string) => void;
-  endShift: (successful: boolean, overrideReason?: string) => void;
-}
-
-const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const {
@@ -93,12 +75,4 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       {children}
     </GameContext.Provider>
   );
-};
-
-export const useGameContext = () => {
-  const context = useContext(GameContext);
-  if (context === undefined) {
-    throw new Error('useGameContext must be used within a GameProvider');
-  }
-  return context;
 };
