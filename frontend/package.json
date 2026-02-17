@@ -16,7 +16,6 @@
     "test:run": "vitest run --configLoader runner",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "test:balance": "tsx src/testing/runBalanceTests.ts",
     "ci": "npm run lint && npm run type-check && npm run format:check && npm run test:run && npm run build",
     "ci:quick": "npm run lint && npm run type-check && npm run format:check"
   },
