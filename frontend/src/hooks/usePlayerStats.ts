@@ -1,8 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { PlayerStats, LeaderboardEntry } from '../types/game';
-import { STORAGE_KEYS } from '../data/constants';
-import LocalStorage, { LeaderboardService } from '../services/storageService';
+import { gameApi } from '../api/gameApi';
 
+/**
+ * Default player stats — used for initialization before backend responds.
+ */
 const getDefaultPlayerStats = (): PlayerStats => ({
   totalShiftsCompleted: 0,
   totalShiftsStarted: 0,
@@ -28,33 +30,56 @@ const getDefaultPlayerStats = (): PlayerStats => ({
 });
 
 export const usePlayerStats = () => {
-  const [playerStats, setPlayerStats] = useState<PlayerStats>(() => {
-    const loaded = LocalStorage.load(STORAGE_KEYS.PLAYER_STATS, getDefaultPlayerStats());
-    // Merge with defaults to ensure new fields exist in old saves
-    return { ...getDefaultPlayerStats(), ...loaded };
-  });
+  const [playerStats, setPlayerStats] = useState<PlayerStats>(getDefaultPlayerStats);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
+  /**
+   * Fetch player stats from backend on mount.
+   */
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const stats = await gameApi.getStats();
+        if (stats) {
+          // Merge backend stats with defaults to ensure Set fields are initialized
+          setPlayerStats(prev => ({
+            ...getDefaultPlayerStats(),
+            ...prev,
+            ...stats,
+          }));
+        }
+      } catch (err) {
+        console.warn('Failed to fetch player stats from backend, using defaults:', err);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  /**
+   * Update player stats locally — stats are persisted to the backend
+   * automatically during game actions (start shift, end shift, etc.).
+   */
   const updatePlayerStats = useCallback(
     (updates: Partial<PlayerStats> | ((prev: PlayerStats) => Partial<PlayerStats>)) => {
       setPlayerStats(prev => {
         const derivedUpdates = typeof updates === 'function' ? updates(prev) : updates;
-        // If no updates, return prev to avoid unnecessary re-renders
         if (Object.keys(derivedUpdates).length === 0) return prev;
 
-        const newStats = {
+        return {
           ...prev,
           ...derivedUpdates,
           lastPlayDate: Date.now(),
         };
-        // Save the complete stats, not just updates
-        LocalStorage.save(STORAGE_KEYS.PLAYER_STATS, newStats);
-        return newStats;
       });
     },
     []
   );
 
-  const addToLeaderboard = (entry: {
+  /**
+   * Add to leaderboard — backend handles persistence.
+   * This is called by endShift action which already posts to backend.
+   */
+  const addToLeaderboard = useCallback((entry: {
     earnings: number;
     ridesCompleted: number;
     timeSpent: number;
@@ -63,18 +88,32 @@ export const usePlayerStats = () => {
     passengersEncountered: number;
     difficultyLevel: number;
   }) => {
-    const leaderboardEntry: LeaderboardEntry = {
-      score: entry.earnings + entry.ridesCompleted * 10 - entry.rulesViolated * 5,
-      timeRemaining: 0, // This would need to be calculated from game state
-      date: new Date().toLocaleDateString(),
-      survived: entry.survived,
-      passengersTransported: entry.ridesCompleted,
-      difficultyLevel: entry.difficultyLevel,
-      rulesViolated: entry.rulesViolated,
-    };
+    // Leaderboard is written by the backend endShift action
+    // Just refresh the local leaderboard cache
+    refreshLeaderboard();
+  }, []);
 
-    LeaderboardService.addScore(leaderboardEntry);
-  };
+  /**
+   * Refresh leaderboard from backend.
+   */
+  const refreshLeaderboard = useCallback(async () => {
+    try {
+      const entries = await gameApi.getLeaderboard(10);
+      // Map backend format to frontend format
+      setLeaderboard(entries.map(e => ({
+        score: e.score,
+        timeRemaining: e.time_remaining,
+        date: e.played_at,
+        survived: e.survived,
+        passengersTransported: e.passengers_transported,
+        difficultyLevel: e.difficulty_level,
+        rulesViolated: e.rules_violated,
+        username: e.username || undefined,
+      })));
+    } catch (err) {
+      console.warn('Failed to fetch leaderboard:', err);
+    }
+  }, []);
 
   // Almanac functions
   const trackPassengerEncounter = useCallback(
@@ -95,7 +134,7 @@ export const usePlayerStats = () => {
             [passengerId]: {
               ...currentProgress,
               encountered: true,
-              knowledgeLevel: 1, // Auto-upgrade to level 1 on first encounter
+              knowledgeLevel: 1,
             },
           },
         };
@@ -140,10 +179,8 @@ export const usePlayerStats = () => {
     [updatePlayerStats]
   );
 
-  // Skill Tree functions
   const purchaseSkill = useCallback(
     (skillId: string) => {
-      // Import skill data to get cost
       import('../data/skillTreeData').then(({ SKILL_TREE }) => {
         updatePlayerStats(prev => {
           if (prev.unlockedSkills.includes(skillId)) return {};
@@ -151,7 +188,6 @@ export const usePlayerStats = () => {
           const skill = SKILL_TREE.find(s => s.id === skillId);
           if (!skill) return {};
 
-          // Check prerequisites
           const hasPrereqs = skill.prerequisites.every(prereqId =>
             prev.unlockedSkills.includes(prereqId)
           );
@@ -182,6 +218,8 @@ export const usePlayerStats = () => {
     playerStats,
     updatePlayerStats,
     addToLeaderboard,
+    leaderboard,
+    refreshLeaderboard,
     trackPassengerEncounter,
     upgradeKnowledge,
     awardLoreFragments,

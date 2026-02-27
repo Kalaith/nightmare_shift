@@ -1,68 +1,56 @@
-import { useState, useEffect, useRef, useMemo, type SetStateAction } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, type SetStateAction } from 'react';
 import type { GameState, PlayerStats } from '../types/game';
 import type { ShiftData } from '../utils/statsHandler';
-import { GAME_CONSTANTS, SCREENS, GAME_PHASES } from '../data/constants';
-import { ReputationService } from '../services/reputationService';
-import { GameEngine } from '../services/gameEngine';
-import { PassengerService } from '../services/passengerService';
-import { PassengerStateMachine } from '../services/passengerStateMachine';
-import { SaveGameService } from '../services/storageService';
-import { WeatherService } from '../services/weatherService';
-import { gameData } from '../data/gameData';
+import { SCREENS, GAME_PHASES } from '../data/constants';
+import { gameApi } from '../api/gameApi';
 import { useUIContext } from './useUIContext';
 
-const getInitialGameState = (): Omit<GameState, 'currentScreen'> => {
-  const season = WeatherService.getCurrentSeason();
-  const initialWeather = WeatherService.generateInitialWeather(season);
-
-  return {
-    fuel: GAME_CONSTANTS.INITIAL_FUEL,
-    earnings: 0,
-    timeRemaining: GAME_CONSTANTS.INITIAL_TIME,
-    ridesCompleted: 0,
-    rulesViolated: 0,
-    currentRules: [],
-    inventory: [],
-    currentPassenger: null,
-    currentRide: null,
-    gamePhase: GAME_PHASES.WAITING,
-    usedPassengers: [],
-    shiftStartTime: null,
-    sessionStartTime: Date.now(),
-    passengerReputation: ReputationService.initializeReputation(),
-    minimumEarnings: GAME_CONSTANTS.MINIMUM_EARNINGS,
-    routeHistory: [],
-    // Weather and environmental properties
-    currentWeather: initialWeather.success
-      ? initialWeather.data
-      : {
-          type: 'clear',
-          intensity: 'light',
-          description: 'A calm night with clear skies',
-          visibility: 100,
-          icon: '🌙',
-          effects: [],
-          duration: 120,
-          startTime: Date.now(),
-        },
-    timeOfDay: WeatherService.updateTimeOfDay(Date.now(), Date.now()),
-    season,
-    environmentalHazards: [],
-    weatherEffects: [],
-    // Route mastery and consequence tracking
-    routeMastery: { normal: 0, shortcut: 0, scenic: 0, police: 0 },
-    routeConsequences: [],
-    consecutiveRouteStreak: { type: '', count: 0 },
-    detectedTells: [],
-    ruleConfidence: 0.5,
-    currentPassengerNeedState: null,
-  };
-};
+/**
+ * Default empty game state for initialization before backend responds.
+ */
+const getInitialGameState = (): Omit<GameState, 'currentScreen'> => ({
+  fuel: 100,
+  earnings: 0,
+  timeRemaining: 600,
+  ridesCompleted: 0,
+  rulesViolated: 0,
+  currentRules: [],
+  inventory: [],
+  currentPassenger: null,
+  currentRide: null,
+  gamePhase: GAME_PHASES.WAITING,
+  usedPassengers: [],
+  shiftStartTime: null,
+  sessionStartTime: Date.now(),
+  passengerReputation: {},
+  minimumEarnings: 30,
+  routeHistory: [],
+  currentWeather: {
+    type: 'clear',
+    intensity: 'light',
+    description: 'A calm night with clear skies',
+    visibility: 100,
+    icon: '🌙',
+    effects: [],
+    duration: 120,
+    startTime: Date.now(),
+  },
+  timeOfDay: { phase: 'night', hour: 22, description: 'Night', ambientLight: 15, supernaturalActivity: 70 },
+  season: { type: 'fall', month: 10, temperature: 'cool', description: 'Fall — cool temperatures', passengerModifiers: { spawnRates: [], behaviorChanges: [] } },
+  environmentalHazards: [],
+  weatherEffects: [],
+  routeMastery: { normal: 0, shortcut: 0, scenic: 0, police: 0 },
+  routeConsequences: [],
+  consecutiveRouteStreak: { type: '', count: 0 },
+  detectedTells: [],
+  ruleConfidence: 0.5,
+  currentPassengerNeedState: null,
+});
 
 export const useGameState = (playerStats: PlayerStats) => {
-  // We cast the initial state to GameState internally, but we'll override currentScreen
   const [localGameState, setLocalGameState] =
     useState<Omit<GameState, 'currentScreen'>>(getInitialGameState);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { currentScreen, showScreen, showInventory, setShowInventory } = useUIContext();
 
@@ -82,7 +70,7 @@ export const useGameState = (playerStats: PlayerStats) => {
     gameStateRef.current = gameState;
   }, [gameState]);
 
-  // Game timer effect
+  // Game timer effect — frontend still tracks time for UI responsiveness
   useEffect(() => {
     if (currentScreen !== SCREENS.GAME || gameState.gamePhase === GAME_PHASES.WAITING) {
       return;
@@ -109,69 +97,71 @@ export const useGameState = (playerStats: PlayerStats) => {
     return () => clearInterval(timer);
   }, [currentScreen, gameState.gamePhase, showScreen]);
 
-  const generateShiftRules = () => {
-    const engineResult = GameEngine.generateShiftRules(playerStats.totalShiftsCompleted || 0);
-    setLocalGameState(prev => ({
-      ...prev,
-      currentRules: engineResult.visibleRules,
-      hiddenRules: engineResult.hiddenRules,
-      difficultyLevel: engineResult.difficultyLevel,
-    }));
-  };
+  /**
+   * Apply a backend game state response to local state.
+   * Strips currentScreen (managed by UI context) and merges the rest.
+   */
+  const applyBackendState = useCallback((backendState: GameState) => {
+    const { currentScreen: _ignored, ...rest } = backendState as GameState & { currentScreen?: string };
+    void _ignored;
+    setLocalGameState(rest);
+  }, []);
 
-  const startGame = () => {
-    generateShiftRules();
+  const startGame = useCallback(() => {
     showScreen(SCREENS.BRIEFING);
-  };
+  }, [showScreen]);
 
-  const startShift = () => {
-    setLocalGameState(prev => ({
-      ...prev,
-      shiftStartTime: Date.now(),
-      fuel: GAME_CONSTANTS.INITIAL_FUEL, // Reset fuel to 100% at start of each shift
-    }));
-    showScreen(SCREENS.GAME);
-    setTimeout(() => showRideRequest(), 2000 + Math.random() * 3000);
-  };
+  const startShift = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const backendState = await gameApi.startShift();
+      applyBackendState(backendState);
+      showScreen(SCREENS.GAME);
+      // Request first passenger after a short delay
+      setTimeout(() => showRideRequest(), 2000 + Math.random() * 3000);
+    } catch (err) {
+      console.error('Failed to start shift:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [applyBackendState, showScreen]);
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setLocalGameState(getInitialGameState());
-    // Note: We don't reset screen here as that might be handled by the caller or UI context
-  };
+  }, []);
 
-  const saveGame = () => {
-    SaveGameService.saveGame({
-      gameState,
-      playerStats,
-      timestamp: Date.now(),
-      version: '1.0.0',
-    });
-    setLocalGameState(prev => ({ ...prev, showSaveNotification: true }));
-    setTimeout(() => {
-      setLocalGameState(prev => ({ ...prev, showSaveNotification: false }));
-    }, 2000);
-  };
+  const saveGame = useCallback(async () => {
+    try {
+      await gameApi.saveGame(gameState);
+      setLocalGameState(prev => ({ ...prev, showSaveNotification: true }));
+      setTimeout(() => {
+        setLocalGameState(prev => ({ ...prev, showSaveNotification: false }));
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to save game:', err);
+    }
+  }, [gameState]);
 
-  const loadGame = () => {
-    const savedData = SaveGameService.loadGame();
-    if (savedData) {
-      // We need to separate currentScreen from the saved state if it exists
-      const { currentScreen: savedScreen, ...rest } = savedData.gameState;
-      setLocalGameState(rest);
-      if (savedScreen) {
-        showScreen(SCREENS.GAME); // Always go to game on load? Or savedScreen?
-        // Original code: showScreen(SCREENS.GAME);
-      } else {
+  const loadGame = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const savedState = await gameApi.loadGame();
+      if (savedState) {
+        applyBackendState(savedState);
         showScreen(SCREENS.GAME);
       }
+    } catch (err) {
+      console.error('Failed to load game:', err);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [applyBackendState, showScreen]);
 
-  const deleteSavedGame = () => {
-    SaveGameService.clearSave();
-  };
+  const deleteSavedGame = useCallback(() => {
+    // No-op — handled by backend on end shift
+  }, []);
 
-  const showRideRequest = () => {
+  const showRideRequest = useCallback(async () => {
     const currentGameState = gameStateRef.current;
 
     // Don't show new ride request if in active phases (but allow if transitioning from dropOff)
@@ -183,198 +173,78 @@ export const useGameState = (playerStats: PlayerStats) => {
       return;
     }
 
-    // Update weather and environmental conditions
-    updateWeatherAndEnvironment();
-
-    // Check if all passengers have been used and reset if necessary
-    const availablePassengers = gameData.passengers.filter(
-      passenger => !currentGameState.usedPassengers.includes(passenger.id)
-    );
-
-    // If no passengers available, either reset the used passenger list or select from all
-    let currentUsedPassengers = currentGameState.usedPassengers;
-    if (availablePassengers.length === 0) {
-      // Allow passengers to repeat after all have been used once
-      currentUsedPassengers = [];
+    setIsLoading(true);
+    try {
+      // Backend handles all passenger selection, weather updates, and rule generation
+      const backendState = await gameApi.requestPassenger();
+      applyBackendState(backendState);
+    } catch (err) {
+      console.error('Failed to request passenger:', err);
+    } finally {
+      setIsLoading(false);
     }
+  }, [applyBackendState]);
 
-    // Use weather-aware passenger selection
-    const passengerResult = PassengerService.selectWeatherAwarePassenger(
-      currentUsedPassengers,
-      currentGameState.difficultyLevel || 1,
-      currentGameState.currentWeather,
-      currentGameState.timeOfDay,
-      currentGameState.season
-    );
-
-    let passenger = passengerResult.success ? passengerResult.data : null;
-
-    // If weather-aware selection fails, use fallback selection
-    if (!passenger) {
-      passenger = PassengerService.getRandomPassenger(
-        gameData.passengers,
-        currentUsedPassengers,
-        currentGameState.difficultyLevel || 1
-      );
-    }
-
-    // If we still don't have a passenger, force select one from all available
-    if (!passenger && gameData.passengers.length > 0) {
-      passenger = gameData.passengers[Math.floor(Math.random() * gameData.passengers.length)];
-    }
-
-    // Only end shift if there are truly no passengers available (should never happen)
-    if (!passenger) {
-      endShift(false);
-      return;
-    }
-
-    // Apply weather-triggered rules
-    const weatherTriggeredRules = WeatherService.getWeatherTriggeredRules(
-      currentGameState.currentWeather,
-      currentGameState.timeOfDay
-    );
-
-    const passengerNeedState = PassengerStateMachine.initialize(passenger);
-
-    setLocalGameState(prev => ({
-      ...prev,
-      currentPassenger: passenger,
-      gamePhase: GAME_PHASES.RIDE_REQUEST,
-      usedPassengers: [...currentUsedPassengers, passenger.id],
-      // Add weather-triggered rules to current rules
-      currentRules: [
-        ...prev.currentRules,
-        ...gameData.shift_rules.filter(rule => weatherTriggeredRules.includes(rule.id)),
-      ],
-      currentPassengerNeedState: passengerNeedState,
-      detectedTells: prev.detectedTells || [],
-    }));
-  };
-
-  const updateWeatherAndEnvironment = () => {
-    const currentTime = Date.now();
-
-    setLocalGameState(prev => {
-      // Update time of day
-      const newTimeOfDay = prev.shiftStartTime
-        ? WeatherService.updateTimeOfDay(prev.shiftStartTime, currentTime)
-        : prev.timeOfDay;
-
-      // Update weather
-      const weatherUpdateResult = WeatherService.updateWeather(
-        prev.currentWeather,
-        currentTime,
-        prev.season
-      );
-      const newWeather = weatherUpdateResult.success
-        ? weatherUpdateResult.data
-        : prev.currentWeather;
-
-      // Generate environmental hazards
-      const hazardsResult = WeatherService.generateEnvironmentalHazards(
-        newWeather,
-        newTimeOfDay,
-        prev.season
-      );
-      const newHazards = hazardsResult.success ? hazardsResult.data : [];
-
-      // Filter out expired hazards
-      const activeHazards = prev.environmentalHazards.filter(hazard => {
-        const elapsed = (currentTime - hazard.startTime) / (60 * 1000); // minutes
-        return elapsed < hazard.duration;
-      });
-
-      return {
-        ...prev,
-        timeOfDay: newTimeOfDay,
-        currentWeather: newWeather,
-        environmentalHazards: [...activeHazards, ...newHazards],
-        weatherEffects: newWeather.effects,
-      };
-    });
-  };
-
-  const gameOver = (reason: string) => {
+  const gameOver = useCallback((reason: string) => {
     setLocalGameState(prev => ({
       ...prev,
       rulesViolated: prev.rulesViolated + 1,
       gameOverReason: reason,
     }));
     showScreen(SCREENS.GAME_OVER);
-  };
+  }, [showScreen]);
 
-  const endShift = (successful: boolean, overrideReason?: string): ShiftData => {
-    const shiftEndTime = Date.now();
-    const shiftDuration = gameState.shiftStartTime
-      ? Math.round((shiftEndTime - gameState.shiftStartTime) / (1000 * 60))
-      : 0;
+  const endShift = useCallback(async (successful: boolean, overrideReason?: string): Promise<ShiftData> => {
+    try {
+      const result = await gameApi.endShift();
 
-    // Check if minimum earnings requirement was met
-    const earnedEnough = gameState.earnings >= gameState.minimumEarnings;
-    const actuallySuccessful = successful && earnedEnough;
-
-    if (actuallySuccessful) {
-      const survivalBonus = GAME_CONSTANTS.SURVIVAL_BONUS;
-      const finalEarnings = gameState.earnings + survivalBonus;
-
-      setLocalGameState(prev => ({
-        ...prev,
-        earnings: finalEarnings,
-        survivalBonus,
-      }));
-
-      deleteSavedGame();
-      showScreen(SCREENS.SUCCESS);
-    } else {
-      // Determine failure reason
-      let failureReason: string;
-      if (overrideReason) {
-        failureReason = overrideReason;
-      } else if (!successful) {
-        failureReason = 'Time ran out or you ran out of fuel. The night shift waits for no one...';
-      } else if (!earnedEnough) {
-        failureReason = `Shift failed: You only earned $${gameState.earnings} but needed $${gameState.minimumEarnings}. The company expects better performance.`;
+      if (result.survived) {
+        setLocalGameState(prev => ({
+          ...prev,
+          earnings: result.earnings,
+          survivalBonus: 50,
+        }));
+        showScreen(SCREENS.SUCCESS);
       } else {
-        failureReason = 'The night shift has ended in failure...';
+        const reason = overrideReason || 'The night shift has ended in failure...';
+        gameOver(reason);
       }
 
-      gameOver(failureReason);
+      return {
+        earnings: result.earnings,
+        ridesCompleted: result.ridesCompleted,
+        timeSpent: result.timeSpent,
+        survived: result.survived,
+        rulesViolated: result.rulesViolated,
+        passengersEncountered: result.ridesCompleted,
+        difficultyLevel: result.difficultyLevel,
+        score: result.score,
+      };
+    } catch (err) {
+      console.error('Failed to end shift:', err);
+      // Return fallback data from local state
+      return {
+        earnings: gameState.earnings,
+        ridesCompleted: gameState.ridesCompleted,
+        timeSpent: 0,
+        survived: successful,
+        rulesViolated: gameState.rulesViolated || 0,
+        passengersEncountered: gameState.usedPassengers?.length || 0,
+        difficultyLevel: gameState.difficultyLevel || 0,
+        score: 0,
+      };
     }
+  }, [gameState, showScreen, gameOver]);
 
-    const finalEarningsForScore = actuallySuccessful
-      ? gameState.earnings + GAME_CONSTANTS.SURVIVAL_BONUS
-      : gameState.earnings;
-    const calculatedScore =
-      finalEarningsForScore + gameState.ridesCompleted * 10 - (gameState.rulesViolated || 0) * 5;
-
-    return {
-      earnings: finalEarningsForScore,
-      ridesCompleted: gameState.ridesCompleted,
-      timeSpent: shiftDuration,
-      survived: actuallySuccessful,
-      rulesViolated: gameState.rulesViolated || 0,
-      passengersEncountered: gameState.usedPassengers.length,
-      difficultyLevel: gameState.difficultyLevel || 0,
-      score: calculatedScore,
-    };
-  };
-
-  // Expose setGameState for game actions
-  // We need to be careful here. If updater tries to set currentScreen, it will be ignored by local state
-  // But since we are merging it back in the return, it should be fine as long as we don't expect setGameState to update screen
-  const updateGameState = (updater: SetStateAction<GameState>) => {
+  const updateGameState = useCallback((updater: SetStateAction<GameState>) => {
     setLocalGameState(prev => {
-      // If updater is a function, call it with the FULL state (including screen)
-      // but only use the result to update local state (excluding screen)
       const fullPrev: GameState = { ...prev, currentScreen } as GameState;
       const result = typeof updater === 'function' ? updater(fullPrev) : updater;
-
       const { currentScreen: ignoredCurrentScreen, ...rest } = result;
       void ignoredCurrentScreen;
       return rest;
     });
-  };
+  }, [currentScreen]);
 
   return {
     gameState,
@@ -390,5 +260,6 @@ export const useGameState = (playerStats: PlayerStats) => {
     showRideRequest,
     gameOver,
     endShift,
+    isLoading,
   };
 };

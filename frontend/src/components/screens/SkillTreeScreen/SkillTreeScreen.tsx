@@ -1,6 +1,6 @@
-import React from 'react';
-import { SKILL_TREE } from '../../../data/skillTreeData';
+import React, { useState, useEffect } from 'react';
 import type { PlayerStats, Skill } from '../../../types/game';
+import { gameApi } from '../../../api/gameApi';
 
 interface SkillTreeScreenProps {
   playerStats: PlayerStats;
@@ -13,7 +13,33 @@ const SkillTreeScreen: React.FC<SkillTreeScreenProps> = ({
   onPurchaseSkill,
   onBack,
 }) => {
-  const [selectedSkill, setSelectedSkill] = React.useState<Skill | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchSkills = async () => {
+      try {
+        const data = await gameApi.getSkills();
+        if (mounted) {
+          setSkills(data);
+          setLoading(false);
+        }
+      } catch (err: unknown) {
+        if (mounted) {
+          const message = err instanceof Error ? err.message : 'Failed to load skills';
+          setError(message);
+          setLoading(false);
+        }
+      }
+    };
+    fetchSkills();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const canAfford = (skill: Skill) => (playerStats.bankBalance || 0) >= skill.cost;
 
@@ -30,9 +56,9 @@ const SkillTreeScreen: React.FC<SkillTreeScreenProps> = ({
   };
 
   const skillsByCategory = {
-    survival: SKILL_TREE.filter(s => s.category === 'survival'),
-    occult: SKILL_TREE.filter(s => s.category === 'occult'),
-    efficiency: SKILL_TREE.filter(s => s.category === 'efficiency'),
+    survival: skills.filter(s => s.category === 'survival'),
+    occult: skills.filter(s => s.category === 'occult'),
+    efficiency: skills.filter(s => s.category === 'efficiency'),
   };
 
   const renderSkill = (skill: Skill) => {
@@ -72,6 +98,32 @@ const SkillTreeScreen: React.FC<SkillTreeScreenProps> = ({
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-slate-950 p-6 flex flex-col items-center justify-center">
+        <div className="w-12 h-12 border-4 border-gray-700 border-t-teal-400 rounded-full animate-spin mb-4"></div>
+        <p className="text-teal-400 font-semibold animate-pulse">Loading skill tree...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-slate-950 p-6 flex flex-col items-center justify-center">
+        <div className="bg-red-900/50 border border-red-500 rounded-lg p-6 max-w-md text-center">
+          <h2 className="text-2xl font-bold text-red-400 mb-2">Error</h2>
+          <p className="text-red-200 mb-6">{error}</p>
+          <button
+            onClick={onBack}
+            className="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg border border-gray-600 transition-colors"
+          >
+            ← Return to Main Menu
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-slate-950 p-6">
@@ -150,14 +202,13 @@ const SkillTreeScreen: React.FC<SkillTreeScreenProps> = ({
                 <span className="text-gray-400 text-sm">Prerequisites:</span>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {selectedSkill.prerequisites.map(prereqId => {
-                    const prereq = SKILL_TREE.find(s => s.id === prereqId);
+                    const prereq = skills.find(s => s.id === prereqId);
                     const unlocked = (playerStats.unlockedSkills || []).includes(prereqId);
                     return (
                       <span
                         key={prereqId}
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          unlocked ? 'bg-teal-900 text-teal-300' : 'bg-gray-700 text-gray-400'
-                        }`}
+                        className={`px-3 py-1 rounded-full text-sm ${unlocked ? 'bg-teal-900 text-teal-300' : 'bg-gray-700 text-gray-400'
+                          }`}
                       >
                         {unlocked ? '✓' : '🔒'} {prereq?.name || prereqId}
                       </span>
@@ -172,10 +223,9 @@ const SkillTreeScreen: React.FC<SkillTreeScreenProps> = ({
               disabled={!canPurchase(selectedSkill)}
               className={`
                 w-full py-3 px-6 rounded-lg font-semibold text-lg transition-colors
-                ${
-                  canPurchase(selectedSkill)
-                    ? 'bg-teal-500 hover:bg-teal-600 text-white cursor-pointer'
-                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                ${canPurchase(selectedSkill)
+                  ? 'bg-teal-500 hover:bg-teal-600 text-white cursor-pointer'
+                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                 }
               `}
             >

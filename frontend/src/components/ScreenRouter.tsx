@@ -19,7 +19,7 @@ import ErrorBoundary from './ErrorBoundary';
 const ScreenRouter: React.FC = () => {
   const { gameState, startGame, loadGame, startShift, resetGame } = useGameContext();
 
-  const { playerStats, upgradeKnowledge, purchaseSkill } = usePlayerContext();
+  const { playerStats, upgradeKnowledge, purchaseSkill, user, isAuthenticated, isLoading: authLoading } = usePlayerContext();
 
   const { currentScreen, showScreen } = useUIContext();
 
@@ -42,6 +42,9 @@ const ScreenRouter: React.FC = () => {
       return (
         <LoadingScreen
           playerStats={playerStats}
+          user={user}
+          isAuthenticated={isAuthenticated}
+          authLoading={authLoading}
           onStartGame={startGame}
           onLoadGame={loadGame}
           onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}
@@ -113,6 +116,9 @@ const ScreenRouter: React.FC = () => {
       return (
         <LoadingScreen
           playerStats={playerStats}
+          user={user}
+          isAuthenticated={isAuthenticated}
+          authLoading={authLoading}
           onStartGame={startGame}
           onLoadGame={loadGame}
           onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}

@@ -1,10 +1,14 @@
 import React from 'react';
 import { SaveGameService } from '../../../services/storageService';
 import type { PlayerStats } from '../../../types/game';
+import type { AuthUser } from '../../../hooks/useAuthSession';
 import bannerImg from '../../../assets/banner.png';
 
 interface LoadingScreenProps {
   playerStats: PlayerStats;
+  user: AuthUser | null;
+  isAuthenticated: boolean;
+  authLoading: boolean;
   onStartGame: () => void;
   onLoadGame: () => void;
   onShowLeaderboard: () => void;
@@ -14,6 +18,9 @@ interface LoadingScreenProps {
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
   playerStats,
+  user,
+  isAuthenticated,
+  authLoading,
   onStartGame,
   onLoadGame,
   onShowLeaderboard,
@@ -34,6 +41,26 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         <p className="text-lg text-gray-300">
           Drive the supernatural. Follow the rules. Survive the shift.
         </p>
+      </div>
+
+      {/* Auth User Bar */}
+      <div className="bg-gray-800/80 border border-gray-600 rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">👤</span>
+          {authLoading ? (
+            <span className="text-gray-400 text-sm animate-pulse">Connecting...</span>
+          ) : isAuthenticated && user ? (
+            <div>
+              <span className="text-white font-semibold">{user.username}</span>
+              <span className="text-gray-400 text-xs ml-2">• Online</span>
+            </div>
+          ) : (
+            <span className="text-red-400 text-sm">Not signed in</span>
+          )}
+        </div>
+        {isAuthenticated && (
+          <span className="text-green-400 text-xs">✓ Authenticated</span>
+        )}
       </div>
 
       <div className="bg-gray-800 border border-gray-600 rounded-lg p-4 mb-6">

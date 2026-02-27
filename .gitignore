@@ -27,3 +27,5 @@
 ehthumbs.db
 mcp
 Thumbs.db
+backend/.env.preview
+frontend/.env.preview

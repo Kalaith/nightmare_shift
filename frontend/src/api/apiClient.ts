@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 // Determine the base URL from the environment or use a relative path
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const BASE_URL = import.meta.env.VITE_API_URL;
+if (!BASE_URL) {
+    throw new Error('VITE_API_URL environment variable is not set. Please add it to your .env file.');
+}
 
 /**
  * Standardized Web Hatchery Axios Instance
