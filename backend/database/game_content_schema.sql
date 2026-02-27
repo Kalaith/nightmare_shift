@@ -140,3 +140,19 @@ CREATE TABLE IF NOT EXISTS `skills` (
     KEY `idx_category` (`category`),
     KEY `idx_active` (`is_active`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Almanac Levels (knowledge tier definitions) ────────────────────
+CREATE TABLE IF NOT EXISTS `almanac_levels` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `level` TINYINT UNSIGNED NOT NULL COMMENT '0=Unknown, 1=Observed, 2=Studied, 3=Mastered',
+    `name` VARCHAR(50) NOT NULL,
+    `description` TEXT NOT NULL,
+    `rewards` JSON NOT NULL DEFAULT ('[]') COMMENT 'Array of reward/unlock description strings',
+    `lore_cost` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Lore fragments to upgrade TO this level',
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_level` (`level`),
+    KEY `idx_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

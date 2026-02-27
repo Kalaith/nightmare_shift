@@ -178,6 +178,18 @@ final class GameContentRepository
         return array_map([$this, 'hydrateSkill'], $rows);
     }
 
+    // ─── Almanac Levels ──────────────────────────────────────────────
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function getAllAlmanacLevels(): array
+    {
+        $stmt = $this->pdo->query('SELECT * FROM almanac_levels WHERE is_active = 1 ORDER BY sort_order, level');
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return array_map([$this, 'hydrateAlmanacLevel'], $rows);
+    }
+
     // ─── Hydration helpers (decode JSON columns) ────────────────────
 
     private function hydratePassenger(array $row): array
@@ -297,6 +309,22 @@ final class GameContentRepository
                 'target' => $row['effect_target'],
                 'value' => (float) $row['effect_value'],
             ],
+        ];
+    }
+
+    private function hydrateAlmanacLevel(array $row): array
+    {
+        $rewards = [];
+        if (isset($row['rewards']) && is_string($row['rewards'])) {
+            $rewards = json_decode($row['rewards'], true) ?? [];
+        }
+
+        return [
+            'level'       => (int) $row['level'],
+            'name'        => $row['name'],
+            'description' => $row['description'],
+            'rewards'     => $rewards,
+            'loreCost'    => (int) $row['lore_cost'],
         ];
     }
 }

@@ -29,4 +29,17 @@ final class ContentController
             $response->error('Failed to load skills: ' . $e->getMessage(), 500);
         }
     }
+
+    /**
+     * GET /api/v1/content/almanac-levels — returns all almanac level definitions.
+     */
+    public function getAlmanacLevels(Request $request, Response $response): void
+    {
+        try {
+            $levels = $this->contentRepo->getAllAlmanacLevels();
+            $response->success($levels, 'Almanac levels loaded');
+        } catch (\Exception $e) {
+            $response->error('Failed to load almanac levels: ' . $e->getMessage(), 500);
+        }
+    }
 }

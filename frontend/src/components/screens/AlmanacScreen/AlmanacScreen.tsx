@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ALMANAC_LEVELS, LORE_COSTS } from '../../../data/almanacData';
+import { gameApi } from '../../../api/gameApi';
 import type { PlayerStats, Passenger, AlmanacEntry } from '../../../types/game';
+
+type LevelInfo = { name: string; description: string; rewards: string[] };
+type LevelMap = Record<number, LevelInfo>;
+type CostMap = Record<number, number>;
 
 interface AlmanacScreenProps {
   playerStats: PlayerStats;
@@ -15,7 +20,29 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
   onUpgradeKnowledge,
   onBack,
 }) => {
-  const [selectedPassenger, setSelectedPassenger] = React.useState<Passenger | null>(null);
+  const [selectedPassenger, setSelectedPassenger] = useState<Passenger | null>(null);
+
+  // Fetch almanac levels from API, fall back to hardcoded data
+  const defaultLevelMap: LevelMap = Object.fromEntries(
+    Object.entries(ALMANAC_LEVELS).map(([k, v]) => [Number(k), v])
+  );
+  const defaultCostMap: CostMap = { 0: LORE_COSTS.UNLOCK_LEVEL_1, 1: LORE_COSTS.UNLOCK_LEVEL_2, 2: LORE_COSTS.UNLOCK_LEVEL_3 };
+
+  const [levelMap, setLevelMap] = useState<LevelMap>(defaultLevelMap);
+  const [costMap, setCostMap] = useState<CostMap>(defaultCostMap);
+
+  useEffect(() => {
+    gameApi.getAlmanacLevels().then((levels) => {
+      const lm: LevelMap = {};
+      const cm: CostMap = {};
+      for (const l of levels) {
+        lm[l.level] = { name: l.name, description: l.description, rewards: l.rewards };
+        if (l.level > 0) cm[l.level - 1] = l.loreCost;
+      }
+      setLevelMap(lm);
+      setCostMap(cm);
+    }).catch(() => { /* use defaults */ });
+  }, []);
 
   const getAlmanacEntry = (passengerId: number): AlmanacEntry => {
     return (
@@ -29,10 +56,7 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
   };
 
   const getUpgradeCost = (currentLevel: 0 | 1 | 2 | 3): number => {
-    if (currentLevel === 0) return LORE_COSTS.UNLOCK_LEVEL_1;
-    if (currentLevel === 1) return LORE_COSTS.UNLOCK_LEVEL_2;
-    if (currentLevel === 2) return LORE_COSTS.UNLOCK_LEVEL_3;
-    return 0;
+    return costMap[currentLevel] ?? 0;
   };
 
   const canUpgrade = (entry: AlmanacEntry): boolean => {
@@ -46,7 +70,7 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
 
   const renderPassengerCard = (passenger: Passenger) => {
     const entry = getAlmanacEntry(passenger.id);
-    const level = ALMANAC_LEVELS[entry.knowledgeLevel];
+    const level = levelMap[entry.knowledgeLevel] ?? { name: 'Unknown', description: '', rewards: [] };
 
     return (
       <div
@@ -73,9 +97,8 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
             {[0, 1, 2, 3].map(lvl => (
               <div
                 key={lvl}
-                className={`h-1 flex-1 rounded ${
-                  lvl < entry.knowledgeLevel ? 'bg-purple-500' : 'bg-gray-700'
-                }`}
+                className={`h-1 flex-1 rounded ${lvl < entry.knowledgeLevel ? 'bg-purple-500' : 'bg-gray-700'
+                  }`}
               />
             ))}
           </div>
@@ -124,17 +147,16 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
                     </h2>
                     <div className="flex items-center gap-3">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          selectedEntry.knowledgeLevel === 0
+                        className={`px-3 py-1 rounded-full text-sm ${selectedEntry.knowledgeLevel === 0
                             ? 'bg-gray-700 text-gray-400'
                             : selectedEntry.knowledgeLevel === 1
                               ? 'bg-blue-900 text-blue-300'
                               : selectedEntry.knowledgeLevel === 2
                                 ? 'bg-purple-900 text-purple-300'
                                 : 'bg-yellow-900 text-yellow-300'
-                        }`}
+                          }`}
                       >
-                        {ALMANAC_LEVELS[selectedEntry.knowledgeLevel].name}
+                        {(levelMap[selectedEntry.knowledgeLevel] ?? { name: 'Unknown' }).name}
                       </span>
                       <span className="text-gray-400 text-sm">
                         Level {selectedEntry.knowledgeLevel}/3
@@ -187,8 +209,7 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
                                 <p className="text-sm text-gray-400">{pref.reason}</p>
                               </div>
                               <span
-                                className={`px-2 py-1 rounded text-sm ${
-                                  pref.preference === 'loves'
+                                className={`px-2 py-1 rounded text-sm ${pref.preference === 'loves'
                                     ? 'bg-green-900 text-green-300'
                                     : pref.preference === 'likes'
                                       ? 'bg-blue-900 text-blue-300'
@@ -197,7 +218,7 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
                                         : pref.preference === 'fears'
                                           ? 'bg-red-900 text-red-300'
                                           : 'bg-gray-700 text-gray-300'
-                                }`}
+                                  }`}
                               >
                                 {pref.preference}
                               </span>
@@ -232,15 +253,14 @@ const AlmanacScreen: React.FC<AlmanacScreenProps> = ({
                         disabled={!canUpgrade(selectedEntry)}
                         className={`
                           w-full py-3 px-6 rounded-lg font-semibold text-lg transition-colors
-                          ${
-                            canUpgrade(selectedEntry)
-                              ? 'bg-purple-500 hover:bg-purple-600 text-white cursor-pointer'
-                              : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                          ${canUpgrade(selectedEntry)
+                            ? 'bg-purple-500 hover:bg-purple-600 text-white cursor-pointer'
+                            : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                           }
                         `}
                       >
                         {canUpgrade(selectedEntry)
-                          ? `Upgrade to ${ALMANAC_LEVELS[(selectedEntry.knowledgeLevel + 1) as 1 | 2 | 3].name} (${getUpgradeCost(selectedEntry.knowledgeLevel)} Lore)`
+                          ? `Upgrade to ${(levelMap[selectedEntry.knowledgeLevel + 1] ?? { name: '?' }).name} (${getUpgradeCost(selectedEntry.knowledgeLevel)} Lore)`
                           : selectedEntry.knowledgeLevel >= 3
                             ? 'Fully Mastered'
                             : `Need ${getUpgradeCost(selectedEntry.knowledgeLevel)} Lore Fragments`}

@@ -1,6 +1,5 @@
 import React from 'react';
 import { SCREENS } from '../data/constants';
-import { LeaderboardService } from '../services/storageService';
 import { gameData } from '../data/gameData';
 import { useGameContext } from '../hooks/useGameContext';
 import { usePlayerContext } from '../hooks/usePlayerContext';
@@ -57,7 +56,6 @@ const ScreenRouter: React.FC = () => {
       return (
         <ErrorBoundary>
           <LeaderboardScreen
-            leaderboard={LeaderboardService.getLeaderboard()}
             onBack={() => showScreen(SCREENS.LOADING)}
           />
         </ErrorBoundary>

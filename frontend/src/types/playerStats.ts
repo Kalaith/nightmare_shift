@@ -51,9 +51,13 @@ export interface SkillEffect {
 }
 
 export interface LeaderboardEntry {
+  id: number;
+  userId: number;
+  username: string | null;
   score: number;
   timeRemaining: number;
   date: string;
+  playedAt?: string;
   survived: boolean;
   passengersTransported: number;
   difficultyLevel: number;

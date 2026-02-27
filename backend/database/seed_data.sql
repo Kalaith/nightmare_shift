@@ -201,3 +201,11 @@ INSERT INTO `skills` (`skill_id`, `name`, `description`, `cost`, `icon`, `catego
 -- Efficiency Branch
 ('silver_tongue_1', 'Silver Tongue', 'Increases tips from passengers by 10%.', 400, '🗣️', 'efficiency', '[]', 'stat_boost', 'tip_multiplier', 1.1000, 6),
 ('negotiator', 'Negotiator', 'Reduces the cost of items in shops by 15%.', 900, '🤝', 'efficiency', '["silver_tongue_1"]', 'stat_boost', 'shop_discount', 0.1500, 7);
+
+-- ─── Almanac Levels ─────────────────────────────────────────────────
+
+INSERT INTO `almanac_levels` (`level`, `name`, `description`, `rewards`, `lore_cost`, `sort_order`) VALUES
+(0, 'Unknown', 'You have not encountered this entity.', '[]', 0, 0),
+(1, 'Observed', 'You have seen this entity and know its basic nature.', '["Name", "Description", "Basic Needs"]', 1, 1),
+(2, 'Studied', 'You understand the behavioral patterns of this entity.', '["Route Preferences", "Common Tells", "Likes/Dislikes"]', 3, 2),
+(3, 'Mastered', 'You know the deepest secrets of this entity.', '["Hidden Rules", "True Nature", "Backstory"]', 5, 3);

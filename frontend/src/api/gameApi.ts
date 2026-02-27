@@ -53,6 +53,14 @@ interface LeaderboardEntry {
   username: string | null;
 }
 
+interface AlmanacLevel {
+  level: number;
+  name: string;
+  description: string;
+  rewards: string[];
+  loreCost: number;
+}
+
 // ─── API Service ────────────────────────────────────────────────────
 
 /**
@@ -144,13 +152,32 @@ export const gameApi = {
     return res.data.data;
   },
 
+  /** Get almanac level definitions from the backend */
+  async getAlmanacLevels(): Promise<AlmanacLevel[]> {
+    const res = await apiClient.get<BackendResponse<AlmanacLevel[]>>('/content/almanac-levels');
+    return res.data.data;
+  },
+
   /** Get global leaderboard */
-  async getLeaderboard(limit: number = 10): Promise<LeaderboardEntry[]> {
-    const res = await apiClient.get<BackendResponse<LeaderboardEntry[]>>(
+  async getLeaderboard(limit: number = 20): Promise<LeaderboardEntry[]> {
+    const res = await apiClient.get<BackendResponse<Record<string, unknown>[]>>(
       '/player/leaderboard',
       { params: { limit } }
     );
-    return res.data.data;
+    // Map snake_case backend keys to camelCase frontend type
+    return (res.data.data ?? []).map((row) => ({
+      id: Number(row.id ?? 0),
+      userId: Number(row.user_id ?? 0),
+      username: (row.username as string) ?? null,
+      score: Number(row.score ?? 0),
+      timeRemaining: Number(row.time_remaining ?? 0),
+      date: String(row.played_at ?? ''),
+      playedAt: String(row.played_at ?? ''),
+      survived: Boolean(row.survived),
+      passengersTransported: Number(row.passengers_transported ?? 0),
+      difficultyLevel: Number(row.difficulty_level ?? 0),
+      rulesViolated: Number(row.rules_violated ?? 0),
+    }));
   },
 
   /** Get passenger almanac entries */
@@ -160,4 +187,4 @@ export const gameApi = {
   },
 };
 
-export type { SessionData, ShiftResult, RouteOption, LeaderboardEntry, BackendResponse };
+export type { SessionData, ShiftResult, RouteOption, LeaderboardEntry, AlmanacLevel, BackendResponse };
