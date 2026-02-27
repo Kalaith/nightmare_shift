@@ -32,6 +32,22 @@ export const useAuthSession = () => {
         setError(null);
         try {
             const sessionData = await gameApi.session();
+
+            // Read the WH username from auth-storage (same pattern as Blacksmith Forge)
+            let whUsername: string | undefined;
+            try {
+                const raw = localStorage.getItem('auth-storage');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    whUsername = parsed?.state?.user?.username;
+                }
+            } catch { /* silent */ }
+
+            // Override backend username with WH username if available
+            if (whUsername && sessionData.user) {
+                sessionData.user.username = whUsername;
+            }
+
             setUser(sessionData.user);
             setStats(sessionData.stats);
         } catch (err: unknown) {
