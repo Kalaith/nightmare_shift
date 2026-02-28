@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import type { GameState, PlayerStats } from '../types/game';
+import type { GameState, PlayerStats, Passenger, Location, Rule } from '../types/game';
 
 // ─── Response Types ─────────────────────────────────────────────────
 interface BackendResponse<T = unknown> {
@@ -183,6 +183,26 @@ export const gameApi = {
   /** Get passenger almanac entries */
   async getAlmanac(): Promise<Record<number, unknown>> {
     const res = await apiClient.get<BackendResponse<Record<number, unknown>>>('/player/almanac');
+    return res.data.data;
+  },
+
+  // ─── Game Content ───────────────────────────────────────────────────
+
+  /** Get all passenger definitions */
+  async getPassengers(): Promise<Passenger[]> {
+    const res = await apiClient.get<BackendResponse<Passenger[]>>('/content/passengers');
+    return res.data.data;
+  },
+
+  /** Get all location definitions */
+  async getLocations(): Promise<Location[]> {
+    const res = await apiClient.get<BackendResponse<Location[]>>('/content/locations');
+    return res.data.data;
+  },
+
+  /** Get all shift rule definitions */
+  async getRules(): Promise<Rule[]> {
+    const res = await apiClient.get<BackendResponse<Rule[]>>('/content/rules');
     return res.data.data;
   },
 };

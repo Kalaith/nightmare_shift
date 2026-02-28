@@ -21,7 +21,15 @@ final class GameContentRepository
     public function getAllLocations(): array
     {
         $stmt = $this->pdo->query('SELECT * FROM locations WHERE is_active = 1 ORDER BY name');
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return array_map(function (array $row): array {
+            return [
+                'name'        => $row['name'],
+                'description' => $row['description'],
+                'atmosphere'  => $row['atmosphere'],
+                'riskLevel'   => (int) $row['risk_level'],
+            ];
+        }, $rows);
     }
 
     public function getLocationByName(string $name): ?array
