@@ -10,6 +10,13 @@ use Firebase\JWT\Key;
 
 final class AuthMiddleware
 {
+    private \PDO $pdo;
+
+    public function __construct(\PDO $pdo)
+    {
+        $this->pdo = $pdo;
+    }
+
     /**
      * Validate JWT and set auth_user on request.
      * Returns false to halt the request pipeline on auth failure.
@@ -46,8 +53,19 @@ final class AuthMiddleware
                 return false;
             }
 
+            // Resolve WH user ID → internal users.id
+            $whUserId = (int) $userId;
+            $internalId = $whUserId; // fallback if user row doesn't exist yet
+            $stmt = $this->pdo->prepare('SELECT id FROM users WHERE wh_user_id = :wh_id LIMIT 1');
+            $stmt->execute(['wh_id' => $whUserId]);
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($row) {
+                $internalId = (int) $row['id'];
+            }
+
             $authUser = [
-                'id' => (int) $userId,
+                'id' => $internalId,           // internal users.id — safe for FK usage
+                'wh_user_id' => $whUserId,      // original WebHatchery ID
                 'email' => $decoded->email ?? null,
                 'username' => $decoded->username ?? null,
                 'roles' => $decoded->roles ?? [],

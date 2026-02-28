@@ -18,7 +18,7 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
   onRefuelFull,
   onRefuelPartial,
 }) => {
-  const fuelPercentage = gameState.fuel;
+  const fuelPercentage = Number(gameState.fuel.toFixed(1));
   const isLowFuel = fuelPercentage <= GAME_BALANCE.FUEL_THRESHOLDS.LOW_FUEL_WARNING;
   const isCriticalFuel = fuelPercentage <= GAME_BALANCE.FUEL_THRESHOLDS.CRITICAL_FUEL;
 

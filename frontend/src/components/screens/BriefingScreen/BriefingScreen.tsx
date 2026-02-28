@@ -1,5 +1,5 @@
-import React from 'react';
-import type { GameState } from '../../../types/game';
+import type { GameState, Rule } from '../../../types/game';
+import { gameApi } from '../../../api/gameApi';
 
 interface BriefingScreenProps {
   gameState: GameState;
@@ -7,6 +7,29 @@ interface BriefingScreenProps {
 }
 
 const BriefingScreen: React.FC<BriefingScreenProps> = ({ gameState, onStartShift }) => {
+  const [rules, setRules] = React.useState<Rule[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    // Always fetch fresh rules for the briefing screen
+    setIsLoading(true);
+    gameApi.getDailyRules()
+      .then(fetchedRules => {
+        if (mounted) {
+          setRules(fetchedRules);
+          setIsLoading(false);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load daily rules", err);
+        if (mounted) setIsLoading(false);
+      });
+
+    return () => { mounted = false; };
+  }, []);
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
@@ -31,27 +54,38 @@ const BriefingScreen: React.FC<BriefingScreenProps> = ({ gameState, onStartShift
         </div>
 
         <div className="space-y-4 mb-8">
-          {gameState.currentRules.map((rule, index) => (
-            <div
-              key={rule.id}
-              className="bg-gray-800/50 border border-gray-600 rounded-lg p-4 flex gap-4"
-            >
-              <div className="flex-shrink-0 w-8 h-8 bg-teal-300 text-gray-800 rounded-full flex items-center justify-center font-bold">
-                {index + 1}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-xl font-semibold text-teal-300">{rule.title}</h3>
-                  <span
-                    className={`px-2 py-1 text-xs font-medium rounded border ${getDifficultyColor(rule.difficulty)}`}
-                  >
-                    {rule.difficulty.toUpperCase()}
-                  </span>
-                </div>
-                <p className="text-gray-300 leading-relaxed">{rule.description}</p>
-              </div>
+          {isLoading ? (
+            <div className="text-center py-12 text-teal-200/50 animate-pulse border border-gray-600 rounded-lg bg-gray-800/20">
+              <span className="text-3xl mb-4 block">📻</span>
+              Receiving Dispatch Instructions...
             </div>
-          ))}
+          ) : rules.length === 0 ? (
+            <div className="text-center py-8 text-gray-400 border border-gray-600 rounded-lg bg-gray-800/20">
+              No specific rules tonight. Drive safe.
+            </div>
+          ) : (
+            rules.map((rule, index) => (
+              <div
+                key={rule.id}
+                className="bg-gray-800/50 border border-gray-600 rounded-lg p-4 flex gap-4"
+              >
+                <div className="flex-shrink-0 w-8 h-8 bg-teal-300 text-gray-800 rounded-full flex items-center justify-center font-bold">
+                  {index + 1}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-xl font-semibold text-teal-300">{rule.title}</h3>
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded border ${getDifficultyColor(rule.difficulty)}`}
+                    >
+                      {rule.difficulty.toUpperCase()}
+                    </span>
+                  </div>
+                  <p className="text-gray-300 leading-relaxed">{rule.description}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="text-center">

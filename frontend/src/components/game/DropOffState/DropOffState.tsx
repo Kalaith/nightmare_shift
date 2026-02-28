@@ -93,7 +93,7 @@ export const DropOffState: React.FC<DropOffStateProps> = ({
             <div className={styles.statusItem}>
               <span className={styles.statusIcon}>⛽</span>
               <div className={styles.statusInfo}>
-                <span className={styles.statusValue}>{gameState.fuel}%</span>
+                <span className={styles.statusValue}>{Number(gameState.fuel.toFixed(1))}%</span>
                 <span className={styles.statusLabel}>Fuel Remaining</span>
               </div>
             </div>

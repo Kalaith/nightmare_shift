@@ -86,7 +86,7 @@ if (isset($_ENV['APP_BASE_PATH']) && $_ENV['APP_BASE_PATH']) {
     }
 }
 
-$router->addMiddleware(new AuthMiddleware());
+$router->addMiddleware(new AuthMiddleware($pdo));
 
 // Load routes
 (require __DIR__ . '/../src/routes/router.php')($router, $container);

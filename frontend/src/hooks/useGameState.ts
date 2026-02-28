@@ -70,6 +70,8 @@ export const useGameState = (playerStats: PlayerStats) => {
     gameStateRef.current = gameState;
   }, [gameState]);
 
+
+
   // Game timer effect — frontend still tracks time for UI responsiveness
   useEffect(() => {
     if (currentScreen !== SCREENS.GAME || gameState.gamePhase === GAME_PHASES.WAITING) {
@@ -106,6 +108,26 @@ export const useGameState = (playerStats: PlayerStats) => {
     void _ignored;
     setLocalGameState(rest);
   }, []);
+
+  // Auto-resume: check for an active shift on mount
+  const hasCheckedSave = useRef(false);
+  useEffect(() => {
+    if (hasCheckedSave.current) return;
+    hasCheckedSave.current = true;
+
+    (async () => {
+      try {
+        const savedState = await gameApi.loadGame();
+        if (savedState && savedState.gamePhase && savedState.gamePhase !== 'waiting') {
+          // Active shift found — resume it
+          applyBackendState(savedState);
+          showScreen(SCREENS.GAME);
+        }
+      } catch {
+        // No saved game or not authenticated yet — start normally
+      }
+    })();
+  }, [applyBackendState, showScreen]);
 
   const startGame = useCallback(() => {
     showScreen(SCREENS.BRIEFING);

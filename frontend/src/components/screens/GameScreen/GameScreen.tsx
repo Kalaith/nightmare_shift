@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useGameContext } from '../../../hooks/useGameContext';
 import { usePlayerContext } from '../../../hooks/usePlayerContext';
 import { useGameActions } from '../../../hooks/useGameActions';
-import { RouteService } from '../../../services/reputationService';
 import { gameData } from '../../../data/gameData';
+import { gameApi, type RouteOption } from '../../../api/gameApi';
 import { GAME_BALANCE } from '../../../constants/gameBalance';
 import { GameResultHelpers } from '../../../utils/errorHandling';
 import { AlmanacHelper } from '../../../utils/almanacHelper';
@@ -37,6 +37,22 @@ const GameScreen: React.FC = () => {
   } = useGameActions();
 
   const [showQuickRules, setShowQuickRules] = useState(false);
+  const [backendRouteOptions, setBackendRouteOptions] = useState<RouteOption[]>([]);
+  const [loadingRoutes, setLoadingRoutes] = useState(false);
+
+  React.useEffect(() => {
+    if (gameState.gamePhase === 'driving') {
+      setLoadingRoutes(true);
+      gameApi.getRouteOptions()
+        .then(routes => {
+          setBackendRouteOptions(Array.isArray(routes) ? routes : Object.values(routes));
+        })
+        .catch(console.error)
+        .finally(() => setLoadingRoutes(false));
+    } else {
+      setBackendRouteOptions([]);
+    }
+  }, [gameState.gamePhase]);
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / GAME_BALANCE.TIME_FORMATTING.MINUTES_PER_HOUR);
@@ -67,11 +83,10 @@ const GameScreen: React.FC = () => {
             <div className="bg-gray-700 px-3 py-1 rounded">
               ⏰ {formatTime(gameState.timeRemaining)}
             </div>
-            <div className="bg-gray-700 px-3 py-1 rounded">⛽ {gameState.fuel}%</div>
+            <div className="bg-gray-700 px-3 py-1 rounded">⛽ {Number(gameState.fuel.toFixed(1))}%</div>
             <div
-              className={`px-3 py-1 rounded ${
-                gameState.earnings >= gameState.minimumEarnings ? 'bg-green-700' : 'bg-gray-700'
-              }`}
+              className={`px-3 py-1 rounded ${gameState.earnings >= gameState.minimumEarnings ? 'bg-green-700' : 'bg-gray-700'
+                }`}
             >
               💰 ${gameState.earnings}/${gameState.minimumEarnings}
             </div>
@@ -180,23 +195,18 @@ const GameScreen: React.FC = () => {
 
           {gameState.gamePhase === 'driving' &&
             (() => {
-              const passengerRiskLevel = gameState.currentPassenger
-                ? gameData.locations.find(loc => loc.name === gameState.currentPassenger?.pickup)
-                    ?.riskLevel || GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL
-                : GAME_BALANCE.PASSENGER_SELECTION.DEFAULT_RISK_LEVEL;
-              const routeOptionsResult = RouteService.getRouteOptions(
-                gameState.fuel,
-                gameState.timeRemaining,
-                passengerRiskLevel,
-                gameState.currentWeather,
-                gameState.timeOfDay,
-                gameState.environmentalHazards,
-                gameState.currentPassenger || undefined,
-                gameState.routeMastery,
-                gameState.routeConsequences,
-                playerStats
-              );
-              const routeOptions = GameResultHelpers.unwrapOr(routeOptionsResult, []);
+              if (loadingRoutes) {
+                return (
+                  <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-6 text-center">
+                    <h2 className="text-2xl font-bold text-teal-300 mb-4 animate-pulse">
+                      🗺️ Calculating Routes...
+                    </h2>
+                    <p className="text-gray-400">Consulting GPS and local reports...</p>
+                  </div>
+                );
+              }
+
+              const routeOptions = backendRouteOptions;
 
               // If we somehow still have no routes, provide a basic fallback
               if (routeOptions.length === 0) {
@@ -285,72 +295,23 @@ const GameScreen: React.FC = () => {
                           )
                         }
                         disabled={!route.available}
-                        className={`p-4 rounded-lg font-semibold transition-all duration-200 text-left relative shadow-lg ${
-                          !route.available
-                            ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50 border border-slate-700'
-                            : route.riskLevel >= 4
-                              ? route.type === 'normal'
-                                ? 'bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20'
-                                : route.type === 'shortcut'
-                                  ? 'bg-gradient-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 text-white border-2 border-amber-500 shadow-amber-500/20'
-                                  : route.type === 'scenic'
-                                    ? 'bg-gradient-to-br from-emerald-800 to-slate-800 hover:from-emerald-700 hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20'
-                                    : 'bg-gradient-to-br from-indigo-800 to-slate-800 hover:from-indigo-700 hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20'
-                              : route.riskLevel >= 3
-                                ? route.type === 'normal'
-                                  ? 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10'
-                                  : route.type === 'shortcut'
-                                    ? 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border border-yellow-400/60 shadow-yellow-400/10'
-                                    : route.type === 'scenic'
-                                      ? 'bg-gradient-to-br from-emerald-700 to-slate-700 hover:from-emerald-600 hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10'
-                                      : 'bg-gradient-to-br from-indigo-700 to-slate-700 hover:from-indigo-600 hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10'
-                                : route.passengerReaction === 'positive'
-                                  ? route.type === 'normal'
-                                    ? 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border-2 border-emerald-400/80 shadow-emerald-400/20'
-                                    : route.type === 'shortcut'
-                                      ? 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20'
-                                      : route.type === 'scenic'
-                                        ? 'bg-gradient-to-br from-emerald-700 to-emerald-800 hover:from-emerald-600 hover:to-emerald-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20'
-                                        : 'bg-gradient-to-br from-indigo-700 to-indigo-800 hover:from-indigo-600 hover:to-indigo-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20'
-                                  : route.passengerReaction === 'negative'
-                                    ? route.type === 'normal'
-                                      ? 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10'
-                                      : route.type === 'shortcut'
-                                        ? 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border-2 border-rose-400/60 shadow-rose-400/10'
-                                        : route.type === 'scenic'
-                                          ? 'bg-gradient-to-br from-emerald-700 to-slate-700 hover:from-emerald-600 hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10'
-                                          : 'bg-gradient-to-br from-indigo-700 to-slate-700 hover:from-indigo-600 hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10'
-                                    : route.type === 'normal'
-                                      ? 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border border-slate-500/50 hover:border-slate-400/70'
-                                      : route.type === 'shortcut'
-                                        ? 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border border-gray-500/50 hover:border-gray-400/70'
-                                        : route.type === 'scenic'
-                                          ? 'bg-gradient-to-br from-emerald-700 to-emerald-800 hover:from-emerald-600 hover:to-emerald-700 text-white border border-emerald-500/50 hover:border-emerald-400/70'
-                                          : 'bg-gradient-to-br from-indigo-700 to-indigo-800 hover:from-indigo-600 hover:to-indigo-700 text-white border border-indigo-500/50 hover:border-indigo-400/70'
-                        }`}
+                        className={`p-4 rounded-lg font-semibold transition-all duration-200 text-left relative shadow-lg ${route.colorClass || 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50 border border-slate-700'}`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="text-lg font-bold flex items-center gap-2">
                               {route.name}
-                              {route.fareModifier &&
-                                route.fareModifier !== 1.0 &&
-                                gameState.currentPassenger &&
-                                AlmanacHelper.canSeeFareModifiers(
-                                  playerStats,
-                                  gameState.currentPassenger.id
-                                ) && (
-                                  <span
-                                    className={`text-xs px-2 py-1 rounded-md backdrop-blur-sm ${
-                                      route.fareModifier > 1.0
-                                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                        : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                              {route.fareBonusDisplay?.visible && (
+                                <span
+                                  className={`text-xs px-2 py-1 rounded-md backdrop-blur-sm ${route.fareBonusDisplay.color === 'emerald'
+                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                                     }`}
-                                  >
-                                    {route.fareModifier > 1.0 ? '+' : ''}
-                                    {Math.round((route.fareModifier - 1) * 100)}% fare
-                                  </span>
-                                )}
+                                >
+                                  {route.fareBonusDisplay.percentage > 0 ? '+' : ''}
+                                  {route.fareBonusDisplay.percentage}% fare
+                                </span>
+                              )}
                             </div>
                             <div className="text-sm opacity-90">{route.description}</div>
                             {route.bonusInfo && (
@@ -368,33 +329,17 @@ const GameScreen: React.FC = () => {
                               <span className="text-cyan-300">⏰</span>
                               <span className="text-cyan-200">-{route.timeCost} min</span>
                             </div>
-                            {gameState.currentPassenger &&
-                            AlmanacHelper.canSeeRiskLevels(
-                              playerStats,
-                              gameState.currentPassenger.id
-                            ) ? (
+                            {route.riskDisplay?.visible ? (
                               <div className="flex items-center gap-1 justify-end">
                                 <span
-                                  className={
-                                    route.riskLevel >= 4
-                                      ? 'text-amber-400'
-                                      : route.riskLevel >= 3
-                                        ? 'text-yellow-400'
-                                        : 'text-gray-400'
-                                  }
+                                  className={`text-${route.riskDisplay.color}-400`}
                                 >
                                   ⚠️
                                 </span>
                                 <span
-                                  className={
-                                    route.riskLevel >= 4
-                                      ? 'text-amber-300'
-                                      : route.riskLevel >= 3
-                                        ? 'text-yellow-300'
-                                        : 'text-gray-300'
-                                  }
+                                  className={`text-${route.riskDisplay.color}-300`}
                                 >
-                                  Risk: {route.riskLevel}
+                                  Risk: {route.riskDisplay.level}
                                 </span>
                               </div>
                             ) : (
@@ -410,7 +355,7 @@ const GameScreen: React.FC = () => {
                   </div>
 
                   <div className="mt-4 text-center text-gray-400 text-sm">
-                    Current: ⛽ {gameState.fuel} fuel • ⏰ {Math.floor(gameState.timeRemaining)} min
+                    Current: ⛽ {Number(gameState.fuel.toFixed(1))} fuel • ⏰ {Math.floor(gameState.timeRemaining)} min
                     • 💰 ${gameState.earnings}
                   </div>
                 </div>

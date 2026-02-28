@@ -13,14 +13,12 @@ return function (\App\Core\Router $router, Container $container): void {
     // Auth routes
     $router->post('/api/v1/auth/session', $container->get('auth'), 'session');
 
-    // Content routes
+    // Content routes (public game config — no secrets)
     $router->get('/api/v1/content/skills', $container->get('content'), 'getSkills');
     $router->get('/api/v1/content/almanac-levels', $container->get('content'), 'getAlmanacLevels');
-    $router->get('/api/v1/content/passengers', $container->get('content'), 'getPassengers');
-    $router->get('/api/v1/content/locations', $container->get('content'), 'getLocations');
-    $router->get('/api/v1/content/rules', $container->get('content'), 'getRules');
 
     // Game lifecycle routes
+    $router->get('/api/v1/game/daily-rules', $container->get('game'), 'getDailyRules');
     $router->post('/api/v1/game/start-shift', $container->get('game'), 'startShift');
     $router->post('/api/v1/game/request-passenger', $container->get('game'), 'requestPassenger');
     $router->post('/api/v1/game/driving-choice', $container->get('game'), 'drivingChoice');

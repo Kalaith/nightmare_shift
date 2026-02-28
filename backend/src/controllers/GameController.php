@@ -14,6 +14,8 @@ use App\Actions\EndShiftAction;
 use App\Actions\SaveGameAction;
 use App\Actions\LoadGameAction;
 use App\Services\RouteService;
+use App\Services\PassengerSanitizer;
+use App\Repositories\RuleRepository;
 
 /**
  * Game controller — thin HTTP handler for game lifecycle.
@@ -30,7 +32,8 @@ final class GameController
         private readonly EndShiftAction $endShiftAction,
         private readonly SaveGameAction $saveGameAction,
         private readonly LoadGameAction $loadGameAction,
-        private readonly RouteService $routeService
+        private readonly RouteService $routeService,
+        private readonly RuleRepository $ruleRepository
     ) {}
 
     public function startShift(Request $request, Response $response): void
@@ -40,7 +43,7 @@ final class GameController
 
         try {
             $gameState = $this->startShiftAction->execute($userId);
-            $response->success($gameState, 'Shift started');
+            $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Shift started');
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 400);
         }
@@ -53,7 +56,7 @@ final class GameController
 
         try {
             $gameState = $this->requestPassengerAction->execute($userId);
-            $response->success($gameState, 'Passenger assigned');
+            $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Passenger assigned');
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 400);
         }
@@ -70,7 +73,7 @@ final class GameController
 
         try {
             $gameState = $this->handleDrivingChoiceAction->execute($userId, $routeType, $phase);
-            $response->success($gameState, 'Route selected');
+            $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Route selected');
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 400);
         }
@@ -91,7 +94,7 @@ final class GameController
 
         try {
             $gameState = $this->handleInteractionAction->execute($userId, $action);
-            $response->success($gameState, 'Interaction processed');
+            $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Interaction processed');
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 400);
         }
@@ -107,7 +110,7 @@ final class GameController
 
         try {
             $gameState = $this->completeRideAction->execute($userId, $isPositive);
-            $response->success($gameState, 'Ride completed');
+            $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Ride completed');
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 400);
         }
@@ -157,7 +160,7 @@ final class GameController
             if ($gameState === null) {
                 $response->success(null, 'No saved game');
             } else {
-                $response->success($gameState, 'Game loaded');
+                $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Game loaded');
             }
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 400);
@@ -169,14 +172,73 @@ final class GameController
         $userId = $this->getUserId($request, $response);
         if ($userId === null) return;
 
-        $fuel = (float) ($request->query()['fuel'] ?? 100);
-        $time = (float) ($request->query()['time'] ?? 600);
-
         try {
-            $options = $this->routeService->getRouteOptions($fuel, $time);
-            $response->success($options, 'Route options');
+            $gameState = $this->loadGameAction->execute($userId);
+            if ($gameState === null) {
+                $response->error('No active game found', 400);
+                return;
+            }
+
+            $fuel = (float) $gameState['fuel'];
+            $time = (float) $gameState['timeRemaining'];
+            $weather = $gameState['currentWeather'] ?? [];
+            $timeOfDay = $gameState['timeOfDay'] ?? [];
+            $hazards = $gameState['environmentalHazards'] ?? [];
+            $routeMastery = $gameState['routeMastery'] ?? [];
+            $passenger = $gameState['currentPassenger'] ?? null;
+            
+            // Assume default risk level of 1 for now, as location lookups might require LocationRepository
+            $passengerRiskLevel = 1.0; 
+
+            $options = $this->routeService->getRouteOptions(
+                $fuel,
+                $time,
+                $passengerRiskLevel,
+                $weather,
+                $timeOfDay,
+                $hazards,
+                $routeMastery,
+                $passenger
+            );
+
+            // Reformat dictionary to array and strip secrets
+            $optionsArray = array_values($options);
+            foreach ($optionsArray as &$opt) {
+                unset($opt['riskLevel']);
+                unset($opt['passengerReaction']);
+                unset($opt['fareModifier']);
+            }
+
+            $response->success($optionsArray, 'Route options');
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 400);
+        }
+    }
+
+    public function getDailyRules(Request $request, Response $response): void
+    {
+        $userId = $this->getUserId($request, $response);
+        if ($userId === null) return;
+
+        try {
+            // Get 3 random rules for tonight's shift
+            $rules = $this->ruleRepository->getShiftRules(3);
+            
+            // Strip out secret fields before sending to client
+            $safeRules = array_map(function($rule) {
+                return [
+                    'id' => $rule['id'],
+                    'title' => $rule['title'],
+                    'description' => $rule['description'],
+                    'difficulty' => $rule['difficulty'] ?? 'easy',
+                    'type' => $rule['type'] ?? 'basic',
+                    'visible' => true
+                ];
+            }, $rules);
+
+            $response->success($safeRules, 'Daily rules generated');
+        } catch (\Exception $e) {
+            $response->error($e->getMessage(), 500);
         }
     }
 
@@ -192,9 +254,7 @@ final class GameController
             return null;
         }
 
-        // The auth_user 'id' is the WH user ID. We need the internal user ID.
-        // For simplicity, we store it as an attribute after session validation.
-        // In production, AuthMiddleware would look up the internal user ID.
+        // AuthMiddleware resolves the WH user ID to the internal users.id
         return (int) $authUser['id'];
     }
 }

@@ -11,6 +11,7 @@ use App\External\LeaderboardRepository;
 use App\External\BackstoryRepository;
 use App\External\AlmanacRepository;
 use App\External\GameContentRepository;
+use App\Repositories\RuleRepository;
 use App\Services\GameEngineService;
 use App\Services\WeatherService;
 use App\Services\PassengerService;
@@ -54,6 +55,7 @@ final class Container
         $backstoryRepo   = new BackstoryRepository($pdo);
         $almanacRepo     = new AlmanacRepository($pdo);
         $contentRepo     = new GameContentRepository($pdo);
+        $ruleRepo        = new RuleRepository($pdo);
 
         // ── Services ────────────────────────────────────────────────
         $gameEngineService  = new GameEngineService($contentRepo);
@@ -91,6 +93,7 @@ final class Container
                 $saveGameAction,
                 $loadGameAction,
                 $routeService,
+                $ruleRepo
             ),
             'player'  => new PlayerController($getStatsAction, $getLeaderboardAction, $getAlmanacAction),
         ];

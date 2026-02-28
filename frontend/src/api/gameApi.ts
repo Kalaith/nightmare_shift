@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import type { GameState, PlayerStats, Passenger, Location, Rule } from '../types/game';
+import type { GameState, PlayerStats } from '../types/game';
 
 // ─── Response Types ─────────────────────────────────────────────────
 interface BackendResponse<T = unknown> {
@@ -28,16 +28,25 @@ interface ShiftResult {
   difficultyLevel: number;
 }
 
-interface RouteOption {
+export interface RouteOption {
   type: string;
   name: string;
   description: string;
   fuelCost: number;
   timeCost: number;
-  riskLevel: number;
   available: boolean;
-  passengerReaction?: string;
-  fareModifier?: number;
+  bonusInfo?: string;
+  colorClass: string;
+  riskDisplay: {
+    visible: boolean;
+    level?: number;
+    color?: 'amber' | 'yellow' | 'gray';
+  };
+  fareBonusDisplay: {
+    visible: boolean;
+    percentage?: number;
+    color?: 'emerald' | 'rose';
+  };
 }
 
 interface LeaderboardEntry {
@@ -131,11 +140,16 @@ export const gameApi = {
   },
 
   /** Get available route options */
-  async getRouteOptions(fuel: number, time: number): Promise<Record<string, RouteOption>> {
-    const res = await apiClient.get<BackendResponse<Record<string, RouteOption>>>(
-      '/game/route-options',
-      { params: { fuel, time } }
+  async getRouteOptions(): Promise<RouteOption[]> {
+    const res = await apiClient.get<BackendResponse<RouteOption[]>>(
+      '/game/route-options'
     );
+    return res.data.data;
+  },
+
+  /** Get basic rules for the upcoming shift briefing */
+  async getDailyRules(): Promise<Rule[]> {
+    const res = await apiClient.get<BackendResponse<Rule[]>>('/game/daily-rules');
     return res.data.data;
   },
 
@@ -183,26 +197,6 @@ export const gameApi = {
   /** Get passenger almanac entries */
   async getAlmanac(): Promise<Record<number, unknown>> {
     const res = await apiClient.get<BackendResponse<Record<number, unknown>>>('/player/almanac');
-    return res.data.data;
-  },
-
-  // ─── Game Content ───────────────────────────────────────────────────
-
-  /** Get all passenger definitions */
-  async getPassengers(): Promise<Passenger[]> {
-    const res = await apiClient.get<BackendResponse<Passenger[]>>('/content/passengers');
-    return res.data.data;
-  },
-
-  /** Get all location definitions */
-  async getLocations(): Promise<Location[]> {
-    const res = await apiClient.get<BackendResponse<Location[]>>('/content/locations');
-    return res.data.data;
-  },
-
-  /** Get all shift rule definitions */
-  async getRules(): Promise<Rule[]> {
-    const res = await apiClient.get<BackendResponse<Rule[]>>('/content/rules');
     return res.data.data;
   },
 };

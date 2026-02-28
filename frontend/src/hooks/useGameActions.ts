@@ -93,7 +93,9 @@ export const useGameActions = () => {
 
     const dialogue =
       gameState.pendingRouteDialogue ||
-      passenger.dialogue[Math.floor(Math.random() * passenger.dialogue.length)];
+      (passenger.dialogue && passenger.dialogue.length > 0
+        ? passenger.dialogue[Math.floor(Math.random() * passenger.dialogue.length)]
+        : "...");
 
     setGameState(prev => ({
       ...prev,

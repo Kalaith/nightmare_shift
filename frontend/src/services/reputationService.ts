@@ -208,6 +208,8 @@ export class RouteService {
     // Apply hazard effects if any
     if (hazards && hazards.length > 0) {
       for (const hazard of hazards) {
+        if (!hazard.effects) continue; // Safety check for empty sanitized hazards
+
         // Check if hazard blocks this route type
         if (hazard.effects.routeBlocked?.includes(routeType)) {
           finalRiskLevel = Math.min(5, finalRiskLevel + 2); // Route is risky due to blockage
@@ -227,8 +229,8 @@ export class RouteService {
       }
     }
 
-    // Apply route mastery bonuses
-    if (routeMastery && routeMastery[routeType]) {
+    // Apply route mastery bonuses (check if it has keys to handle empty sanitized objects)
+    if (routeMastery && Object.keys(routeMastery).length > 0 && routeMastery[routeType]) {
       const masteryLevel = routeMastery[routeType];
       const fuelReduction = Math.min(4, Math.floor(masteryLevel / 3)); // -1 fuel per 3 uses, max -4
       const timeReduction = Math.min(6, Math.floor(masteryLevel / 2)); // -1 time per 2 uses, max -6
@@ -317,74 +319,58 @@ export class RouteService {
         ];
 
         const resultRoutes = routes.map(route => {
-          try {
-            const costs = this.calculateRouteCosts(
+          const costs = this.calculateRouteCosts(
+            route.type,
+            passengerRiskLevel,
+            weather,
+            timeOfDay,
+            hazards,
+            routeMastery,
+            passenger
+          );
+
+          // ALL ROUTES ARE ALWAYS AVAILABLE - no fuel/time restrictions
+          let available = true;
+
+          // checkRouteAvailability always returns true now, but keeping for future flexibility
+          available =
+            available &&
+            this.checkRouteAvailability(
               route.type,
-              passengerRiskLevel,
               weather,
               timeOfDay,
-              hazards,
-              routeMastery,
+              routeConsequences,
               passenger
             );
 
-            // ALL ROUTES ARE ALWAYS AVAILABLE - no fuel/time restrictions
-            let available = true;
+          // Get passenger preference for this route
+          const passengerPreference = passenger?.routePreferences?.find(
+            pref => pref.route === route.type
+          );
+          const passengerReaction = passengerPreference
+            ? this.getReactionFromPreference(passengerPreference.preference)
+            : 'neutral';
+          const fareModifier = passengerPreference?.fareModifier || 1.0;
 
-            // checkRouteAvailability always returns true now, but keeping for future flexibility
-            available =
-              available &&
-              this.checkRouteAvailability(
-                route.type,
-                weather,
-                timeOfDay,
-                routeConsequences,
-                passenger
-              );
+          const bonusInfo = this.buildRouteInfo(
+            route.type,
+            passengerPreference,
+            routeMastery,
+            weather,
+            hazards,
+            timeOfDay,
+            passenger,
+            playerStats
+          );
 
-            // Get passenger preference for this route
-            const passengerPreference = passenger?.routePreferences?.find(
-              pref => pref.route === route.type
-            );
-            const passengerReaction = passengerPreference
-              ? this.getReactionFromPreference(passengerPreference.preference)
-              : 'neutral';
-            const fareModifier = passengerPreference?.fareModifier || 1.0;
-
-            const bonusInfo = this.buildRouteInfo(
-              route.type,
-              passengerPreference,
-              routeMastery,
-              weather,
-              hazards,
-              timeOfDay,
-              passenger,
-              playerStats
-            );
-
-            const routeResult = {
-              ...route,
-              ...costs,
-              available,
-              bonusInfo,
-              passengerReaction,
-              fareModifier,
-            };
-
-            return routeResult;
-          } catch {
-            // Return a basic route if processing fails
-            return {
-              ...route,
-              fuelCost: 15,
-              timeCost: 20,
-              riskLevel: 1,
-              available: safeFuel >= 15 && safeTime >= 20,
-              bonusInfo: 'Basic route (error recovery)',
-              passengerReaction: 'neutral' as const,
-              fareModifier: 1.0,
-            };
-          }
+          return {
+            ...route,
+            ...costs,
+            available,
+            bonusInfo,
+            passengerReaction,
+            fareModifier,
+          };
         });
 
         return resultRoutes;

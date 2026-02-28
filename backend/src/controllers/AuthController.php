@@ -31,7 +31,7 @@ final class AuthController
             return;
         }
 
-        $whUserId = (int) ($authUser['id'] ?? 0);
+        $whUserId = (int) ($authUser['wh_user_id'] ?? $authUser['id'] ?? 0);
         $email = (string) ($authUser['email'] ?? '');
         $username = (string) ($authUser['username'] ?? '');
 
