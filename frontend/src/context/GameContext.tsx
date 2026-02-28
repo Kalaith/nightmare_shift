@@ -16,8 +16,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const gameStateLogic = useGameState(playerStats);
 
-  const handleEndShift = (successful: boolean, overrideReason?: string) => {
-    const shiftData = gameStateLogic.endShift(successful, overrideReason);
+  const handleEndShift = async (successful: boolean, overrideReason?: string) => {
+    const shiftData = await gameStateLogic.endShift(successful, overrideReason);
     const updateStats = createStatsUpdater(playerStats, updatePlayerStats, addToLeaderboard);
     updateStats(shiftData.survived, shiftData);
 

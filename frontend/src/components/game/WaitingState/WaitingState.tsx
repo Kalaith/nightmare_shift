@@ -23,7 +23,7 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
   const isCriticalFuel = fuelPercentage <= GAME_BALANCE.FUEL_THRESHOLDS.CRITICAL_FUEL;
 
   // Fuel costs
-  const fuelNeeded = 100 - fuelPercentage;
+  const fuelNeeded = Number((100 - fuelPercentage).toFixed(1));
   const fullRefuelCost = Math.ceil(fuelNeeded * 0.5); // $0.50 per fuel %
   const partialRefuelCost = Math.ceil(25 * 0.5); // Refuel 25% for $12-13
 

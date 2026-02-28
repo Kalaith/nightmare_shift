@@ -308,8 +308,8 @@ const GameScreen: React.FC = () => {
                                     : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                                     }`}
                                 >
-                                  {route.fareBonusDisplay.percentage > 0 ? '+' : ''}
-                                  {route.fareBonusDisplay.percentage}% fare
+                                  {route.fareBonusDisplay.percentage && route.fareBonusDisplay.percentage > 0 ? '+' : ''}
+                                  {route.fareBonusDisplay.percentage || 0}% fare
                                 </span>
                               )}
                             </div>

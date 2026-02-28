@@ -36,7 +36,7 @@ const getInitialGameState = (): Omit<GameState, 'currentScreen'> => ({
     startTime: Date.now(),
   },
   timeOfDay: { phase: 'night', hour: 22, description: 'Night', ambientLight: 15, supernaturalActivity: 70 },
-  season: { type: 'fall', month: 10, temperature: 'cool', description: 'Fall — cool temperatures', passengerModifiers: { spawnRates: [], behaviorChanges: [] } },
+  season: { type: 'fall', month: 10, temperature: 'cool', description: 'Fall — cool temperatures', passengerModifiers: { spawnRates: {}, behaviorChanges: {} } },
   environmentalHazards: [],
   weatherEffects: [],
   routeMastery: { normal: 0, shortcut: 0, scenic: 0, police: 0 },

@@ -113,7 +113,7 @@ final class CompleteRideAction
         $gameState['currentPassenger'] = null;
         $gameState['currentRide'] = null;
         $gameState['currentDrivingPhase'] = null;
-        $gameState['gamePhase'] = 'waiting';
+        $gameState['gamePhase'] = 'dropOff';
 
         // Process item deterioration
         $gameState['inventory'] = $this->itemService->processItemDeterioration($gameState['inventory'] ?? []);

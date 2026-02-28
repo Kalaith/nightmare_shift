@@ -99,17 +99,7 @@ export const usePlayerStats = () => {
   const refreshLeaderboard = useCallback(async () => {
     try {
       const entries = await gameApi.getLeaderboard(10);
-      // Map backend format to frontend format
-      setLeaderboard(entries.map(e => ({
-        score: e.score,
-        timeRemaining: e.time_remaining,
-        date: e.played_at,
-        survived: e.survived,
-        passengersTransported: e.passengers_transported,
-        difficultyLevel: e.difficulty_level,
-        rulesViolated: e.rules_violated,
-        username: e.username || undefined,
-      })));
+      setLeaderboard(entries);
     } catch (err) {
       console.warn('Failed to fetch leaderboard:', err);
     }

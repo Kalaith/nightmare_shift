@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import type { GameState, PlayerStats } from '../types/game';
+import type { GameState, PlayerStats, Rule, LeaderboardEntry, Skill, AlmanacLevel } from '../types/game';
 
 // ─── Response Types ─────────────────────────────────────────────────
 interface BackendResponse<T = unknown> {
@@ -49,26 +49,6 @@ export interface RouteOption {
   };
 }
 
-interface LeaderboardEntry {
-  id: number;
-  user_id: number;
-  score: number;
-  time_remaining: number;
-  passengers_transported: number;
-  difficulty_level: number;
-  rules_violated: number;
-  survived: boolean;
-  played_at: string;
-  username: string | null;
-}
-
-interface AlmanacLevel {
-  level: number;
-  name: string;
-  description: string;
-  rewards: string[];
-  loreCost: number;
-}
 
 // ─── API Service ────────────────────────────────────────────────────
 
@@ -201,4 +181,4 @@ export const gameApi = {
   },
 };
 
-export type { SessionData, ShiftResult, RouteOption, LeaderboardEntry, AlmanacLevel, BackendResponse };
+export type { SessionData, ShiftResult, BackendResponse };

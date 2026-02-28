@@ -33,6 +33,14 @@ export interface AlmanacEntry {
   unlockedSecrets: string[];
 }
 
+export interface AlmanacLevel {
+  level: number;
+  name: string;
+  description: string;
+  rewards: string[];
+  loreCost: number;
+}
+
 export interface Skill {
   id: string;
   name: string;

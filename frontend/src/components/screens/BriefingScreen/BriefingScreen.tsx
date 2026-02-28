@@ -1,3 +1,4 @@
+import React from 'react';
 import type { GameState, Rule } from '../../../types/game';
 import { gameApi } from '../../../api/gameApi';
 

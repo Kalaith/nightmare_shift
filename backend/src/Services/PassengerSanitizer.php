@@ -17,7 +17,7 @@ final class PassengerSanitizer
     private const PASSENGER_FIELDS = [
         'id', 'name', 'emoji', 'description',
         'pickup', 'destination', 'fare', 'rarity',
-        'backstoryUnlocked',
+        'backstoryUnlocked', 'dialogue',
     ];
 
     public static function sanitizePassenger(?array $passenger): ?array
@@ -35,7 +35,6 @@ final class PassengerSanitizer
         $sanitized['backstoryUnlocked'] = $passenger['backstoryUnlocked'] ?? false;
         
         // Return empty collections for frontend type safety while hiding data
-        $sanitized['dialogue'] = [];
         $sanitized['items'] = [];
         $sanitized['relationships'] = [];
 
@@ -132,6 +131,14 @@ final class PassengerSanitizer
             'routeConsequences'    => [],
             'passengerReputation'  => (object)[],
             'passengerBackstories' => (object)[],
+            
+            // Ride summary data
+            'lastRideCompletion'   => isset($gs['lastRideCompletion']) ? [
+                'passenger' => self::sanitizePassenger($gs['lastRideCompletion']['passenger'] ?? null),
+                'fareEarned' => $gs['lastRideCompletion']['fareEarned'] ?? 0,
+                'itemsReceived' => $gs['lastRideCompletion']['itemsReceived'] ?? [],
+                'backstoryUnlocked' => $gs['lastRideCompletion']['backstoryUnlocked'] ?? null,
+            ] : null,
         ];
     }
 }
