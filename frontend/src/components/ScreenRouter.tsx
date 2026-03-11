@@ -13,12 +13,22 @@ import GameOverScreen from './screens/GameOverScreen/GameOverScreen';
 import SuccessScreen from './screens/SuccessScreen/SuccessScreen';
 import AlmanacScreen from './screens/AlmanacScreen/AlmanacScreen';
 import SkillTreeScreen from './screens/SkillTreeScreen/SkillTreeScreen';
+import AdminSessionsScreen from './screens/AdminSessionsScreen/AdminSessionsScreen';
 import ErrorBoundary from './ErrorBoundary';
 
 const ScreenRouter: React.FC = () => {
   const { gameState, startGame, loadGame, startShift, resetGame } = useGameContext();
 
-  const { playerStats, upgradeKnowledge, purchaseSkill, user, isAuthenticated, isLoading: authLoading } = usePlayerContext();
+  const {
+    playerStats,
+    upgradeKnowledge,
+    purchaseSkill,
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+    continueAsGuest,
+    getLinkAccountUrl,
+  } = usePlayerContext();
 
   const { currentScreen, showScreen } = useUIContext();
 
@@ -44,11 +54,14 @@ const ScreenRouter: React.FC = () => {
           user={user}
           isAuthenticated={isAuthenticated}
           authLoading={authLoading}
+          onContinueAsGuest={continueAsGuest}
+          linkAccountUrl={getLinkAccountUrl()}
           onStartGame={startGame}
           onLoadGame={loadGame}
           onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}
           onShowSkillTree={() => showScreen(SCREENS.SKILL_TREE)}
           onShowAlmanac={() => showScreen(SCREENS.ALMANAC)}
+          onShowAdmin={() => showScreen(SCREENS.ADMIN)}
         />
       );
 
@@ -110,6 +123,13 @@ const ScreenRouter: React.FC = () => {
         </ErrorBoundary>
       );
 
+    case SCREENS.ADMIN:
+      return (
+        <ErrorBoundary>
+          <AdminSessionsScreen onBack={() => showScreen(SCREENS.LOADING)} />
+        </ErrorBoundary>
+      );
+
     default:
       return (
         <LoadingScreen
@@ -117,11 +137,14 @@ const ScreenRouter: React.FC = () => {
           user={user}
           isAuthenticated={isAuthenticated}
           authLoading={authLoading}
+          onContinueAsGuest={continueAsGuest}
+          linkAccountUrl={getLinkAccountUrl()}
           onStartGame={startGame}
           onLoadGame={loadGame}
           onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}
           onShowSkillTree={() => showScreen(SCREENS.SKILL_TREE)}
           onShowAlmanac={() => showScreen(SCREENS.ALMANAC)}
+          onShowAdmin={() => showScreen(SCREENS.ADMIN)}
         />
       );
   }

@@ -262,8 +262,18 @@
 }
 
 .statusIcon {
-  font-size: 2rem;
+  font-size: 1.25rem;
   flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(94, 234, 212, 0.12);
+  border: 1px solid rgba(94, 234, 212, 0.28);
+  color: #5eead4;
+  font-weight: 700;
 }
 
 .statusInfo {
@@ -279,7 +289,9 @@
 
 .statusLabel {
   font-size: 0.875rem;
-  color: #9ca3af;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .continueHint {

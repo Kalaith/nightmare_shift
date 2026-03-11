@@ -88,7 +88,7 @@ final class RouteService
         foreach ($routeTypes as $type => $info) {
             $costs = $this->calculateRouteCosts($type, $passengerRiskLevel, $weather, $timeOfDay, $hazards, $routeMastery, $passenger ?? []);
 
-            $available = $currentFuel >= $costs['fuelCost'] && $currentTime >= $costs['timeCost'];
+            $available = true;
 
             $option = array_merge($info, [
                 'type' => $type,

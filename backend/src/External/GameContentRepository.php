@@ -202,7 +202,7 @@ final class GameContentRepository
 
     private function hydratePassenger(array $row): array
     {
-        $jsonFields = ['items', 'dialogue', 'relationships', 'tells', 'guideline_exceptions', 'route_preferences', 'state_profile', 'rule_modification'];
+        $jsonFields = ['items', 'dialogue', 'relationships', 'tells', 'guideline_exceptions', 'route_preferences', 'state_profile', 'tip_profile', 'rule_modification'];
         foreach ($jsonFields as $field) {
             if (isset($row[$field]) && is_string($row[$field])) {
                 $row[$field] = json_decode($row[$field], true);
@@ -232,6 +232,7 @@ final class GameContentRepository
             'trustRequired' => isset($row['trust_required']) ? (float) $row['trust_required'] : null,
             'routePreferences' => $row['route_preferences'],
             'stateProfile' => $row['state_profile'],
+            'tipProfile' => $row['tip_profile'],
             'ruleModification' => $row['rule_modification'],
         ];
     }

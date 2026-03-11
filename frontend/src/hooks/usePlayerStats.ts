@@ -29,31 +29,98 @@ const getDefaultPlayerStats = (): PlayerStats => ({
   almanacProgress: {},
 });
 
-export const usePlayerStats = () => {
+const parseBackendDate = (value: unknown): number => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Date.parse(value);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  return Date.now();
+};
+
+const normalizePlayerStats = (stats: Record<string, unknown>): PlayerStats => ({
+  ...getDefaultPlayerStats(),
+  totalShiftsCompleted: Number(stats.totalShiftsCompleted ?? stats.total_shifts_completed ?? 0),
+  totalShiftsStarted: Number(stats.totalShiftsStarted ?? stats.total_shifts_started ?? 0),
+  totalRidesCompleted: Number(stats.totalRidesCompleted ?? stats.total_rides_completed ?? 0),
+  totalEarnings: Number(stats.totalEarnings ?? stats.total_earnings ?? 0),
+  totalFuelUsed: Number(stats.totalFuelUsed ?? stats.total_fuel_used ?? 0),
+  totalTimePlayedMinutes: Number(stats.totalTimePlayedMinutes ?? stats.total_time_played_minutes ?? 0),
+  bestShiftEarnings: Number(stats.bestShiftEarnings ?? stats.best_shift_earnings ?? 0),
+  bestShiftRides: Number(stats.bestShiftRides ?? stats.best_shift_rides ?? 0),
+  longestShiftMinutes: Number(stats.longestShiftMinutes ?? stats.longest_shift_minutes ?? 0),
+  bankBalance: Number(stats.bankBalance ?? stats.bank_balance ?? 0),
+  loreFragments: Number(stats.loreFragments ?? stats.lore_fragments ?? 0),
+  unlockedSkills: Array.isArray(stats.unlockedSkills ?? stats.unlocked_skills)
+    ? ((stats.unlockedSkills ?? stats.unlocked_skills) as string[])
+    : [],
+  passengersEncountered: new Set(
+    Array.isArray(stats.passengersEncountered ?? stats.passengers_encountered)
+      ? ((stats.passengersEncountered ?? stats.passengers_encountered) as number[]).map(Number)
+      : []
+  ),
+  backstoriesUnlocked: new Set(
+    Array.isArray(stats.backstoriesUnlocked ?? stats.backstories_unlocked)
+      ? ((stats.backstoriesUnlocked ?? stats.backstories_unlocked) as number[]).map(Number)
+      : []
+  ),
+  legendaryPassengersEncountered: new Set(
+    Array.isArray(stats.legendaryPassengersEncountered ?? stats.legendary_passengers)
+      ? ((stats.legendaryPassengersEncountered ?? stats.legendary_passengers) as number[]).map(Number)
+      : []
+  ),
+  achievementsUnlocked: new Set(
+    Array.isArray(stats.achievementsUnlocked ?? stats.achievements_unlocked)
+      ? ((stats.achievementsUnlocked ?? stats.achievements_unlocked) as string[])
+      : []
+  ),
+  rulesViolatedHistory: Array.isArray(stats.rulesViolatedHistory ?? stats.rules_violated_history)
+    ? ((stats.rulesViolatedHistory ?? stats.rules_violated_history) as PlayerStats['rulesViolatedHistory'])
+    : [],
+  firstPlayDate: parseBackendDate(stats.firstPlayDate ?? stats.first_play_date),
+  lastPlayDate: parseBackendDate(stats.lastPlayDate ?? stats.last_play_date),
+  almanacProgress:
+    (stats.almanacProgress as Record<number, PlayerStats['almanacProgress'][number]>) ??
+    (stats.almanac_progress as Record<number, PlayerStats['almanacProgress'][number]>) ??
+    {},
+});
+
+export const usePlayerStats = (authUserId: number | null) => {
   const [playerStats, setPlayerStats] = useState<PlayerStats>(getDefaultPlayerStats);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+
+  const refreshStats = useCallback(async () => {
+    if (authUserId === null) {
+      setPlayerStats(getDefaultPlayerStats());
+      return;
+    }
+
+    try {
+      const [stats, almanac] = await Promise.all([gameApi.getStats(), gameApi.getAlmanac()]);
+      if (stats) {
+        setPlayerStats(prev => ({
+          ...prev,
+          ...normalizePlayerStats(stats as unknown as Record<string, unknown>),
+          almanacProgress: (almanac as PlayerStats['almanacProgress']) ?? {},
+        }));
+      }
+    } catch (err) {
+      console.warn('Failed to fetch player stats from backend, using defaults:', err);
+    }
+  }, [authUserId]);
 
   /**
    * Fetch player stats from backend on mount.
    */
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const stats = await gameApi.getStats();
-        if (stats) {
-          // Merge backend stats with defaults to ensure Set fields are initialized
-          setPlayerStats(prev => ({
-            ...getDefaultPlayerStats(),
-            ...prev,
-            ...stats,
-          }));
-        }
-      } catch (err) {
-        console.warn('Failed to fetch player stats from backend, using defaults:', err);
-      }
-    };
-    fetchStats();
-  }, []);
+    void refreshStats();
+  }, [refreshStats]);
 
   /**
    * Update player stats locally — stats are persisted to the backend
@@ -134,30 +201,19 @@ export const usePlayerStats = () => {
   );
 
   const upgradeKnowledge = useCallback(
-    (passengerId: number) => {
-      updatePlayerStats(prev => {
-        const currentProgress = prev.almanacProgress[passengerId];
-        if (!currentProgress || currentProgress.knowledgeLevel >= 3) return {};
-
-        const costs = { 0: 1, 1: 3, 2: 5 };
-        const cost = costs[currentProgress.knowledgeLevel as 0 | 1 | 2] || 0;
-
-        if (prev.loreFragments >= cost) {
-          return {
-            loreFragments: prev.loreFragments - cost,
-            almanacProgress: {
-              ...prev.almanacProgress,
-              [passengerId]: {
-                ...currentProgress,
-                knowledgeLevel: (currentProgress.knowledgeLevel + 1) as 0 | 1 | 2 | 3,
-              },
-            },
-          };
-        }
-        return {};
-      });
+    async (passengerId: number) => {
+      try {
+        const stats = await gameApi.upgradeAlmanac(passengerId);
+        setPlayerStats(prev => ({
+          ...prev,
+          ...normalizePlayerStats(stats as unknown as Record<string, unknown>),
+        }));
+        await refreshStats();
+      } catch (err) {
+        console.warn('Failed to upgrade almanac:', err);
+      }
     },
-    [updatePlayerStats]
+    [refreshStats]
   );
 
   const awardLoreFragments = useCallback(
@@ -170,29 +226,19 @@ export const usePlayerStats = () => {
   );
 
   const purchaseSkill = useCallback(
-    (skillId: string) => {
-      import('../data/skillTreeData').then(({ SKILL_TREE }) => {
-        updatePlayerStats(prev => {
-          if (prev.unlockedSkills.includes(skillId)) return {};
-
-          const skill = SKILL_TREE.find(s => s.id === skillId);
-          if (!skill) return {};
-
-          const hasPrereqs = skill.prerequisites.every(prereqId =>
-            prev.unlockedSkills.includes(prereqId)
-          );
-
-          if (hasPrereqs && prev.bankBalance >= skill.cost) {
-            return {
-              bankBalance: prev.bankBalance - skill.cost,
-              unlockedSkills: [...prev.unlockedSkills, skillId],
-            };
-          }
-          return {};
-        });
-      });
+    async (skillId: string) => {
+      try {
+        const stats = await gameApi.purchaseSkill(skillId);
+        setPlayerStats(prev => ({
+          ...prev,
+          ...normalizePlayerStats(stats as unknown as Record<string, unknown>),
+        }));
+        await refreshStats();
+      } catch (err) {
+        console.warn('Failed to purchase skill:', err);
+      }
     },
-    [updatePlayerStats]
+    [refreshStats]
   );
 
   const addToBankBalance = useCallback(
@@ -206,6 +252,7 @@ export const usePlayerStats = () => {
 
   return {
     playerStats,
+    refreshStats,
     updatePlayerStats,
     addToLeaderboard,
     leaderboard,

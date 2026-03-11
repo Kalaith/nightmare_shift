@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `passengers` (
     `trust_required` DECIMAL(3,2) DEFAULT NULL COMMENT '0.0-1.0',
     `route_preferences` JSON DEFAULT NULL COMMENT 'Array of RoutePreference objects',
     `state_profile` JSON DEFAULT NULL COMMENT 'PassengerStateProfile object',
+    `tip_profile` JSON DEFAULT NULL COMMENT 'Tip offer configuration object',
     `rule_modification` JSON DEFAULT NULL COMMENT 'Rule modification capability',
     `is_active` TINYINT(1) NOT NULL DEFAULT 1,
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,

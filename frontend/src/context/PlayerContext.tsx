@@ -5,7 +5,7 @@ import { PlayerContext } from './playerContextObject';
 
 export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const authSession = useAuthSession();
-  const playerStatsLogic = usePlayerStats();
+  const playerStatsLogic = usePlayerStats(authSession.user?.id ?? null);
 
   const value = useMemo(() => ({
     // Auth session
@@ -14,6 +14,8 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     isLoading: authSession.isLoading,
     authError: authSession.error,
     refreshSession: authSession.refreshSession,
+    continueAsGuest: authSession.continueAsGuest,
+    getLinkAccountUrl: authSession.getLinkAccountUrl,
     // Player stats
     ...playerStatsLogic,
   }), [authSession, playerStatsLogic]);

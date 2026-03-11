@@ -9,6 +9,7 @@ interface WaitingStateProps {
   onToggleInventory: () => void;
   onRefuelFull: () => void;
   onRefuelPartial: () => void;
+  onRequestRide: () => void;
 }
 
 export const WaitingState: React.FC<WaitingStateProps> = ({
@@ -17,6 +18,7 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
   onToggleInventory,
   onRefuelFull,
   onRefuelPartial,
+  onRequestRide,
 }) => {
   const fuelPercentage = Number(gameState.fuel.toFixed(1));
   const isLowFuel = fuelPercentage <= GAME_BALANCE.FUEL_THRESHOLDS.LOW_FUEL_WARNING;
@@ -77,6 +79,15 @@ export const WaitingState: React.FC<WaitingStateProps> = ({
 
       {/* Action Buttons */}
       <div className={styles.actionGrid}>
+        <button
+          onClick={onRequestRide}
+          className={styles.inventoryButton}
+          title="Look for the next fare"
+        >
+          <span className={styles.buttonIcon}>🚕</span>
+          <span className={styles.buttonText}>Request Next Ride</span>
+        </button>
+
         {/* Inventory Button */}
         <button
           onClick={onToggleInventory}

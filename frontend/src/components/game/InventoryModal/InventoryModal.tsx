@@ -8,7 +8,6 @@ interface InventoryModalProps {
   onClose: () => void;
   inventory: InventoryItem[];
   gameState?: GameState;
-  onUseItem?: (itemId: string) => void;
   onTradeItem?: (itemId: string, passenger: Passenger) => void;
   currentPassenger?: Passenger | null;
 }
@@ -18,7 +17,6 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
   onClose,
   inventory,
   gameState: _gameState,
-  onUseItem,
   onTradeItem,
   currentPassenger,
 }) => {
@@ -26,13 +24,6 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
   const [showTradeOptions, setShowTradeOptions] = useState(false);
 
   if (!isOpen) return null;
-
-  const handleUseItem = (item: InventoryItem) => {
-    if (item.canUse && onUseItem) {
-      onUseItem(item.id);
-      setSelectedItem(null);
-    }
-  };
 
   const handleTradeItem = (item: InventoryItem) => {
     if (currentPassenger && ItemService.canTradeWith(item, currentPassenger)) {
@@ -225,14 +216,9 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
 
                       {/* Action buttons */}
                       <div className={styles.itemActions}>
-                        {item.canUse && !isBroken && (
-                          <button className={styles.useButton} onClick={() => handleUseItem(item)}>
-                            Use
-                          </button>
-                        )}
-
                         {item.canTrade &&
                           currentPassenger &&
+                          !isBroken &&
                           ItemService.canTradeWith(item, currentPassenger) && (
                             <button
                               className={styles.tradeButton}

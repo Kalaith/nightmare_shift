@@ -1,34 +1,26 @@
 import { useCallback } from 'react';
 import { useGameContext } from './useGameContext';
 import { GAME_PHASES } from '../data/constants';
-import { GAME_BALANCE } from '../constants/gameBalance';
 import type { Passenger } from '../types/game';
 import { gameApi } from '../api/gameApi';
 
-/**
- * Game actions hook — refactored to delegate business logic to the backend.
- *
- * Most actions now call a backend API endpoint which processes the logic
- * and returns the updated game state. The frontend only handles UI state
- * transitions and optimistic updates where needed.
- */
 export const useGameActions = () => {
-  const { gameState, updateGameState: setGameState, showRideRequest, endShift } = useGameContext();
+  const { gameState, updateGameState: setGameState, endShift } = useGameContext();
 
   const declineRide = useCallback(() => {
-    setGameState(prev => ({
-      ...prev,
-      gamePhase: GAME_PHASES.WAITING,
-      currentPassenger: null,
-    }));
-
-    setTimeout(
-      () => {
-        showRideRequest();
-      },
-      2000 + Math.random() * 3000
-    );
-  }, [showRideRequest, setGameState]);
+    void (async () => {
+      try {
+        const backendState = await gameApi.declineRide();
+        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
+          currentScreen?: string;
+        };
+        void _ignored;
+        setGameState(prev => ({ ...prev, ...rest }));
+      } catch (err) {
+        console.error('Failed to decline ride:', err);
+      }
+    })();
+  }, [setGameState]);
 
   const startDriving = useCallback(
     (phase: 'pickup' | 'destination') => {
@@ -49,87 +41,19 @@ export const useGameActions = () => {
     startDriving('pickup');
   }, [gameState.fuel, endShift, startDriving]);
 
-  /**
-   * Handle driving choice — delegates route cost calculation, rule checking,
-   * and state updates to the backend.
-   */
-  const handleDrivingChoice = useCallback(
-    async (choice: string, phase: string) => {
-      try {
-        // Backend handles: route costs, rule violations, fuel/time deduction,
-        // route mastery, passenger state machine, game over checks
-        const backendState = await gameApi.drivingChoice(choice, phase);
-
-        // Check if backend flagged game over
-        if (backendState.gamePhase === 'gameOver') {
-          const reason =
-            backendState.gameOverReason ||
-            'Something went wrong during the drive...';
-          endShift(false, reason);
-          return;
-        }
-
-        // Apply backend state
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & { currentScreen?: string };
-        void _ignored;
-        setGameState(prev => ({ ...prev, ...rest }));
-
-        // Handle UI transitions
-        if (phase === 'pickup') {
-          startPassengerInteraction();
-        } else {
-          completeRide();
-        }
-      } catch (err) {
-        console.error('Failed to process driving choice:', err);
-      }
-    },
-    [setGameState, endShift]
-  );
-
-  const startPassengerInteraction = useCallback(() => {
-    const passenger = gameState.currentPassenger;
-    if (!passenger) return;
-
-    const dialogue =
-      gameState.pendingRouteDialogue ||
-      (passenger.dialogue && passenger.dialogue.length > 0
-        ? passenger.dialogue[Math.floor(Math.random() * passenger.dialogue.length)]
-        : "...");
-
-    setGameState(prev => ({
-      ...prev,
-      gamePhase: GAME_PHASES.INTERACTION,
-      currentDialogue: {
-        text: dialogue,
-        speaker: 'passenger',
-        timestamp: Date.now(),
-        type: 'normal',
-      },
-      pendingRouteDialogue: null,
-    }));
-  }, [gameState.currentPassenger, gameState.pendingRouteDialogue, setGameState]);
-
-  const continueToDestination = useCallback(() => {
-    startDriving('destination');
-  }, [startDriving]);
-
-  /**
-   * Complete ride — backend handles fare calculation, item drops,
-   * backstory unlocks, reputation updates, and almanac tracking.
-   */
   const completeRide = useCallback(async () => {
     const passenger = gameState.currentPassenger;
     if (!passenger) return;
 
     try {
       const backendState = await gameApi.completeRide(true);
-      const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & { currentScreen?: string };
+      const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
+        currentScreen?: string;
+      };
       void _ignored;
       setGameState(prev => ({ ...prev, ...rest }));
     } catch (err) {
       console.error('Failed to complete ride:', err);
-      // Fallback: simple local completion
       setGameState(prev => ({
         ...prev,
         earnings: prev.earnings + (passenger.fare || 10),
@@ -146,9 +70,57 @@ export const useGameActions = () => {
     }
   }, [gameState.currentPassenger, setGameState]);
 
-  /**
-   * Use an item — sends interaction to backend for effect processing.
-   */
+  const handleDrivingChoice = useCallback(
+    async (choice: string, phase: string) => {
+      try {
+        const backendState = await gameApi.drivingChoice(choice, phase);
+
+        if (backendState.gamePhase === 'gameOver') {
+          const reason = backendState.gameOverReason || 'Something went wrong during the drive...';
+          endShift(false, reason);
+          return;
+        }
+
+        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
+          currentScreen?: string;
+        };
+        void _ignored;
+        setGameState(prev => ({ ...prev, ...rest }));
+      } catch (err) {
+        console.error('Failed to process driving choice:', err);
+      }
+    },
+    [endShift, setGameState]
+  );
+
+  const handleCabAction = useCallback(
+    async (action: string) => {
+      try {
+        const backendState = await gameApi.interaction(action);
+
+        if (backendState.gamePhase === 'gameOver') {
+          const reason = backendState.gameOverReason || 'Something went wrong during the ride...';
+          endShift(false, reason);
+          return;
+        }
+
+        if (backendState.gamePhase === 'dropOff') {
+          await completeRide();
+          return;
+        }
+
+        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
+          currentScreen?: string;
+        };
+        void _ignored;
+        setGameState(prev => ({ ...prev, ...rest }));
+      } catch (err) {
+        console.error('Failed to process interaction:', err);
+      }
+    },
+    [completeRide, endShift, setGameState]
+  );
+
   const useItem = useCallback(
     async (itemId: string) => {
       const item = gameState.inventory.find(i => i.id === itemId);
@@ -156,7 +128,9 @@ export const useGameActions = () => {
 
       try {
         const backendState = await gameApi.interaction(`use_item_${itemId}`);
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & { currentScreen?: string };
+        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
+          currentScreen?: string;
+        };
         void _ignored;
         setGameState(prev => ({ ...prev, ...rest }));
       } catch (err) {
@@ -166,9 +140,6 @@ export const useGameActions = () => {
     [gameState.inventory, setGameState]
   );
 
-  /**
-   * Trade an item with a passenger — sends trade action to backend.
-   */
   const tradeItem = useCallback(
     async (itemId: string, passenger: Passenger) => {
       const item = gameState.inventory.find(i => i.id === itemId);
@@ -176,7 +147,9 @@ export const useGameActions = () => {
 
       try {
         const backendState = await gameApi.interaction(`trade_item_${itemId}_${passenger.id}`);
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & { currentScreen?: string };
+        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
+          currentScreen?: string;
+        };
         void _ignored;
         setGameState(prev => ({ ...prev, ...rest }));
       } catch (err) {
@@ -187,63 +160,56 @@ export const useGameActions = () => {
   );
 
   const processItemEffects = useCallback(() => {
-    // Item effects are now processed by the backend during each game action
-    // This is kept as a no-op for compatibility
+    // No-op. Backend applies item effects during actions.
   }, []);
 
   const refuelFull = useCallback(() => {
-    const fuelNeeded = 100 - gameState.fuel;
-    const cost = Math.ceil(fuelNeeded * GAME_BALANCE.FUEL_COSTS.PER_PERCENT);
-
-    if (gameState.earnings >= cost && gameState.fuel < 100) {
-      setGameState(prev => ({
-        ...prev,
-        fuel: 100,
-        earnings: prev.earnings - cost,
-      }));
-    }
-  }, [gameState.fuel, gameState.earnings, setGameState]);
+    void (async () => {
+      try {
+        const backendState = await gameApi.refuel('full');
+        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
+          currentScreen?: string;
+        };
+        void _ignored;
+        setGameState(prev => ({ ...prev, ...rest }));
+      } catch (err) {
+        console.error('Failed to refuel fully:', err);
+      }
+    })();
+  }, [setGameState]);
 
   const refuelPartial = useCallback(() => {
-    const fuelToAdd = Math.min(25, 100 - gameState.fuel);
-    const cost = Math.ceil(fuelToAdd * GAME_BALANCE.FUEL_COSTS.PER_PERCENT);
-
-    if (gameState.earnings >= cost && gameState.fuel < 75) {
-      setGameState(prev => ({
-        ...prev,
-        fuel: prev.fuel + fuelToAdd,
-        earnings: prev.earnings - cost,
-      }));
-    }
-  }, [gameState.fuel, gameState.earnings, setGameState]);
+    void (async () => {
+      try {
+        const backendState = await gameApi.refuel('partial');
+        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
+          currentScreen?: string;
+        };
+        void _ignored;
+        setGameState(prev => ({ ...prev, ...rest }));
+      } catch (err) {
+        console.error('Failed to refuel partially:', err);
+      }
+    })();
+  }, [setGameState]);
 
   const continueFromDropOff = useCallback(() => {
-    setGameState(prev => {
-      return {
-        ...prev,
-        gamePhase: GAME_PHASES.WAITING,
-        currentPassenger: null,
-        lastRideCompletion: undefined,
-      };
-    });
-
-    setTimeout(
-      () => {
-        if (gameState.timeRemaining <= 60 || gameState.fuel <= 5) {
-          endShift(true);
-        } else {
-          showRideRequest();
-        }
-      },
-      2500 + Math.random() * 2500
-    );
-  }, [gameState, setGameState, endShift, showRideRequest]);
+    setGameState(prev => ({
+      ...prev,
+      gamePhase: GAME_PHASES.WAITING,
+      currentPassenger: null,
+      lastRideCompletion: undefined,
+      cabState: { windowsOpen: false, radioOn: false },
+      rideProgress: null,
+      pendingTipOffer: null,
+    }));
+  }, [setGameState]);
 
   return {
     acceptRide,
     declineRide,
     handleDrivingChoice,
-    continueToDestination,
+    handleCabAction,
     useItem,
     tradeItem,
     processItemEffects,

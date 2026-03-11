@@ -6,9 +6,11 @@ namespace App\Actions;
 use App\Services\ReputationService;
 use App\Services\ItemService;
 use App\Services\PassengerService;
+use App\External\PlayerStatsRepository;
 use App\External\BackstoryRepository;
 use App\External\AlmanacRepository;
 use App\External\GameSaveRepository;
+use App\Services\GameSessionLogger;
 
 final class CompleteRideAction
 {
@@ -16,9 +18,11 @@ final class CompleteRideAction
         private readonly ReputationService $reputationService,
         private readonly ItemService $itemService,
         private readonly PassengerService $passengerService,
+        private readonly PlayerStatsRepository $statsRepo,
         private readonly BackstoryRepository $backstoryRepo,
         private readonly AlmanacRepository $almanacRepo,
-        private readonly GameSaveRepository $saveRepo
+        private readonly GameSaveRepository $saveRepo,
+        private readonly GameSessionLogger $logger
     ) {}
 
     /**
@@ -93,6 +97,37 @@ final class CompleteRideAction
 
         // Update almanac
         $this->almanacRepo->updateEntry($userId, $passengerId, 1);
+        $stats = $this->statsRepo->findByUserId($userId);
+        if ($stats !== null) {
+            $encountered = $stats->passengers_encountered;
+            if (!in_array($passengerId, $encountered, true)) {
+                $encountered[] = $passengerId;
+            }
+
+            $almanacProgress = $stats->almanac_progress;
+            $existingEntry = is_array($almanacProgress[$passengerId] ?? null) ? $almanacProgress[$passengerId] : [];
+            $almanacProgress[$passengerId] = [
+                'passengerId' => $passengerId,
+                'encountered' => true,
+                'knowledgeLevel' => max(1, (int) ($existingEntry['knowledgeLevel'] ?? 0)),
+                'unlockedSecrets' => is_array($existingEntry['unlockedSecrets'] ?? null) ? $existingEntry['unlockedSecrets'] : [],
+            ];
+
+            $updates = [
+                'passengers_encountered' => array_values(array_unique($encountered)),
+                'almanac_progress' => $almanacProgress,
+            ];
+
+            if ($backstoryUnlocked !== null) {
+                $backstoriesUnlocked = $stats->backstories_unlocked;
+                if (!in_array($passengerId, $backstoriesUnlocked, true)) {
+                    $backstoriesUnlocked[] = $passengerId;
+                }
+                $updates['backstories_unlocked'] = array_values(array_unique($backstoriesUnlocked));
+            }
+
+            $this->statsRepo->updateStats($userId, $updates);
+        }
 
         // Record completed ride
         $gameState['completedRides'][] = [
@@ -130,6 +165,11 @@ final class CompleteRideAction
         }
 
         $this->saveRepo->save($userId, $gameState);
+        $this->logger->log($userId, $gameState, 'ride_completed', [
+            'passengerId' => $passengerId,
+            'fareEarned' => $fare,
+            'itemsReceived' => count($itemsReceived),
+        ]);
         return $gameState;
     }
 }

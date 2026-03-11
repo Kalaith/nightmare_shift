@@ -144,6 +144,22 @@ INSERT INTO `shift_rules` (`id`, `title`, `description`, `difficulty`, `type`, `
  '[{"type":"money","value":25,"description":"Passenger tipped big for getting them to safety in time.","probability":0.7},{"type":"reputation","value":10,"description":"Earned trust among nocturnal regulars for decisive driving.","probability":0.65}]',
  -30, 12, 18, 'Dispatch routes exist for a reason. The shadows were waiting off-grid.', 5);
 
+UPDATE `passengers`
+SET `tip_profile` = '{"chanceByRoute":{"normal":35,"shortcut":25,"scenic":60,"police":15},"amountRange":{"min":2,"max":5},"currencyText":"a few careful bills","requiredActions":["stay_silent","keep_eyes_forward","focus_on_driving"]}'
+WHERE `id` = 1;
+
+UPDATE `passengers`
+SET `tip_profile` = '{"chanceByRoute":{"normal":20,"shortcut":15,"scenic":10,"police":5},"amountRange":{"min":4,"max":7},"currencyText":"a velvet-folded note","requiredActions":["speak_first","play_music","eye_contact"]}'
+WHERE `id` = 2;
+
+UPDATE `passengers`
+SET `tip_profile` = '{"chanceByRoute":{"normal":15,"shortcut":45,"scenic":20,"police":5},"amountRange":{"min":5,"max":9},"currencyText":"a tightly folded stack of old cash","requiredActions":["open_window","speak_first","take_shortcut"]}'
+WHERE `id` = 3;
+
+UPDATE `passengers`
+SET `tip_profile` = '{"chanceByRoute":{"normal":25,"shortcut":20,"scenic":30,"police":10},"amountRange":{"min":1,"max":3},"currencyText":"a crumpled note from a tiny fist","requiredActions":["stay_silent","focus_on_driving","keep_eyes_forward"]}'
+WHERE `id` = 6;
+
 -- Conditional rules
 INSERT INTO `shift_rules` (`id`, `title`, `description`, `difficulty`, `type`, `visible`, `sort_order`) VALUES
 (6, 'Midnight Curfew', 'No pickups after midnight from cemetery locations', 'medium', 'conditional', 1, 6),

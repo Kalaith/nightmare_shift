@@ -29,3 +29,6 @@ mcp
 Thumbs.db
 backend/.env.preview
 frontend/.env.preview
+error_log
+backend/.env.production
+frontend/.env.production

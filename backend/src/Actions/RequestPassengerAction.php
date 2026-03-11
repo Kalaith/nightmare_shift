@@ -6,13 +6,15 @@ namespace App\Actions;
 use App\Services\PassengerService;
 use App\Services\WeatherService;
 use App\External\GameSaveRepository;
+use App\Services\GameSessionLogger;
 
 final class RequestPassengerAction
 {
     public function __construct(
         private readonly PassengerService $passengerService,
         private readonly WeatherService $weatherService,
-        private readonly GameSaveRepository $saveRepo
+        private readonly GameSaveRepository $saveRepo,
+        private readonly GameSessionLogger $logger
     ) {}
 
     /**
@@ -47,6 +49,14 @@ final class RequestPassengerAction
         $gameState['currentPassenger'] = $passenger;
         $gameState['gamePhase'] = 'rideRequest';
         $gameState['usedPassengers'][] = $passenger['id'];
+        $gameState['currentRide'] = null;
+        $gameState['rideProgress'] = null;
+        $gameState['currentDialogue'] = null;
+        $gameState['cabState'] = [
+            'windowsOpen' => false,
+            'radioOn' => false,
+        ];
+        $gameState['pendingTipOffer'] = null;
 
         // Update weather
         $gameState['currentWeather'] = $this->weatherService->updateWeather(
@@ -57,6 +67,10 @@ final class RequestPassengerAction
 
         // Save
         $this->saveRepo->save($userId, $gameState);
+        $this->logger->log($userId, $gameState, 'passenger_requested', [
+            'passengerId' => $passenger['id'] ?? null,
+            'passengerName' => $passenger['name'] ?? null,
+        ]);
 
         return $gameState;
     }

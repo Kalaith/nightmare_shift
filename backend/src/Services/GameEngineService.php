@@ -160,6 +160,54 @@ final class GameEngineService
     }
 
     /**
+     * @param array<int, array<string, mixed>> $consequences
+     * @return array{applied: array<int, array<string, mixed>>, gameState: array<string, mixed>}
+     */
+    public function applyConsequences(array $gameState, array $consequences): array
+    {
+        $applied = [];
+
+        foreach ($consequences as $consequence) {
+            $probability = (float) ($consequence['probability'] ?? 1.0);
+            if ((random_int(0, 100) / 100) > $probability) {
+                continue;
+            }
+
+            $type = (string) ($consequence['type'] ?? '');
+            $value = (float) ($consequence['value'] ?? 0);
+            $applied[] = $consequence;
+
+            switch ($type) {
+                case 'fuel':
+                    $gameState['fuel'] = max(0, (float) ($gameState['fuel'] ?? 0) + $value);
+                    break;
+                case 'time':
+                    $gameState['timeRemaining'] = max(0, (float) ($gameState['timeRemaining'] ?? 0) + $value);
+                    break;
+                case 'money':
+                    $gameState['earnings'] = max(0, (float) ($gameState['earnings'] ?? 0) + $value);
+                    break;
+                case 'reputation':
+                    $gameState['ruleConfidence'] = max(
+                        0.0,
+                        min(1.0, (float) ($gameState['ruleConfidence'] ?? 1.0) + ($value / 100))
+                    );
+                    break;
+                case 'death':
+                    $gameState['gamePhase'] = 'gameOver';
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return [
+            'applied' => $applied,
+            'gameState' => $gameState,
+        ];
+    }
+
+    /**
      * Check guideline violation with exception handling.
      */
     public function checkGuidelineViolation(array $gameState, string $action): ?array

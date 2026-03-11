@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Services\RouteService;
-use App\Services\ReputationService;
-use App\Services\WeatherService;
 use App\External\GameSaveRepository;
+use App\Services\GameEngineService;
+use App\Services\GameSessionLogger;
+use App\Services\ReputationService;
+use App\Services\RouteService;
+use App\Services\WeatherService;
 
 final class HandleDrivingChoiceAction
 {
@@ -14,7 +16,9 @@ final class HandleDrivingChoiceAction
         private readonly RouteService $routeService,
         private readonly ReputationService $reputationService,
         private readonly WeatherService $weatherService,
-        private readonly GameSaveRepository $saveRepo
+        private readonly GameEngineService $gameEngine,
+        private readonly GameSaveRepository $saveRepo,
+        private readonly GameSessionLogger $logger
     ) {}
 
     /**
@@ -36,7 +40,6 @@ final class HandleDrivingChoiceAction
             throw new \RuntimeException('No current passenger');
         }
 
-        // Calculate route costs
         $weather = $gameState['currentWeather'] ?? [];
         $timeOfDay = $gameState['timeOfDay'] ?? [];
         $hazards = $gameState['environmentalHazards'] ?? [];
@@ -52,11 +55,16 @@ final class HandleDrivingChoiceAction
             $passenger
         );
 
-        // Apply costs
+        $gameState['rideProgress'] = $gameState['rideProgress'] ?? [
+            'stepIndex' => 0,
+            'sequence' => ['route', 'action', 'route', 'action', 'arrive'],
+            'routeChoicesMade' => 0,
+            'actionChoicesMade' => 0,
+        ];
+
         $gameState['fuel'] = max(0, ($gameState['fuel'] ?? 0) - $costs['fuelCost']);
         $gameState['timeRemaining'] = max(0, ($gameState['timeRemaining'] ?? 0) - $costs['timeCost']);
 
-        // Record route choice
         $gameState['routeHistory'][] = [
             'choice' => $routeType,
             'phase' => $phase,
@@ -67,34 +75,83 @@ final class HandleDrivingChoiceAction
             'timestamp' => time(),
         ];
 
-        // Track route mastery
         if (!isset($gameState['routeMastery'])) {
             $gameState['routeMastery'] = [];
         }
         $gameState['routeMastery'][$routeType] = ($gameState['routeMastery'][$routeType] ?? 0) + 1;
 
-        // Update ride info
-        if ($gameState['currentRide'] === null) {
+        if (($gameState['currentRide'] ?? null) === null) {
             $gameState['currentRide'] = [
                 'passenger' => $passenger,
                 'pickupLocation' => ['name' => $passenger['pickup'] ?? 'Unknown'],
                 'destinationLocation' => ['name' => $passenger['destination'] ?? 'Unknown'],
                 'startTime' => time(),
-                'estimatedDuration' => (int) $costs['timeCost'],
+                'estimatedDuration' => (int) ($costs['timeCost'] * 2),
                 'actualFare' => (float) ($passenger['fare'] ?? 10),
                 'routeType' => $routeType,
             ];
-        }
-
-        // Update phase
-        if ($phase === 'pickup') {
-            $gameState['currentDrivingPhase'] = 'destination';
-            $gameState['gamePhase'] = 'interaction';
         } else {
-            $gameState['gamePhase'] = 'dropOff';
+            $gameState['currentRide']['routeType'] = $routeType;
         }
 
-        // Check for game over conditions
+        $result = [
+            'choice' => $routeType,
+            'violation' => false,
+            'violatedRule' => null,
+            'consequences' => [],
+            'message' => null,
+        ];
+
+        if ($routeType === 'shortcut') {
+            $violatedRule = $this->gameEngine->checkRuleViolation($gameState, 'take_shortcut');
+            if ($violatedRule !== null) {
+                $result['violation'] = true;
+                $result['violatedRule'] = $violatedRule;
+                $result['message'] = $violatedRule['violationMessage'] ?? 'Rule violated!';
+                $gameState['rulesViolated'] = ($gameState['rulesViolated'] ?? 0) + 1;
+
+                $applied = $this->gameEngine->applyConsequences(
+                    $gameState,
+                    $violatedRule['breakConsequences'] ?? []
+                );
+                $gameState = $applied['gameState'];
+                $result['consequences'] = $applied['applied'];
+
+                foreach ($result['consequences'] as $consequence) {
+                    if (($consequence['type'] ?? '') === 'death') {
+                        $gameState['gameOverReason'] = $result['message'];
+                        break;
+                    }
+                }
+            }
+        }
+
+        $gameState['rideProgress']['routeChoicesMade'] = (int) ($gameState['rideProgress']['routeChoicesMade'] ?? 0) + 1;
+        $gameState['rideProgress']['stepIndex'] = min(4, (int) ($gameState['rideProgress']['stepIndex'] ?? 0) + 1);
+        $gameState['currentDrivingPhase'] = $phase === 'pickup' ? 'destination' : $phase;
+        $gameState['gamePhase'] = 'interaction';
+        $gameState['pendingTipOffer'] = $this->maybeCreateTipOffer($passenger, $routeType, $gameState);
+
+        $dialoguePool = $passenger['dialogue'] ?? [];
+        $fallbackDialogue = empty($dialoguePool)
+            ? 'The road stretches on in uneasy silence.'
+            : $dialoguePool[array_rand($dialoguePool)];
+
+        if ($gameState['pendingTipOffer'] !== null && !$result['violation']) {
+            $fallbackDialogue = sprintf(
+                'The passenger slides %s forward and offers a tip if you will take it.',
+                $gameState['pendingTipOffer']['currency']
+            );
+        }
+
+        $gameState['currentDialogue'] = [
+            'text' => $result['message'] ?? $fallbackDialogue,
+            'speaker' => $result['violation'] ? 'system' : 'passenger',
+            'timestamp' => time(),
+            'type' => $result['violation'] ? 'rule_related' : 'normal',
+        ];
+        $gameState['routeChoiceResult'] = $result;
+
         if (($gameState['fuel'] ?? 0) <= 0) {
             $gameState['gamePhase'] = 'gameOver';
             $gameState['gameOverReason'] = 'Out of fuel';
@@ -104,13 +161,54 @@ final class HandleDrivingChoiceAction
             $gameState['gameOverReason'] = 'Time expired';
         }
 
-        // Risk check
-        if ((random_int(0, 100) / 100) < $costs['riskLevel']) {
-            // Risk event occurred — minor penalty
+        if (($gameState['gamePhase'] ?? null) !== 'gameOver' && (random_int(0, 100) / 100) < $costs['riskLevel']) {
             $gameState['fuel'] = max(0, ($gameState['fuel'] ?? 0) - 5);
         }
 
         $this->saveRepo->save($userId, $gameState);
+        $this->logger->log($userId, $gameState, 'route_selected', [
+            'routeType' => $routeType,
+            'phase' => $phase,
+            'fuelCost' => $costs['fuelCost'],
+            'timeCost' => $costs['timeCost'],
+            'violation' => $result['violation'],
+        ]);
         return $gameState;
+    }
+
+    private function maybeCreateTipOffer(array $passenger, string $routeType, array $gameState): ?array
+    {
+        if (($gameState['pendingTipOffer'] ?? null) !== null) {
+            return $gameState['pendingTipOffer'];
+        }
+
+        $tipProfile = $passenger['tipProfile'] ?? null;
+        if (!is_array($tipProfile)) {
+            return null;
+        }
+
+        $requiredActions = $tipProfile['requiredActions'] ?? [];
+        $lastInteractionAction = $gameState['interactionResult']['action'] ?? null;
+        if (!empty($requiredActions) && !in_array($lastInteractionAction, $requiredActions, true)) {
+            return null;
+        }
+
+        $chanceByRoute = $tipProfile['chanceByRoute'] ?? [];
+        $chance = (int) ($chanceByRoute[$routeType] ?? 0);
+        if (random_int(1, 100) > $chance) {
+            return null;
+        }
+
+        $amountRange = $tipProfile['amountRange'] ?? ['min' => 1, 'max' => 1];
+        $min = max(1, (int) ($amountRange['min'] ?? 1));
+        $max = max($min, (int) ($amountRange['max'] ?? $min));
+        $amount = random_int($min, $max);
+        $currencyText = (string) ($tipProfile['currencyText'] ?? 'an offered tip');
+
+        return [
+            'offerId' => bin2hex(random_bytes(8)),
+            'amount' => $amount,
+            'currency' => $currencyText,
+        ];
     }
 }

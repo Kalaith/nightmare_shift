@@ -45,6 +45,12 @@ const getInitialGameState = (): Omit<GameState, 'currentScreen'> => ({
   detectedTells: [],
   ruleConfidence: 0.5,
   currentPassengerNeedState: null,
+  cabState: {
+    windowsOpen: false,
+    radioOn: false,
+  },
+  rideProgress: null,
+  pendingTipOffer: null,
 });
 
 export const useGameState = (playerStats: PlayerStats) => {
@@ -139,8 +145,6 @@ export const useGameState = (playerStats: PlayerStats) => {
       const backendState = await gameApi.startShift();
       applyBackendState(backendState);
       showScreen(SCREENS.GAME);
-      // Request first passenger after a short delay
-      setTimeout(() => showRideRequest(), 2000 + Math.random() * 3000);
     } catch (err) {
       console.error('Failed to start shift:', err);
     } finally {

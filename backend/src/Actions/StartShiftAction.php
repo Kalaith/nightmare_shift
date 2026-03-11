@@ -8,6 +8,7 @@ use App\Services\WeatherService;
 use App\External\GameSaveRepository;
 use App\External\PlayerStatsRepository;
 use App\Data\Constants;
+use App\Services\GameSessionLogger;
 
 final class StartShiftAction
 {
@@ -15,7 +16,8 @@ final class StartShiftAction
         private readonly GameEngineService $gameEngine,
         private readonly WeatherService $weatherService,
         private readonly GameSaveRepository $saveRepo,
-        private readonly PlayerStatsRepository $statsRepo
+        private readonly PlayerStatsRepository $statsRepo,
+        private readonly GameSessionLogger $logger
     ) {}
 
     /**
@@ -70,6 +72,13 @@ final class StartShiftAction
             'ruleConfidence' => 1.0,
             'completedRides' => [],
             'passengerBackstories' => [],
+            'cabState' => [
+                'windowsOpen' => false,
+                'radioOn' => false,
+            ],
+            'rideProgress' => null,
+            'pendingTipOffer' => null,
+            'sessionId' => uniqid('shift_', true),
         ];
 
         // Update stats
@@ -81,6 +90,9 @@ final class StartShiftAction
 
         // Save game state
         $this->saveRepo->save($userId, $gameState);
+        $this->logger->log($userId, $gameState, 'shift_started', [
+            'difficultyLevel' => $engineResult['difficultyLevel'],
+        ]);
 
         return $gameState;
     }

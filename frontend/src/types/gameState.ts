@@ -45,6 +45,11 @@ export interface GameState {
   sessionStartTime: number;
   currentDialogue?: Dialogue;
   currentDrivingPhase?: 'pickup' | 'destination';
+  interactionResult?: InteractionResult;
+  routeChoiceResult?: RouteChoiceResult;
+  cabState?: CabState;
+  rideProgress?: RideProgress | null;
+  pendingTipOffer?: TipOffer | null;
   currentLocation?: Location;
   lastRideCompletion?: {
     passenger: Passenger;
@@ -104,6 +109,39 @@ export interface Dialogue {
   speaker: 'passenger' | 'driver' | 'system';
   timestamp: number;
   type: 'normal' | 'supernatural' | 'rule_related' | 'backstory';
+}
+
+export interface CabState {
+  windowsOpen: boolean;
+  radioOn: boolean;
+}
+
+export interface RideProgress {
+  stepIndex: number;
+  sequence: string[];
+  routeChoicesMade: number;
+  actionChoicesMade: number;
+}
+
+export interface InteractionResult {
+  action: string;
+  violation: boolean;
+  violatedRule: Rule | null;
+  consequences: Array<Record<string, unknown>>;
+  message: string | null;
+}
+
+export interface RouteChoiceResult {
+  choice: string;
+  violation: boolean;
+  violatedRule: Rule | null;
+  consequences: Array<Record<string, unknown>>;
+  message: string | null;
+}
+
+export interface TipOffer {
+  amount: number;
+  currency: string;
 }
 
 export interface GameEngineResult {

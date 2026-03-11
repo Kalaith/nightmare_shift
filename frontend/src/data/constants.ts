@@ -47,6 +47,7 @@ export const SCREENS = {
   SUCCESS: 'success',
   SKILL_TREE: 'skillTree',
   ALMANAC: 'almanac',
+  ADMIN: 'admin',
 } as const;
 
 export const GAME_PHASES = {

@@ -8,6 +8,9 @@ use PDO;
 
 final class UserRepository
 {
+    private const GUEST_WH_USER_ID_MIN = 4000000000;
+    private const GUEST_WH_USER_ID_MAX = 4294967294;
+
     public function __construct(
         private readonly PDO $db
     ) {}
@@ -69,6 +72,51 @@ final class UserRepository
         $user->is_active = true;
 
         return $user;
+    }
+
+    public function createGuestUser(string $username): User
+    {
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $guestWhUserId = random_int(self::GUEST_WH_USER_ID_MIN, self::GUEST_WH_USER_ID_MAX);
+
+            try {
+                $stmt = $this->db->prepare(
+                    'INSERT INTO users (wh_user_id, email, username, is_active, created_at, updated_at, last_seen_at)
+                     VALUES (:wh_user_id, :email, :username, 1, NOW(), NOW(), NOW())'
+                );
+                $stmt->execute([
+                    'wh_user_id' => $guestWhUserId,
+                    'email' => '',
+                    'username' => $username,
+                ]);
+
+                $user = new User();
+                $user->id = (int) $this->db->lastInsertId();
+                $user->wh_user_id = $guestWhUserId;
+                $user->email = '';
+                $user->username = $username;
+                $user->is_active = true;
+
+                return $user;
+            } catch (\PDOException $exception) {
+                if ((int) $exception->getCode() !== 23000) {
+                    throw $exception;
+                }
+            }
+        }
+
+        throw new \RuntimeException('Unable to allocate guest user identifier');
+    }
+
+    public function deleteById(int $id): void
+    {
+        $stmt = $this->db->prepare('DELETE FROM users WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+    }
+
+    public function isGuestWhUserId(int $whUserId): bool
+    {
+        return $whUserId >= self::GUEST_WH_USER_ID_MIN;
     }
 
     /**

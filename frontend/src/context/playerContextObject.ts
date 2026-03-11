@@ -9,6 +9,9 @@ export interface PlayerContextType {
   isLoading: boolean;
   authError: string | null;
   refreshSession: () => Promise<void>;
+  refreshStats: () => Promise<void>;
+  continueAsGuest: () => Promise<void>;
+  getLinkAccountUrl: () => string;
 
   // Player stats
   playerStats: PlayerStats;
@@ -32,4 +35,3 @@ export interface PlayerContextType {
 }
 
 export const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
-

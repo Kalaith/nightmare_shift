@@ -7,12 +7,14 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Actions\StartShiftAction;
 use App\Actions\RequestPassengerAction;
+use App\Actions\DeclineRideAction;
 use App\Actions\HandleDrivingChoiceAction;
 use App\Actions\HandleInteractionAction;
 use App\Actions\CompleteRideAction;
 use App\Actions\EndShiftAction;
 use App\Actions\SaveGameAction;
 use App\Actions\LoadGameAction;
+use App\Actions\RefuelAction;
 use App\Services\RouteService;
 use App\Services\PassengerSanitizer;
 use App\Repositories\RuleRepository;
@@ -26,12 +28,14 @@ final class GameController
     public function __construct(
         private readonly StartShiftAction $startShiftAction,
         private readonly RequestPassengerAction $requestPassengerAction,
+        private readonly DeclineRideAction $declineRideAction,
         private readonly HandleDrivingChoiceAction $handleDrivingChoiceAction,
         private readonly HandleInteractionAction $handleInteractionAction,
         private readonly CompleteRideAction $completeRideAction,
         private readonly EndShiftAction $endShiftAction,
         private readonly SaveGameAction $saveGameAction,
         private readonly LoadGameAction $loadGameAction,
+        private readonly RefuelAction $refuelAction,
         private readonly RouteService $routeService,
         private readonly RuleRepository $ruleRepository
     ) {}
@@ -162,6 +166,34 @@ final class GameController
             } else {
                 $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Game loaded');
             }
+        } catch (\Exception $e) {
+            $response->error($e->getMessage(), 400);
+        }
+    }
+
+    public function declineRide(Request $request, Response $response): void
+    {
+        $userId = $this->getUserId($request, $response);
+        if ($userId === null) return;
+
+        try {
+            $gameState = $this->declineRideAction->execute($userId);
+            $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Ride declined');
+        } catch (\Exception $e) {
+            $response->error($e->getMessage(), 400);
+        }
+    }
+
+    public function refuel(Request $request, Response $response): void
+    {
+        $userId = $this->getUserId($request, $response);
+        if ($userId === null) return;
+
+        $mode = (string) (($request->getParsedBody()['mode'] ?? 'partial'));
+
+        try {
+            $gameState = $this->refuelAction->execute($userId, $mode);
+            $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Refuel complete');
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 400);
         }
