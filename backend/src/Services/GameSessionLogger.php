@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -7,7 +8,9 @@ use App\External\GameSessionLogRepository;
 
 final class GameSessionLogger
 {
-    public function __construct(private readonly GameSessionLogRepository $logRepo) {}
+    public function __construct(private readonly GameSessionLogRepository $logRepo)
+    {
+    }
 
     /**
      * @param array<string, mixed> $gameState

@@ -17,7 +17,7 @@ import AdminSessionsScreen from './screens/AdminSessionsScreen/AdminSessionsScre
 import ErrorBoundary from './ErrorBoundary';
 
 const ScreenRouter: React.FC = () => {
-  const { gameState, startGame, loadGame, startShift, resetGame } = useGameContext();
+  const { gameState, startGame, loadGame, startShift, resetGame, hasSavedGame } = useGameContext();
 
   const {
     playerStats,
@@ -56,6 +56,7 @@ const ScreenRouter: React.FC = () => {
           authLoading={authLoading}
           onContinueAsGuest={continueAsGuest}
           linkAccountUrl={getLinkAccountUrl()}
+          hasSavedGame={hasSavedGame}
           onStartGame={startGame}
           onLoadGame={loadGame}
           onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}
@@ -75,7 +76,7 @@ const ScreenRouter: React.FC = () => {
       );
 
     case SCREENS.BRIEFING:
-      return <BriefingScreen gameState={gameState} onStartShift={startShift} />;
+      return <BriefingScreen onStartShift={startShift} />;
 
     case SCREENS.GAME:
       return <GameScreen />;
@@ -139,6 +140,7 @@ const ScreenRouter: React.FC = () => {
           authLoading={authLoading}
           onContinueAsGuest={continueAsGuest}
           linkAccountUrl={getLinkAccountUrl()}
+          hasSavedGame={hasSavedGame}
           onStartGame={startGame}
           onLoadGame={loadGame}
           onShowLeaderboard={() => showScreen(SCREENS.LEADERBOARD)}

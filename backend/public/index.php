@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 /**
  * Nightmare Shift Backend — Entry Point
@@ -7,6 +6,8 @@ declare(strict_types=1);
  * This file is intentionally thin. All business logic, dependency wiring,
  * and database access live in the classes under App\.
  */
+
+declare(strict_types=1);
 
 // ─── Autoloading ───────────────────────────────────────────────────
 $centralAutoload = __DIR__ . '/../../../vendor/autoload.php';
@@ -48,7 +49,7 @@ if (!file_exists($dotenvPath . '/.env')) {
 $dotenv = Dotenv::createImmutable($dotenvPath);
 $dotenv->load();
 
-$requiredEnvVars = ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET'];
+$requiredEnvVars = ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET', 'WEB_HATCHERY_LOGIN_URL'];
 foreach ($requiredEnvVars as $var) {
     if (!isset($_ENV[$var])) {
         throw new \RuntimeException("Missing required environment variable: {$var}");

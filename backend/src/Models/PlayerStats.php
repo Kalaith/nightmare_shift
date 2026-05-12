@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -18,26 +19,25 @@ final class PlayerStats
     public int $longest_shift_minutes = 0;
     public float $bank_balance = 0.0;
     public int $lore_fragments = 0;
-    /** @var string[] */
+/** @var string[] */
     public array $unlocked_skills = [];
-    /** @var int[] */
+/** @var int[] */
     public array $passengers_encountered = [];
-    /** @var int[] */
+/** @var int[] */
     public array $backstories_unlocked = [];
-    /** @var int[] */
+/** @var int[] */
     public array $legendary_passengers = [];
-    /** @var string[] */
+/** @var string[] */
     public array $achievements_unlocked = [];
-    /** @var array<int, mixed> */
+/** @var array<int, mixed> */
     public array $rules_violated_history = [];
-    /** @var array<int, array<string, mixed>> */
+/** @var array<int, array<string, mixed>> */
     public array $almanac_progress = [];
     public ?string $first_play_date = null;
     public ?string $last_play_date = null;
     public string $created_at = '';
     public string $updated_at = '';
-
-    /**
+/**
      * @return array<string, mixed>
      */
     public function toArray(): array

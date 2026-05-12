@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Core;
@@ -34,7 +35,6 @@ final class Response
             'success' => false,
             'error' => $message,
         ];
-
         if ($details !== null) {
             $payload['details'] = $details;
         }
@@ -48,7 +48,6 @@ final class Response
     public function unauthorized(string $message = 'Authentication required'): void
     {
         $loginUrl = $_ENV['WEB_HATCHERY_LOGIN_URL'] ?? '';
-
         $this->json([
             'success' => false,
             'error' => $message,
@@ -65,12 +64,10 @@ final class Response
     public function json(mixed $data, int $code = 200): void
     {
         http_response_code($code);
-
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Headers: Content-Type, Accept, Origin, Authorization');
         header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-
         echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 }

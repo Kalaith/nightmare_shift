@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -17,7 +18,8 @@ final class HandleInteractionAction
         private readonly ItemService $itemService,
         private readonly GameSaveRepository $saveRepo,
         private readonly GameSessionLogger $logger
-    ) {}
+    ) {
+    }
 
     /**
      * Process a passenger interaction/action.
@@ -123,7 +125,8 @@ final class HandleInteractionAction
                 'routeChoicesMade' => 1,
                 'actionChoicesMade' => 0,
             ];
-            $gameState['rideProgress']['actionChoicesMade'] = (int) ($gameState['rideProgress']['actionChoicesMade'] ?? 0) + 1;
+            $gameState['rideProgress']['actionChoicesMade'] =
+                (int) ($gameState['rideProgress']['actionChoicesMade'] ?? 0) + 1;
             $gameState['rideProgress']['stepIndex'] = min(4, (int) ($gameState['rideProgress']['stepIndex'] ?? 0) + 1);
 
             $hasArrived = (int) ($gameState['rideProgress']['stepIndex'] ?? 0) >= 4;
@@ -160,7 +163,9 @@ final class HandleInteractionAction
             'focus_on_driving' => 'You keep both hands on the wheel and give the road your full attention.',
             'speak_first' => 'You break the silence before the passenger can.',
             'stay_silent' => 'You let the engine and the rain do the talking.',
-            default => $cabState['radioOn'] ? 'The radio hums while the ride continues.' : 'The ride continues in uneasy quiet.',
+            default => $cabState['radioOn']
+                ? 'The radio hums while the ride continues.'
+                : 'The ride continues in uneasy quiet.',
         };
     }
 

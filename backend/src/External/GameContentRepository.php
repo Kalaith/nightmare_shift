@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\External;
@@ -11,7 +12,9 @@ use PDO;
  */
 final class GameContentRepository
 {
-    public function __construct(private readonly PDO $pdo) {}
+    public function __construct(private readonly PDO $pdo)
+    {
+    }
 
     // ─── Locations ──────────────────────────────────────────────────
 
@@ -23,6 +26,7 @@ final class GameContentRepository
         $stmt = $this->pdo->query('SELECT * FROM locations WHERE is_active = 1 ORDER BY name');
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map(function (array $row): array {
+
             return [
                 'name'        => $row['name'],
                 'description' => $row['description'],
@@ -59,7 +63,9 @@ final class GameContentRepository
      */
     public function getPassengersByRarity(string $rarity): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM passengers WHERE rarity = ? AND is_active = 1 ORDER BY sort_order, id');
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM passengers WHERE rarity = ? AND is_active = 1 ORDER BY sort_order, id'
+        );
         $stmt->execute([$rarity]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'hydratePassenger'], $rows);
@@ -86,7 +92,9 @@ final class GameContentRepository
         }
 
         $placeholders = implode(',', array_fill(0, count($excludeIds), '?'));
-        $stmt = $this->pdo->prepare("SELECT * FROM passengers WHERE is_active = 1 AND id NOT IN ($placeholders) ORDER BY sort_order, id");
+        $stmt = $this->pdo->prepare(
+            "SELECT * FROM passengers WHERE is_active = 1 AND id NOT IN ($placeholders) ORDER BY sort_order, id"
+        );
         $stmt->execute($excludeIds);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'hydratePassenger'], $rows);
@@ -111,7 +119,9 @@ final class GameContentRepository
      */
     public function getRulesByType(string $type): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM shift_rules WHERE type = ? AND is_active = 1 ORDER BY sort_order, id');
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM shift_rules WHERE type = ? AND is_active = 1 ORDER BY sort_order, id'
+        );
         $stmt->execute([$type]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'hydrateRule'], $rows);
@@ -124,7 +134,9 @@ final class GameContentRepository
      */
     public function getRulesByDifficulty(string $difficulty): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM shift_rules WHERE difficulty = ? AND is_active = 1 ORDER BY sort_order, id');
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM shift_rules WHERE difficulty = ? AND is_active = 1 ORDER BY sort_order, id'
+        );
         $stmt->execute([$difficulty]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'hydrateRule'], $rows);
@@ -137,7 +149,9 @@ final class GameContentRepository
      */
     public function getVisibleRules(): array
     {
-        $stmt = $this->pdo->query('SELECT * FROM shift_rules WHERE visible = 1 AND is_active = 1 ORDER BY sort_order, id');
+        $stmt = $this->pdo->query(
+            'SELECT * FROM shift_rules WHERE visible = 1 AND is_active = 1 ORDER BY sort_order, id'
+        );
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'hydrateRule'], $rows);
     }
@@ -149,7 +163,9 @@ final class GameContentRepository
      */
     public function getHiddenRules(): array
     {
-        $stmt = $this->pdo->query('SELECT * FROM shift_rules WHERE visible = 0 AND is_active = 1 ORDER BY sort_order, id');
+        $stmt = $this->pdo->query(
+            'SELECT * FROM shift_rules WHERE visible = 0 AND is_active = 1 ORDER BY sort_order, id'
+        );
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'hydrateRule'], $rows);
     }
@@ -202,7 +218,17 @@ final class GameContentRepository
 
     private function hydratePassenger(array $row): array
     {
-        $jsonFields = ['items', 'dialogue', 'relationships', 'tells', 'guideline_exceptions', 'route_preferences', 'state_profile', 'tip_profile', 'rule_modification'];
+        $jsonFields = [
+            'items',
+            'dialogue',
+            'relationships',
+            'tells',
+            'guideline_exceptions',
+            'route_preferences',
+            'state_profile',
+            'tip_profile',
+            'rule_modification',
+        ];
         foreach ($jsonFields as $field) {
             if (isset($row[$field]) && is_string($row[$field])) {
                 $row[$field] = json_decode($row[$field], true);
@@ -239,7 +265,13 @@ final class GameContentRepository
 
     private function hydrateRule(array $row): array
     {
-        $jsonFields = ['exceptions', 'follow_consequences', 'break_consequences', 'exception_rewards', 'conflicts_with'];
+        $jsonFields = [
+            'exceptions',
+            'follow_consequences',
+            'break_consequences',
+            'exception_rewards',
+            'conflicts_with',
+        ];
         foreach ($jsonFields as $field) {
             if (isset($row[$field]) && is_string($row[$field])) {
                 $row[$field] = json_decode($row[$field], true);
@@ -262,9 +294,15 @@ final class GameContentRepository
             'followConsequences' => $row['follow_consequences'],
             'breakConsequences' => $row['break_consequences'],
             'exceptionRewards' => $row['exception_rewards'],
-            'exceptionNeedAdjustment' => isset($row['exception_need_adjustment']) ? (float) $row['exception_need_adjustment'] : null,
-            'followNeedAdjustment' => isset($row['follow_need_adjustment']) ? (float) $row['follow_need_adjustment'] : null,
-            'breakNeedAdjustment' => isset($row['break_need_adjustment']) ? (float) $row['break_need_adjustment'] : null,
+            'exceptionNeedAdjustment' => isset($row['exception_need_adjustment'])
+                ? (float) $row['exception_need_adjustment']
+                : null,
+            'followNeedAdjustment' => isset($row['follow_need_adjustment'])
+                ? (float) $row['follow_need_adjustment']
+                : null,
+            'breakNeedAdjustment' => isset($row['break_need_adjustment'])
+                ? (float) $row['break_need_adjustment']
+                : null,
             'conflictsWith' => $row['conflicts_with'],
             'trigger' => $row['trigger'],
             'violationMessage' => $row['violation_message'],

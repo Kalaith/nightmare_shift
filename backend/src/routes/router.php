@@ -1,7 +1,4 @@
 <?php
-declare(strict_types=1);
-
-use App\Core\Container;
 
 /**
  * Nightmare Shift API Routes
@@ -9,7 +6,13 @@ use App\Core\Container;
  * @param \App\Core\Router    $router
  * @param \App\Core\Container $container
  */
+
+declare(strict_types=1);
+
+use App\Core\Container;
+
 return function (\App\Core\Router $router, Container $container): void {
+
     // Auth routes
     $router->post('/api/v1/auth/session', $container->get('auth'), 'session');
     $router->post('/api/v1/auth/guest-session', $container->get('auth'), 'guestSession');

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controllers;
@@ -13,9 +14,9 @@ use App\External\GameContentRepository;
  */
 final class ContentController
 {
-    public function __construct(
-        private readonly GameContentRepository $contentRepo
-    ) {}
+    public function __construct(private readonly GameContentRepository $contentRepo)
+    {
+    }
 
     /**
      * GET /api/v1/content/skills — returns all skill tree definitions.

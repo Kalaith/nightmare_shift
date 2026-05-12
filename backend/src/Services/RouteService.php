@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -29,10 +30,10 @@ final class RouteService
         $baseTime = (float) Constants::getTimeCost($routeType);
         $baseRisk = Constants::getRiskLevel($routeType);
 
-        // Apply passenger risk modifier
+        // Apply passenger risk modifier.
         $baseRisk *= $passengerRiskLevel;
 
-        // Apply route mastery discount (up to 15% reduction)
+        // Apply route mastery discount (up to 15% reduction).
         $mastery = (int) ($routeMastery[$routeType] ?? 0);
         if ($mastery > 0) {
             $discount = min(0.15, $mastery * 0.02);
@@ -75,29 +76,43 @@ final class RouteService
         array $playerStats = []
     ): array {
         $routeTypes = [
-            Constants::ROUTE_NORMAL => ['name' => 'Normal Route', 'description' => 'Standard route — balanced cost and risk'],
-            Constants::ROUTE_SHORTCUT => ['name' => 'Shortcut', 'description' => 'Faster but riskier through dark alleys'],
-            Constants::ROUTE_SCENIC => ['name' => 'Scenic Route', 'description' => 'Longer but safer through well-lit streets'],
-            Constants::ROUTE_POLICE => ['name' => 'Police Route', 'description' => 'Near police stations — moderate cost and risk'],
+            Constants::ROUTE_NORMAL => [
+                'name' => 'Normal Route',
+                'description' => 'Standard route — balanced cost and risk',
+            ],
+            Constants::ROUTE_SHORTCUT => [
+                'name' => 'Shortcut',
+                'description' => 'Faster but riskier through dark alleys',
+            ],
+            Constants::ROUTE_SCENIC => [
+                'name' => 'Scenic Route',
+                'description' => 'Longer but safer through well-lit streets',
+            ],
+            Constants::ROUTE_POLICE => [
+                'name' => 'Police Route',
+                'description' => 'Near police stations — moderate cost and risk',
+            ],
         ];
-
         $almanacLevel = (int) ($playerStats['almanacLevel'] ?? 1);
-
         $options = [];
-
         foreach ($routeTypes as $type => $info) {
-            $costs = $this->calculateRouteCosts($type, $passengerRiskLevel, $weather, $timeOfDay, $hazards, $routeMastery, $passenger ?? []);
-
+            $costs = $this->calculateRouteCosts(
+                $type,
+                $passengerRiskLevel,
+                $weather,
+                $timeOfDay,
+                $hazards,
+                $routeMastery,
+                $passenger ?? []
+            );
             $available = true;
-
             $option = array_merge($info, [
                 'type' => $type,
                 'fuelCost' => $costs['fuelCost'],
                 'timeCost' => $costs['timeCost'],
                 'available' => $available,
             ]);
-
-            // Add passenger reaction if applicable
+            // Add passenger reaction if applicable.
             $reaction = 'neutral';
             $fareModifier = 1.0;
             if ($passenger !== null && isset($passenger['routePreferences'])) {
@@ -111,51 +126,70 @@ final class RouteService
             }
 
             // --- Server-Side UI Rendering based on Almanac Knowledge --- //
-            
+
             // 1. Color Class
-            $colorClass = 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border border-slate-500/50 hover:border-slate-400/70';
-            
+            $colorClass = 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 '
+                . 'hover:to-slate-600 text-white border border-slate-500/50 hover:border-slate-400/70';
             if (!$available) {
-                 $colorClass = 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50 border border-slate-700';
+                $colorClass = 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50 border border-slate-700';
             } elseif ($costs['riskLevel'] >= 4) {
-                 $colorClass = match($type) {
-                     'normal' => 'bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20',
-                     'shortcut' => 'bg-gradient-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 text-white border-2 border-amber-500 shadow-amber-500/20',
-                     'scenic' => 'bg-gradient-to-br from-emerald-800 to-slate-800 hover:from-emerald-700 hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20',
-                     default => 'bg-gradient-to-br from-indigo-800 to-slate-800 hover:from-indigo-700 hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20'
-                 };
+                $colorClass = match ($type) {
+                    'normal' => 'bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 '
+                        . 'hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20',
+                    'shortcut' => 'bg-gradient-to-br from-gray-800 to-gray-900 hover:from-gray-700 '
+                        . 'hover:to-gray-800 text-white border-2 border-amber-500 shadow-amber-500/20',
+                    'scenic' => 'bg-gradient-to-br from-emerald-800 to-slate-800 hover:from-emerald-700 '
+                        . 'hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20',
+                    default => 'bg-gradient-to-br from-indigo-800 to-slate-800 hover:from-indigo-700 '
+                        . 'hover:to-slate-700 text-white border-2 border-amber-500 shadow-amber-500/20'
+                };
             } elseif ($costs['riskLevel'] >= 3) {
-                 $colorClass = match($type) {
-                     'normal' => 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10',
-                     'shortcut' => 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border border-yellow-400/60 shadow-yellow-400/10',
-                     'scenic' => 'bg-gradient-to-br from-emerald-700 to-slate-700 hover:from-emerald-600 hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10',
-                     default => 'bg-gradient-to-br from-indigo-700 to-slate-700 hover:from-indigo-600 hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10'
-                 };
+                $colorClass = match ($type) {
+                    'normal' => 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 '
+                        . 'hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10',
+                    'shortcut' => 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 '
+                        . 'hover:to-gray-700 text-white border border-yellow-400/60 shadow-yellow-400/10',
+                    'scenic' => 'bg-gradient-to-br from-emerald-700 to-slate-700 hover:from-emerald-600 '
+                        . 'hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10',
+                    default => 'bg-gradient-to-br from-indigo-700 to-slate-700 hover:from-indigo-600 '
+                        . 'hover:to-slate-600 text-white border border-yellow-400/60 shadow-yellow-400/10'
+                };
             } elseif ($reaction === 'positive') {
-                 $colorClass = match($type) {
-                     'normal' => 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border-2 border-emerald-400/80 shadow-emerald-400/20',
-                     'shortcut' => 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20',
-                     'scenic' => 'bg-gradient-to-br from-emerald-700 to-emerald-800 hover:from-emerald-600 hover:to-emerald-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20',
-                     default => 'bg-gradient-to-br from-indigo-700 to-indigo-800 hover:from-indigo-600 hover:to-indigo-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20'
-                 };
+                $colorClass = match ($type) {
+                    'normal' => 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 '
+                        . 'hover:to-slate-600 text-white border-2 border-emerald-400/80 shadow-emerald-400/20',
+                    'shortcut' => 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 '
+                        . 'hover:to-gray-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20',
+                    'scenic' => 'bg-gradient-to-br from-emerald-700 to-emerald-800 hover:from-emerald-600 '
+                        . 'hover:to-emerald-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20',
+                    default => 'bg-gradient-to-br from-indigo-700 to-indigo-800 hover:from-indigo-600 '
+                        . 'hover:to-indigo-700 text-white border-2 border-emerald-400/80 shadow-emerald-400/20'
+                };
             } elseif ($reaction === 'negative') {
-                 $colorClass = match($type) {
-                     'normal' => 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10',
-                     'shortcut' => 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border-2 border-rose-400/60 shadow-rose-400/10',
-                     'scenic' => 'bg-gradient-to-br from-emerald-700 to-slate-700 hover:from-emerald-600 hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10',
-                     default => 'bg-gradient-to-br from-indigo-700 to-slate-700 hover:from-indigo-600 hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10'
-                 };
+                $colorClass = match ($type) {
+                    'normal' => 'bg-gradient-to-br from-slate-600 to-slate-700 hover:from-slate-500 '
+                        . 'hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10',
+                    'shortcut' => 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 '
+                        . 'hover:to-gray-700 text-white border-2 border-rose-400/60 shadow-rose-400/10',
+                    'scenic' => 'bg-gradient-to-br from-emerald-700 to-slate-700 hover:from-emerald-600 '
+                        . 'hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10',
+                    default => 'bg-gradient-to-br from-indigo-700 to-slate-700 hover:from-indigo-600 '
+                        . 'hover:to-slate-600 text-white border-2 border-rose-400/60 shadow-rose-400/10'
+                };
             } else {
-                 $colorClass = match($type) {
-                     'shortcut' => 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border border-gray-500/50 hover:border-gray-400/70',
-                     'scenic' => 'bg-gradient-to-br from-emerald-700 to-emerald-800 hover:from-emerald-600 hover:to-emerald-700 text-white border border-emerald-500/50 hover:border-emerald-400/70',
-                     'police' => 'bg-gradient-to-br from-indigo-700 to-indigo-800 hover:from-indigo-600 hover:to-indigo-700 text-white border border-indigo-500/50 hover:border-indigo-400/70',
-                     default => $colorClass
-                 };
+                $colorClass = match ($type) {
+                    'shortcut' => 'bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 '
+                        . 'hover:to-gray-700 text-white border border-gray-500/50 hover:border-gray-400/70',
+                    'scenic' => 'bg-gradient-to-br from-emerald-700 to-emerald-800 hover:from-emerald-600 '
+                        . 'hover:to-emerald-700 text-white border border-emerald-500/50 hover:border-emerald-400/70',
+                    'police' => 'bg-gradient-to-br from-indigo-700 to-indigo-800 hover:from-indigo-600 '
+                        . 'hover:to-indigo-700 text-white border border-indigo-500/50 hover:border-indigo-400/70',
+                    default => $colorClass
+                };
             }
             $option['colorClass'] = $colorClass;
 
-            // 2. Risk Display (Requires Almanac Level 2)
+            // 2. Risk Display (Requires Almanac Level 2).
             if ($passenger !== null && $almanacLevel >= 2) {
                 $option['riskDisplay'] = [
                     'visible' => true,

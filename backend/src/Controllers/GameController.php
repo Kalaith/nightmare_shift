@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controllers;
@@ -38,12 +39,15 @@ final class GameController
         private readonly RefuelAction $refuelAction,
         private readonly RouteService $routeService,
         private readonly RuleRepository $ruleRepository
-    ) {}
+    ) {
+    }
 
     public function startShift(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         try {
             $gameState = $this->startShiftAction->execute($userId);
@@ -56,7 +60,9 @@ final class GameController
     public function requestPassenger(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         try {
             $gameState = $this->requestPassengerAction->execute($userId);
@@ -69,12 +75,13 @@ final class GameController
     public function drivingChoice(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         $data = $request->getParsedBody();
         $routeType = (string) ($data['routeType'] ?? 'normal');
         $phase = (string) ($data['phase'] ?? 'pickup');
-
         try {
             $gameState = $this->handleDrivingChoiceAction->execute($userId, $routeType, $phase);
             $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Route selected');
@@ -86,11 +93,12 @@ final class GameController
     public function interaction(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         $data = $request->getParsedBody();
         $action = (string) ($data['action'] ?? '');
-
         if ($action === '') {
             $response->error('Action is required', 400);
             return;
@@ -107,11 +115,12 @@ final class GameController
     public function completeRide(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         $data = $request->getParsedBody();
         $isPositive = (bool) ($data['isPositive'] ?? true);
-
         try {
             $gameState = $this->completeRideAction->execute($userId, $isPositive);
             $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Ride completed');
@@ -123,7 +132,9 @@ final class GameController
     public function endShift(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         try {
             $result = $this->endShiftAction->execute($userId);
@@ -136,19 +147,18 @@ final class GameController
     public function save(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
-
-        $data = $request->getParsedBody();
-        $gameState = $data['gameState'] ?? null;
-
-        if ($gameState === null) {
-            $response->error('Game state is required', 400);
+        if ($userId === null) {
             return;
         }
 
         try {
-            $this->saveGameAction->execute($userId, $gameState);
-            $response->success(null, 'Game saved');
+            $gameState = $this->saveGameAction->execute($userId);
+            if ($gameState === null) {
+                $response->error('No active server save found', 404);
+                return;
+            }
+
+            $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Server save checkpointed');
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 400);
         }
@@ -157,7 +167,9 @@ final class GameController
     public function load(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         try {
             $gameState = $this->loadGameAction->execute($userId);
@@ -174,7 +186,9 @@ final class GameController
     public function declineRide(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         try {
             $gameState = $this->declineRideAction->execute($userId);
@@ -187,10 +201,11 @@ final class GameController
     public function refuel(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         $mode = (string) (($request->getParsedBody()['mode'] ?? 'partial'));
-
         try {
             $gameState = $this->refuelAction->execute($userId, $mode);
             $response->success(PassengerSanitizer::sanitizeGameState($gameState), 'Refuel complete');
@@ -202,7 +217,9 @@ final class GameController
     public function getRouteOptions(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         try {
             $gameState = $this->loadGameAction->execute($userId);
@@ -218,10 +235,9 @@ final class GameController
             $hazards = $gameState['environmentalHazards'] ?? [];
             $routeMastery = $gameState['routeMastery'] ?? [];
             $passenger = $gameState['currentPassenger'] ?? null;
-            
-            // Assume default risk level of 1 for now, as location lookups might require LocationRepository
-            $passengerRiskLevel = 1.0; 
 
+            // Assume default risk level of 1 for now, as location lookups might require LocationRepository.
+            $passengerRiskLevel = 1.0;
             $options = $this->routeService->getRouteOptions(
                 $fuel,
                 $time,
@@ -233,7 +249,7 @@ final class GameController
                 $passenger
             );
 
-            // Reformat dictionary to array and strip secrets
+            // Reformat dictionary to array and strip secrets.
             $optionsArray = array_values($options);
             foreach ($optionsArray as &$opt) {
                 unset($opt['riskLevel']);
@@ -250,14 +266,16 @@ final class GameController
     public function getDailyRules(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         try {
-            // Get 3 random rules for tonight's shift
+            // Get 3 random rules for tonight's shift.
             $rules = $this->ruleRepository->getShiftRules(3);
-            
-            // Strip out secret fields before sending to client
-            $safeRules = array_map(function($rule) {
+
+            // Strip out secret fields before sending to client.
+            $safeRules = array_map(function ($rule) {
                 return [
                     'id' => $rule['id'],
                     'title' => $rule['title'],
@@ -267,7 +285,6 @@ final class GameController
                     'visible' => true
                 ];
             }, $rules);
-
             $response->success($safeRules, 'Daily rules generated');
         } catch (\Exception $e) {
             $response->error($e->getMessage(), 500);

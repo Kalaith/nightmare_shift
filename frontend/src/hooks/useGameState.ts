@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback, type SetStateAction } from 'react';
-import type { GameState, PlayerStats } from '../types/game';
+import type { GameState } from '../types/game';
 import type { ShiftData } from '../utils/statsHandler';
 import { SCREENS, GAME_PHASES } from '../data/constants';
 import { gameApi } from '../api/gameApi';
@@ -53,10 +53,11 @@ const getInitialGameState = (): Omit<GameState, 'currentScreen'> => ({
   pendingTipOffer: null,
 });
 
-export const useGameState = (playerStats: PlayerStats) => {
+export const useGameState = () => {
   const [localGameState, setLocalGameState] =
     useState<Omit<GameState, 'currentScreen'>>(getInitialGameState);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasSavedGame, setHasSavedGame] = useState(false);
 
   const { currentScreen, showScreen, showInventory, setShowInventory } = useUIContext();
 
@@ -110,8 +111,8 @@ export const useGameState = (playerStats: PlayerStats) => {
    * Strips currentScreen (managed by UI context) and merges the rest.
    */
   const applyBackendState = useCallback((backendState: GameState) => {
-    const { currentScreen: _ignored, ...rest } = backendState as GameState & { currentScreen?: string };
-    void _ignored;
+    const { currentScreen: ignoredCurrentScreen, ...rest } = backendState as GameState & { currentScreen?: string };
+    void ignoredCurrentScreen;
     setLocalGameState(rest);
   }, []);
 
@@ -124,6 +125,7 @@ export const useGameState = (playerStats: PlayerStats) => {
     (async () => {
       try {
         const savedState = await gameApi.loadGame();
+        setHasSavedGame(savedState !== null);
         if (savedState && savedState.gamePhase && savedState.gamePhase !== 'waiting') {
           // Active shift found — resume it
           applyBackendState(savedState);
@@ -144,6 +146,7 @@ export const useGameState = (playerStats: PlayerStats) => {
     try {
       const backendState = await gameApi.startShift();
       applyBackendState(backendState);
+      setHasSavedGame(true);
       showScreen(SCREENS.GAME);
     } catch (err) {
       console.error('Failed to start shift:', err);
@@ -158,7 +161,9 @@ export const useGameState = (playerStats: PlayerStats) => {
 
   const saveGame = useCallback(async () => {
     try {
-      await gameApi.saveGame(gameState);
+      const backendState = await gameApi.saveGame();
+      applyBackendState(backendState);
+      setHasSavedGame(true);
       setLocalGameState(prev => ({ ...prev, showSaveNotification: true }));
       setTimeout(() => {
         setLocalGameState(prev => ({ ...prev, showSaveNotification: false }));
@@ -166,15 +171,18 @@ export const useGameState = (playerStats: PlayerStats) => {
     } catch (err) {
       console.error('Failed to save game:', err);
     }
-  }, [gameState]);
+  }, [applyBackendState]);
 
   const loadGame = useCallback(async () => {
     setIsLoading(true);
     try {
       const savedState = await gameApi.loadGame();
       if (savedState) {
+        setHasSavedGame(true);
         applyBackendState(savedState);
         showScreen(SCREENS.GAME);
+      } else {
+        setHasSavedGame(false);
       }
     } catch (err) {
       console.error('Failed to load game:', err);
@@ -182,10 +190,6 @@ export const useGameState = (playerStats: PlayerStats) => {
       setIsLoading(false);
     }
   }, [applyBackendState, showScreen]);
-
-  const deleteSavedGame = useCallback(() => {
-    // No-op — handled by backend on end shift
-  }, []);
 
   const showRideRequest = useCallback(async () => {
     const currentGameState = gameStateRef.current;
@@ -287,5 +291,6 @@ export const useGameState = (playerStats: PlayerStats) => {
     gameOver,
     endShift,
     isLoading,
+    hasSavedGame,
   };
 };

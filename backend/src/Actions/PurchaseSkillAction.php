@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -13,7 +14,8 @@ final class PurchaseSkillAction
         private readonly PlayerStatsRepository $statsRepo,
         private readonly GameContentRepository $contentRepo,
         private readonly GameSessionLogger $logger
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<string, mixed>

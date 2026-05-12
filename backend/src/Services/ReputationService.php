@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -49,10 +50,8 @@ final class ReputationService
     ): array {
         $timestamp = $timestamp ?: time();
         $current = $this->getPassengerReputation($reputationMap, $passengerId);
-
         $current['interactions']++;
         $current['lastEncounter'] = $timestamp;
-
         if ($isPositive) {
             $current['positiveChoices']++;
         } else {
@@ -86,7 +85,6 @@ final class ReputationService
     public function getReputationModifier(array $reputation): array
     {
         $level = $reputation['relationshipLevel'] ?? 'neutral';
-
         return match ($level) {
             'trusted' => [
                 'fareMultiplier' => 1.3,

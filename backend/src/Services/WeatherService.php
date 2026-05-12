@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -29,7 +30,6 @@ final class WeatherService
     public function getCurrentSeason(): array
     {
         $month = (int) date('n');
-
         if ($month >= 3 && $month <= 5) {
             $type = 'spring';
             $temperature = 'mild';
@@ -61,9 +61,8 @@ final class WeatherService
     public function updateTimeOfDay(int $shiftStartTime, int $currentTime): array
     {
         $elapsedMinutes = ($currentTime - $shiftStartTime) / 60;
-        // Shifts start at 10 PM (22:00) and time progresses
+// Shifts start at 10 PM (22:00) and time progresses
         $hour = (int) (22 + ($elapsedMinutes / 60)) % 24;
-
         return $this->getTimeOfDayFromHour($hour);
     }
 
@@ -75,7 +74,6 @@ final class WeatherService
     public function generateEnvironmentalHazards(array $weather, array $timeOfDay, array $season): array
     {
         $chance = $this->calculateHazardChance($weather, $timeOfDay, $season);
-
         if ((random_int(0, 100) / 100) > $chance) {
             return [];
         }
@@ -84,7 +82,6 @@ final class WeatherService
         $severity = random_int(0, 2) === 0 ? 'extreme' : (random_int(0, 1) === 0 ? 'major' : 'minor');
         $locations = ['Downtown', 'Warehouse District', 'Cemetery Road', 'Industrial Zone', 'The Docks'];
         $location = $locations[array_rand($locations)];
-
         return [$this->createEnvironmentalHazard($hazardType, $severity, $location, $weather)];
     }
 
@@ -103,14 +100,12 @@ final class WeatherService
         $fuelMod = 1.0;
         $timeMod = 1.0;
         $riskMod = 1.0;
-
         $intensity = $weather['intensity'] ?? 'light';
         $intensityMod = match ($intensity) {
             'heavy' => 1.5,
             'moderate' => 1.2,
             default => 1.0,
         };
-
         $weatherType = $weather['type'] ?? 'clear';
         if ($weatherType !== 'clear') {
             $fuelMod *= 1.0 + (0.1 * $intensityMod);
@@ -142,9 +137,8 @@ final class WeatherService
     {
         $duration = (int) ($currentWeather['duration'] ?? 30);
         $startTime = (int) ($currentWeather['startTime'] ?? 0);
-
         if (($gameTime - $startTime) >= ($duration * 60)) {
-            // Weather expired, generate new
+        // Weather expired, generate new
             $seasonalTypes = $this->getSeasonalWeatherTypes($season);
             $newType = $seasonalTypes[array_rand($seasonalTypes)];
             return $this->createWeatherCondition($newType, $season);
@@ -188,8 +182,12 @@ final class WeatherService
             return 'light';
         }
         $roll = random_int(1, 10);
-        if ($roll <= 4) return 'light';
-        if ($roll <= 7) return 'moderate';
+        if ($roll <= 4) {
+            return 'light';
+        }
+        if ($roll <= 7) {
+            return 'moderate';
+        }
         return 'heavy';
     }
 
@@ -238,7 +236,6 @@ final class WeatherService
             'moderate' => 1.2,
             default => 1.0,
         };
-
         if ($type !== 'clear') {
             $effects[] = [
                 'type' => 'visibility_reduction',
@@ -352,7 +349,8 @@ final class WeatherService
         $phase = $timeOfDay['phase'] ?? 'night';
         if (in_array($phase, ['night', 'latenight'], true)) {
             $types[] = 'supernatural_event';
-            $types[] = 'supernatural_event'; // Double chance at night
+            $types[] = 'supernatural_event';
+        // Double chance at night
         }
         return $types[array_rand($types)];
     }
@@ -379,7 +377,6 @@ final class WeatherService
             'major' => 1.5,
             default => 1.0,
         };
-
         return [
             'timeDelay' => (int) (5 * $severityMod),
             'fuelIncrease' => round(0.1 * $severityMod, 2),

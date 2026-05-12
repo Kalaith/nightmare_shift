@@ -12,7 +12,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     refreshStats,
   } = usePlayerContext();
 
-  const gameStateLogic = useGameState(playerStats);
+  const gameStateLogic = useGameState();
 
   const handleEndShift = async (successful: boolean, overrideReason?: string) => {
     const shiftData = await gameStateLogic.endShift(successful, overrideReason);

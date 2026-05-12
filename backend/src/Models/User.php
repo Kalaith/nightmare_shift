@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -13,8 +14,7 @@ final class User
     public string $created_at = '';
     public string $updated_at = '';
     public ?string $last_seen_at = null;
-
-    /**
+/**
      * @return array<string, mixed>
      */
     public function toArray(): array

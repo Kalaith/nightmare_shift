@@ -1,13 +1,12 @@
 import React from 'react';
-import type { GameState, Rule } from '../../../types/game';
+import type { Rule } from '../../../types/game';
 import { gameApi } from '../../../api/gameApi';
 
 interface BriefingScreenProps {
-  gameState: GameState;
   onStartShift: () => void;
 }
 
-const BriefingScreen: React.FC<BriefingScreenProps> = ({ gameState, onStartShift }) => {
+const BriefingScreen: React.FC<BriefingScreenProps> = ({ onStartShift }) => {
   const [rules, setRules] = React.useState<Rule[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 

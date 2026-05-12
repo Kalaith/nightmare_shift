@@ -143,6 +143,18 @@ export const usePlayerStats = (authUserId: number | null) => {
   );
 
   /**
+   * Refresh leaderboard from backend.
+   */
+  const refreshLeaderboard = useCallback(async () => {
+    try {
+      const entries = await gameApi.getLeaderboard(10);
+      setLeaderboard(entries);
+    } catch (err) {
+      console.warn('Failed to fetch leaderboard:', err);
+    }
+  }, []);
+
+  /**
    * Add to leaderboard — backend handles persistence.
    * This is called by endShift action which already posts to backend.
    */
@@ -155,22 +167,10 @@ export const usePlayerStats = (authUserId: number | null) => {
     passengersEncountered: number;
     difficultyLevel: number;
   }) => {
-    // Leaderboard is written by the backend endShift action
-    // Just refresh the local leaderboard cache
-    refreshLeaderboard();
-  }, []);
-
-  /**
-   * Refresh leaderboard from backend.
-   */
-  const refreshLeaderboard = useCallback(async () => {
-    try {
-      const entries = await gameApi.getLeaderboard(10);
-      setLeaderboard(entries);
-    } catch (err) {
-      console.warn('Failed to fetch leaderboard:', err);
-    }
-  }, []);
+    void entry;
+    // Leaderboard is written by the backend endShift action.
+    void refreshLeaderboard();
+  }, [refreshLeaderboard]);
 
   // Almanac functions
   const trackPassengerEncounter = useCallback(

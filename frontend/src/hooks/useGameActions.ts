@@ -4,6 +4,12 @@ import { GAME_PHASES } from '../data/constants';
 import type { Passenger } from '../types/game';
 import { gameApi } from '../api/gameApi';
 
+const withoutCurrentScreen = <T extends { currentScreen?: unknown }>(state: T): Omit<T, 'currentScreen'> => {
+  const { currentScreen: ignoredCurrentScreen, ...rest } = state;
+  void ignoredCurrentScreen;
+  return rest;
+};
+
 export const useGameActions = () => {
   const { gameState, updateGameState: setGameState, endShift } = useGameContext();
 
@@ -11,10 +17,7 @@ export const useGameActions = () => {
     void (async () => {
       try {
         const backendState = await gameApi.declineRide();
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
-          currentScreen?: string;
-        };
-        void _ignored;
+        const rest = withoutCurrentScreen(backendState);
         setGameState(prev => ({ ...prev, ...rest }));
       } catch (err) {
         console.error('Failed to decline ride:', err);
@@ -47,10 +50,7 @@ export const useGameActions = () => {
 
     try {
       const backendState = await gameApi.completeRide(true);
-      const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
-        currentScreen?: string;
-      };
-      void _ignored;
+      const rest = withoutCurrentScreen(backendState);
       setGameState(prev => ({ ...prev, ...rest }));
     } catch (err) {
       console.error('Failed to complete ride:', err);
@@ -81,10 +81,7 @@ export const useGameActions = () => {
           return;
         }
 
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
-          currentScreen?: string;
-        };
-        void _ignored;
+        const rest = withoutCurrentScreen(backendState);
         setGameState(prev => ({ ...prev, ...rest }));
       } catch (err) {
         console.error('Failed to process driving choice:', err);
@@ -109,10 +106,7 @@ export const useGameActions = () => {
           return;
         }
 
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
-          currentScreen?: string;
-        };
-        void _ignored;
+        const rest = withoutCurrentScreen(backendState);
         setGameState(prev => ({ ...prev, ...rest }));
       } catch (err) {
         console.error('Failed to process interaction:', err);
@@ -128,10 +122,7 @@ export const useGameActions = () => {
 
       try {
         const backendState = await gameApi.interaction(`use_item_${itemId}`);
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
-          currentScreen?: string;
-        };
-        void _ignored;
+        const rest = withoutCurrentScreen(backendState);
         setGameState(prev => ({ ...prev, ...rest }));
       } catch (err) {
         console.error('Failed to use item:', err);
@@ -147,10 +138,7 @@ export const useGameActions = () => {
 
       try {
         const backendState = await gameApi.interaction(`trade_item_${itemId}_${passenger.id}`);
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
-          currentScreen?: string;
-        };
-        void _ignored;
+        const rest = withoutCurrentScreen(backendState);
         setGameState(prev => ({ ...prev, ...rest }));
       } catch (err) {
         console.error('Failed to trade item:', err);
@@ -167,10 +155,7 @@ export const useGameActions = () => {
     void (async () => {
       try {
         const backendState = await gameApi.refuel('full');
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
-          currentScreen?: string;
-        };
-        void _ignored;
+        const rest = withoutCurrentScreen(backendState);
         setGameState(prev => ({ ...prev, ...rest }));
       } catch (err) {
         console.error('Failed to refuel fully:', err);
@@ -182,10 +167,7 @@ export const useGameActions = () => {
     void (async () => {
       try {
         const backendState = await gameApi.refuel('partial');
-        const { currentScreen: _ignored, ...rest } = backendState as typeof backendState & {
-          currentScreen?: string;
-        };
-        void _ignored;
+        const rest = withoutCurrentScreen(backendState);
         setGameState(prev => ({ ...prev, ...rest }));
       } catch (err) {
         console.error('Failed to refuel partially:', err);

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -19,21 +20,18 @@ final class GuidelineService
         $detectedTells = [];
         $passengerTells = $passenger['tells'] ?? [];
         $passengerId = (int) ($passenger['id'] ?? 0);
-
         foreach ($guidelines as $guideline) {
             $exceptions = $guideline['exceptions'] ?? [];
-
             foreach ($exceptions as $exception) {
                 $exceptionTells = $exception['tells'] ?? [];
                 $applicablePassengerIds = $exception['passengerIds'] ?? [];
-
-                // Check if this exception applies to this passenger
+        // Check if this exception applies to this passenger
                 if (!empty($applicablePassengerIds) && !in_array($passengerId, $applicablePassengerIds, true)) {
                     continue;
                 }
 
                 foreach ($exceptionTells as $tell) {
-                    // Match against passenger's tells
+// Match against passenger's tells
                     foreach ($passengerTells as $pTell) {
                         if (($tell['type'] ?? '') === ($pTell['type'] ?? '')) {
                             $detectedTells[] = [
@@ -79,10 +77,9 @@ final class GuidelineService
 
         // Check for active exceptions
         $activeException = $this->findActiveException($guideline, $passenger, $gameState);
-
         if ($choice === 'break') {
             if ($activeException !== null && ($activeException['breakingSafer'] ?? false)) {
-                // Breaking was the right call — return exception rewards
+        // Breaking was the right call — return exception rewards
                 return $guideline['exceptionRewards'] ?? [];
             }
             // Breaking without exception — return break consequences
@@ -91,7 +88,7 @@ final class GuidelineService
 
         // Following the guideline
         if ($activeException !== null && !($activeException['breakingSafer'] ?? false)) {
-            // Following was correct
+// Following was correct
             return $guideline['followConsequences'] ?? [];
         }
 
@@ -128,7 +125,6 @@ final class GuidelineService
     {
         $exceptions = $guideline['exceptions'] ?? [];
         $passengerId = (int) ($passenger['id'] ?? 0);
-
         foreach ($exceptions as $exception) {
             $applicableIds = $exception['passengerIds'] ?? [];
             if (!empty($applicableIds) && !in_array($passengerId, $applicableIds, true)) {
@@ -153,7 +149,6 @@ final class GuidelineService
     private function rollConsequences(array $consequences): array
     {
         $result = [];
-
         foreach ($consequences as $consequence) {
             $probability = (float) ($consequence['probability'] ?? 1.0);
             if ((random_int(0, 100) / 100) <= $probability) {

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { SaveGameService } from '../../../services/storageService';
+import LocalStorage from '../../../services/storageService';
 import type { PlayerStats } from '../../../types/game';
 import type { AuthUser } from '../../../hooks/useAuthSession';
+import { clearGuestSession } from '../../../auth/storage';
+import { env } from '../../../config/env';
 import bannerImg from '../../../assets/banner.png';
 
 interface LoadingScreenProps {
@@ -11,6 +13,7 @@ interface LoadingScreenProps {
   authLoading: boolean;
   onContinueAsGuest: () => Promise<void>;
   linkAccountUrl: string;
+  hasSavedGame: boolean;
   onStartGame: () => void;
   onLoadGame: () => void;
   onShowLeaderboard: () => void;
@@ -26,6 +29,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   authLoading,
   onContinueAsGuest,
   linkAccountUrl,
+  hasSavedGame,
   onStartGame,
   onLoadGame,
   onShowLeaderboard,
@@ -33,7 +37,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onShowAlmanac,
   onShowAdmin,
 }) => {
-  const hasSavedGame = SaveGameService.hasSavedGame();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleStartGame = () => {
@@ -54,7 +57,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     onLoadGame();
   };
 
-  const loginUrl = import.meta.env.VITE_WEB_HATCHERY_LOGIN_URL || '/login';
+  const loginUrl = env.webHatcheryLoginUrl;
   const effectiveLoginUrl = user?.is_guest ? linkAccountUrl : loginUrl;
   const isAdminUser =
     !!user &&
@@ -202,7 +205,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
                   'This will wipe local cache and reset in-browser progress for this device. Continue?'
                 )
               ) {
-                localStorage.clear();
+                LocalStorage.clear();
+                clearGuestSession();
                 window.location.reload();
               }
             }}

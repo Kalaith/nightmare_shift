@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Middleware;
@@ -12,7 +13,8 @@ final class AuthMiddleware
 {
     public function __construct(
         private readonly \PDO $pdo
-    ) {}
+    ) {
+    }
 
     public function __invoke(Request $request, Response $response): bool
     {
@@ -25,14 +27,7 @@ final class AuthMiddleware
                     return true;
                 }
 
-                $authHeader = $request->getAuthorizationHeader();
-                $debugMsg = 'Authorization header missing or invalid';
-                if ($authHeader !== null) {
-                    $debugMsg .= ' (header present but no Bearer token found: ' . substr($authHeader, 0, 30) . '...)';
-                } else {
-                    $debugMsg .= ' (no Authorization header in request)';
-                }
-                $response->unauthorized($debugMsg);
+                $response->unauthorized('Authorization header missing or invalid');
                 return false;
             }
 
@@ -110,6 +105,11 @@ final class AuthMiddleware
 
     private function isPublicPath(string $path): bool
     {
+        $apiPosition = strpos($path, '/api/v1/');
+        if ($apiPosition !== false) {
+            $path = substr($path, $apiPosition);
+        }
+
         $publicExact = [
             '/api/v1/auth/guest-session',
             '/api/v1/player/leaderboard',

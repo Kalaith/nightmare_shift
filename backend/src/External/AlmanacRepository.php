@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\External;
@@ -7,9 +8,9 @@ use PDO;
 
 final class AlmanacRepository
 {
-    public function __construct(
-        private readonly PDO $db
-    ) {}
+    public function __construct(private readonly PDO $db)
+    {
+    }
 
     /**
      * Get all almanac entries for a user.
@@ -18,11 +19,8 @@ final class AlmanacRepository
      */
     public function getByUserId(int $userId): array
     {
-        $stmt = $this->db->prepare(
-            'SELECT * FROM almanac_entries WHERE user_id = :user_id'
-        );
+        $stmt = $this->db->prepare('SELECT * FROM almanac_entries WHERE user_id = :user_id');
         $stmt->execute(['user_id' => $userId]);
-
         $entries = [];
         foreach ($stmt->fetchAll() as $row) {
             $entries[(int) $row['passenger_id']] = [
@@ -42,7 +40,9 @@ final class AlmanacRepository
     public function updateEntry(int $userId, int $passengerId, int $knowledgeLevel, array $secrets = []): void
     {
         $stmt = $this->db->prepare(
-            'INSERT INTO almanac_entries (user_id, passenger_id, knowledge_level, unlocked_secrets, created_at, updated_at)
+            'INSERT INTO almanac_entries (
+                 user_id, passenger_id, knowledge_level, unlocked_secrets, created_at, updated_at
+             )
              VALUES (:user_id, :passenger_id, :knowledge_level, :secrets, NOW(), NOW())
              ON DUPLICATE KEY UPDATE
                 knowledge_level = GREATEST(knowledge_level, :knowledge_level_upd),

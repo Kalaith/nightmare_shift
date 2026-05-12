@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -13,9 +14,9 @@ use App\External\GameContentRepository;
  */
 final class GameEngineService
 {
-    public function __construct(
-        private readonly GameContentRepository $contentRepo
-    ) {}
+    public function __construct(private readonly GameContentRepository $contentRepo)
+    {
+    }
 
     /**
      * Calculate player experience from stats.
@@ -36,7 +37,7 @@ final class GameEngineService
     {
         $difficultyLevel = min(4, intdiv($playerExperience, 10));
 
-        // Use guidelines system for experienced players
+        // Use guidelines system for experienced players.
         if ($playerExperience >= 20) {
             return $this->generateShiftGuidelines($playerExperience, $difficultyLevel);
         }
@@ -46,15 +47,14 @@ final class GameEngineService
         $conditionalRules = $this->contentRepo->getRulesByType('conditional');
         $hiddenRules = $this->contentRepo->getRulesByType('hidden');
         $conflictingRules = $this->contentRepo->getRulesByType('conflicting');
-
         $selectedRules = [];
 
-        // Always include 2-3 basic rules
+        // Always include 2-3 basic rules.
         shuffle($basicRules);
         $numBasic = 2 + (random_int(0, 1));
         $selectedRules = array_merge($selectedRules, array_slice($basicRules, 0, $numBasic));
 
-        // Add conditional rules based on difficulty
+        // Add conditional rules based on difficulty.
         if ($difficultyLevel >= 1) {
             shuffle($conditionalRules);
             $numConditional = random_int(1, 2);
@@ -76,7 +76,6 @@ final class GameEngineService
         }
 
         $visibleRules = array_values(array_filter($selectedRules, fn($r) => ($r['visible'] ?? true)));
-
         return [
             'visibleRules' => $visibleRules,
             'hiddenRules' => $selectedHidden,
@@ -96,15 +95,14 @@ final class GameEngineService
         $guidelines = array_values(array_filter($allRules, fn($r) =>
             isset($r['relatedGuidelineId']) &&
             !empty($r['exceptions']) &&
-            !empty($r['followConsequences'])
-        ));
-
+            !empty($r['followConsequences'])));
         $numGuidelines = min(6, 3 + $difficultyLevel);
         shuffle($guidelines);
         $selectedGuidelines = array_slice($guidelines, 0, $numGuidelines);
 
-        // Convert guidelines to rules for compatibility
+        // Convert guidelines to rules for compatibility.
         $visibleRules = array_map(function ($guideline) {
+
             return [
                 'id' => $guideline['id'],
                 'title' => $guideline['title'],
@@ -126,7 +124,6 @@ final class GameEngineService
                 'relatedGuidelineId' => $guideline['id'],
             ];
         }, $selectedGuidelines);
-
         return [
             'visibleRules' => $visibleRules,
             'hiddenRules' => [],
@@ -142,9 +139,9 @@ final class GameEngineService
      */
     public function checkRuleViolation(array $gameState, string $action): ?array
     {
+
         $guidelines = $gameState['currentGuidelines'] ?? null;
         $currentPassenger = $gameState['currentPassenger'] ?? null;
-
         if ($guidelines !== null && $currentPassenger !== null) {
             return $this->checkGuidelineViolation($gameState, $action);
         }
@@ -165,8 +162,8 @@ final class GameEngineService
      */
     public function applyConsequences(array $gameState, array $consequences): array
     {
-        $applied = [];
 
+        $applied = [];
         foreach ($consequences as $consequence) {
             $probability = (float) ($consequence['probability'] ?? 1.0);
             if ((random_int(0, 100) / 100) > $probability) {
@@ -176,7 +173,6 @@ final class GameEngineService
             $type = (string) ($consequence['type'] ?? '');
             $value = (float) ($consequence['value'] ?? 0);
             $applied[] = $consequence;
-
             switch ($type) {
                 case 'fuel':
                     $gameState['fuel'] = max(0, (float) ($gameState['fuel'] ?? 0) + $value);
@@ -206,7 +202,6 @@ final class GameEngineService
             'gameState' => $gameState,
         ];
     }
-
     /**
      * Check guideline violation with exception handling.
      */
@@ -214,7 +209,6 @@ final class GameEngineService
     {
         $guidelines = $gameState['currentGuidelines'] ?? [];
         $currentPassenger = $gameState['currentPassenger'] ?? null;
-
         if (empty($guidelines) || $currentPassenger === null) {
             return null;
         }
@@ -248,7 +242,6 @@ final class GameEngineService
     public function checkHiddenRuleViolations(array $gameState, array $passenger): ?array
     {
         $hiddenRules = $gameState['hiddenRules'] ?? [];
-
         foreach ($hiddenRules as $rule) {
             if ($this->isHiddenRuleViolated($rule, $gameState, $passenger)) {
                 return ['rule' => $rule];
@@ -271,7 +264,6 @@ final class GameEngineService
         // Dynamic check: match action against rule's actionKey
         $actionKey = $rule['actionKey'] ?? null;
         $actionType = $rule['actionType'] ?? null;
-
         if ($actionKey !== null && $actionKey === $action && $actionType === 'forbidden') {
             return true;
         }
@@ -281,7 +273,8 @@ final class GameEngineService
 
     private function isHiddenRuleViolated(array $rule, array $gameState, array $passenger): bool
     {
-        return false; // Simplified for initial implementation
+        // Simplified for initial implementation.
+        return false;
     }
 
     private function findRelevantGuideline(array $guidelines, string $action): ?array

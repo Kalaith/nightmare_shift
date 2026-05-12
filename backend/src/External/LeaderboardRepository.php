@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\External;
@@ -8,9 +9,9 @@ use PDO;
 
 final class LeaderboardRepository
 {
-    public function __construct(
-        private readonly PDO $db
-    ) {}
+    public function __construct(private readonly PDO $db)
+    {
+    }
 
     /**
      * Get top scores across all users.
@@ -19,16 +20,13 @@ final class LeaderboardRepository
      */
     public function getTopScores(int $limit = 10): array
     {
-        $stmt = $this->db->prepare(
-            'SELECT l.*, u.username
+        $stmt = $this->db->prepare('SELECT l.*, u.username
              FROM leaderboard l
              JOIN users u ON l.user_id = u.id
              ORDER BY l.score DESC
-             LIMIT :lim'
-        );
+             LIMIT :lim');
         $stmt->bindValue('lim', $limit, PDO::PARAM_INT);
         $stmt->execute();
-
         return array_map([$this, 'mapToModel'], $stmt->fetchAll());
     }
 
@@ -39,26 +37,29 @@ final class LeaderboardRepository
      */
     public function getUserScores(int $userId, int $limit = 10): array
     {
-        $stmt = $this->db->prepare(
-            'SELECT l.*, u.username
+        $stmt = $this->db->prepare('SELECT l.*, u.username
              FROM leaderboard l
              JOIN users u ON l.user_id = u.id
              WHERE l.user_id = :user_id
              ORDER BY l.score DESC
-             LIMIT :lim'
-        );
+             LIMIT :lim');
         $stmt->bindValue('user_id', $userId, PDO::PARAM_INT);
         $stmt->bindValue('lim', $limit, PDO::PARAM_INT);
         $stmt->execute();
-
         return array_map([$this, 'mapToModel'], $stmt->fetchAll());
     }
 
     public function addScore(LeaderboardEntry $entry): LeaderboardEntry
     {
         $stmt = $this->db->prepare(
-            'INSERT INTO leaderboard (user_id, score, time_remaining, passengers_transported, difficulty_level, rules_violated, survived, played_at)
-             VALUES (:user_id, :score, :time_remaining, :passengers_transported, :difficulty_level, :rules_violated, :survived, NOW())'
+            'INSERT INTO leaderboard (
+                 user_id, score, time_remaining, passengers_transported,
+                 difficulty_level, rules_violated, survived, played_at
+             )
+             VALUES (
+                 :user_id, :score, :time_remaining, :passengers_transported,
+                 :difficulty_level, :rules_violated, :survived, NOW()
+             )'
         );
         $stmt->execute([
             'user_id' => $entry->user_id,
@@ -69,7 +70,6 @@ final class LeaderboardRepository
             'rules_violated' => $entry->rules_violated,
             'survived' => $entry->survived ? 1 : 0,
         ]);
-
         $entry->id = (int) $this->db->lastInsertId();
         return $entry;
     }
@@ -90,7 +90,6 @@ final class LeaderboardRepository
         $entry->survived = (bool) ($data['survived'] ?? false);
         $entry->played_at = $data['played_at'] ?? '';
         $entry->username = $data['username'] ?? null;
-
         return $entry;
     }
 }

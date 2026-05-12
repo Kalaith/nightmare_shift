@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -17,7 +18,6 @@ final class ItemService
     public function createInventoryItem(string $itemName, string $passengerSource, bool $isBackstory = false): array
     {
         $itemData = $this->getItemData($itemName);
-
         return array_merge([
             'id' => uniqid('item_'),
             'name' => $itemName,
@@ -43,11 +43,9 @@ final class ItemService
     public function applyItemEffects(array $gameState, array $item): array
     {
         $effects = $item['effects'] ?? [];
-
         foreach ($effects as $effect) {
             $type = $effect['type'] ?? '';
             $value = (float) ($effect['value'] ?? 0);
-
             switch ($type) {
                 case 'fuel_bonus':
                     $gameState['fuel'] = min(100, ($gameState['fuel'] ?? 0) + $value);
@@ -76,7 +74,6 @@ final class ItemService
     {
         $inventory = $gameState['inventory'] ?? [];
         $currentTime = time();
-
         foreach ($inventory as $item) {
             if (($item['type'] ?? '') !== 'cursed') {
                 continue;
@@ -95,7 +92,6 @@ final class ItemService
 
             $penaltyType = $cursed['penaltyType'] ?? '';
             $penaltyValue = (float) ($cursed['penaltyValue'] ?? 0);
-
             switch ($penaltyType) {
                 case 'fuel_drain':
                     $gameState['fuel'] = max(0, ($gameState['fuel'] ?? 0) - $penaltyValue);
@@ -125,7 +121,6 @@ final class ItemService
 
         $protectsAgainst = $protective['protectsAgainst'] ?? [];
         $usesRemaining = $protective['usesRemaining'] ?? 1;
-
         return $usesRemaining > 0 && (empty($protectsAgainst) || in_array($threat, $protectsAgainst, true));
     }
 
@@ -136,18 +131,17 @@ final class ItemService
      */
     public function processItemDeterioration(array $inventory): array
     {
-        return array_values(array_filter(
-            array_map(function ($item) {
-                if (isset($item['durability']) && $item['durability'] !== null) {
-                    $item['durability'] = max(0, $item['durability'] - 1);
-                    if ($item['durability'] <= 0) {
-                        return null; // Item destroyed
-                    }
+        return array_values(array_filter(array_map(function ($item) {
+
+            if (isset($item['durability']) && $item['durability'] !== null) {
+                $item['durability'] = max(0, $item['durability'] - 1);
+                if ($item['durability'] <= 0) {
+                    return null;
                 }
-                return $item;
-            }, $inventory),
-            fn($item) => $item !== null
-        ));
+            }
+
+            return $item;
+        }, $inventory), fn($item) => $item !== null));
     }
 
     // ─── Private Helpers ──────────────────────────────────────────────
@@ -156,13 +150,49 @@ final class ItemService
     {
         // Known item definitions — subset of the frontend's item database
         $items = [
-            'Obsidian Mirror' => ['type' => 'protective', 'rarity' => 'rare', 'description' => 'Reflects supernatural gazes', 'protectiveProperties' => ['protectionType' => 'supernatural_immunity', 'protectionStrength' => 0.8, 'usesRemaining' => 3]],
-            'Passenger Manifest' => ['type' => 'story', 'rarity' => 'uncommon', 'description' => 'A list of names that should never be spoken'],
-            'Cold Coffee' => ['type' => 'consumable', 'rarity' => 'common', 'description' => 'Lukewarm at best', 'effects' => [['type' => 'fuel_bonus', 'value' => 5]]],
-            'Cursed Coin' => ['type' => 'cursed', 'rarity' => 'uncommon', 'description' => 'It keeps finding its way back', 'cursedProperties' => ['penaltyType' => 'fuel_drain', 'penaltyValue' => 2, 'triggersAfter' => 3, 'canBeRemoved' => true]],
-            'Lucky Dice' => ['type' => 'protective', 'rarity' => 'rare', 'description' => 'Always rolls in your favor', 'protectiveProperties' => ['protectionType' => 'lucky_encounters', 'protectionStrength' => 0.6, 'usesRemaining' => 5]],
+            'Obsidian Mirror' => [
+                'type' => 'protective',
+                'rarity' => 'rare',
+                'description' => 'Reflects supernatural gazes',
+                'protectiveProperties' => [
+                    'protectionType' => 'supernatural_immunity',
+                    'protectionStrength' => 0.8,
+                    'usesRemaining' => 3,
+                ],
+            ],
+            'Passenger Manifest' => [
+                'type' => 'story',
+                'rarity' => 'uncommon',
+                'description' => 'A list of names that should never be spoken',
+            ],
+            'Cold Coffee' => [
+                'type' => 'consumable',
+                'rarity' => 'common',
+                'description' => 'Lukewarm at best',
+                'effects' => [['type' => 'fuel_bonus', 'value' => 5]],
+            ],
+            'Cursed Coin' => [
+                'type' => 'cursed',
+                'rarity' => 'uncommon',
+                'description' => 'It keeps finding its way back',
+                'cursedProperties' => [
+                    'penaltyType' => 'fuel_drain',
+                    'penaltyValue' => 2,
+                    'triggersAfter' => 3,
+                    'canBeRemoved' => true,
+                ],
+            ],
+            'Lucky Dice' => [
+                'type' => 'protective',
+                'rarity' => 'rare',
+                'description' => 'Always rolls in your favor',
+                'protectiveProperties' => [
+                    'protectionType' => 'lucky_encounters',
+                    'protectionStrength' => 0.6,
+                    'usesRemaining' => 5,
+                ],
+            ],
         ];
-
         return $items[$itemName] ?? [];
     }
 }

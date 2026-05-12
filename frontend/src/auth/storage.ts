@@ -74,18 +74,31 @@ export const getGuestSession = (): GuestSessionData | null => {
 };
 
 export const saveGuestSession = (session: GuestSessionData): void => {
-  localStorage.setItem(NIGHTMARE_SHIFT_GUEST_STORAGE_KEY, JSON.stringify(session));
+  try {
+    localStorage.setItem(NIGHTMARE_SHIFT_GUEST_STORAGE_KEY, JSON.stringify(session));
+  } catch {
+    // Ignore storage errors; the active session can still continue in memory.
+  }
 };
 
 export const clearGuestSession = (): void => {
-  localStorage.removeItem(NIGHTMARE_SHIFT_GUEST_STORAGE_KEY);
+  try {
+    localStorage.removeItem(NIGHTMARE_SHIFT_GUEST_STORAGE_KEY);
+  } catch {
+    // Ignore storage errors.
+  }
 };
 
 export const getActiveToken = (): string | null => {
+  const frontpageToken = getFrontpageToken();
+  if (frontpageToken) {
+    return frontpageToken;
+  }
+
   const guestSession = getGuestSession();
   if (guestSession?.token) {
     return guestSession.token;
   }
 
-  return getFrontpageToken();
+  return null;
 };

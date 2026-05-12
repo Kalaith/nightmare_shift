@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controllers;
@@ -9,6 +10,7 @@ use App\External\GameSaveRepository;
 use App\External\PlayerStatsRepository;
 use App\External\UserRepository;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 final class AuthController
 {
@@ -17,7 +19,8 @@ final class AuthController
         private readonly UserRepository $userRepo,
         private readonly PlayerStatsRepository $statsRepo,
         private readonly GameSaveRepository $saveRepo
-    ) {}
+    ) {
+    }
 
     public function session(Request $request, Response $response): void
     {
@@ -40,9 +43,14 @@ final class AuthController
         }
 
         try {
-            $user = !empty($authUser['is_guest'])
-                ? ($this->userRepo->findById((int) $authUser['id']) ?? $this->userRepo->upsertWebHatcheryUser($whUserId, $email, $username))
-                : $this->userRepo->upsertWebHatcheryUser($whUserId, $email, $username);
+            if (!empty($authUser['is_guest'])) {
+                $user = $this->userRepo->findById((int) $authUser['id']);
+                if ($user === null) {
+                    $user = $this->userRepo->upsertWebHatcheryUser($whUserId, $email, $username);
+                }
+            } else {
+                $user = $this->userRepo->upsertWebHatcheryUser($whUserId, $email, $username);
+            }
 
             $stats = $this->statsRepo->findByUserId($user->id);
             if ($stats === null) {
@@ -125,9 +133,28 @@ final class AuthController
             return;
         }
 
-        $guestUserId = (int) $request->get('guest_user_id', 0);
+        $guestToken = trim((string) $request->get('guest_token', ''));
+        if ($guestToken === '') {
+            $response->error('guest_token is required', 422);
+            return;
+        }
+
+        try {
+            $guestClaims = (array) JWT::decode($guestToken, new Key($_ENV['JWT_SECRET'] ?? '', 'HS256'));
+        } catch (\Exception $e) {
+            $response->error('Guest token could not be validated', 422);
+            return;
+        }
+
+        $isGuestToken = (bool) ($guestClaims['is_guest'] ?? false) || (($guestClaims['auth_type'] ?? null) === 'guest');
+        if (!$isGuestToken) {
+            $response->error('Guest token is not a guest session', 422);
+            return;
+        }
+
+        $guestUserId = (int) ($guestClaims['guest_user_id'] ?? 0);
         if ($guestUserId <= 0) {
-            $response->error('Invalid guest user identifier', 422);
+            $response->error('Guest token is missing its internal guest user id', 422);
             return;
         }
 
@@ -157,7 +184,9 @@ final class AuthController
             $this->mergeBackstoryProgress($guestUser->id, $targetUser->id);
             $this->mergeAlmanacEntries($guestUser->id, $targetUser->id);
 
-            $stmt = $this->pdo->prepare('UPDATE leaderboard SET user_id = :target_user_id WHERE user_id = :guest_user_id');
+            $stmt = $this->pdo->prepare(
+                'UPDATE leaderboard SET user_id = :target_user_id WHERE user_id = :guest_user_id'
+            );
             $stmt->execute([
                 'target_user_id' => $targetUser->id,
                 'guest_user_id' => $guestUser->id,
@@ -166,7 +195,8 @@ final class AuthController
             $this->userRepo->deleteById($guestUser->id);
             $this->pdo->commit();
 
-            $stats = $this->statsRepo->findByUserId($targetUser->id) ?? $this->statsRepo->createDefault($targetUser->id);
+            $stats = $this->statsRepo->findByUserId($targetUser->id)
+                ?? $this->statsRepo->createDefault($targetUser->id);
 
             $response->success([
                 'linked' => true,
@@ -199,7 +229,9 @@ final class AuthController
 
         $targetStats = $this->statsRepo->findByUserId($targetUserId);
         if ($targetStats === null) {
-            $stmt = $this->pdo->prepare('UPDATE player_stats SET user_id = :target_user_id WHERE user_id = :guest_user_id');
+            $stmt = $this->pdo->prepare(
+                'UPDATE player_stats SET user_id = :target_user_id WHERE user_id = :guest_user_id'
+            );
             $stmt->execute([
                 'target_user_id' => $targetUserId,
                 'guest_user_id' => $guestUserId,
@@ -232,23 +264,52 @@ final class AuthController
             'total_rides_completed' => $targetStats->total_rides_completed + $guestStats->total_rides_completed,
             'total_earnings' => $targetStats->total_earnings + $guestStats->total_earnings,
             'total_fuel_used' => $targetStats->total_fuel_used + $guestStats->total_fuel_used,
-            'total_time_played_minutes' => $targetStats->total_time_played_minutes + $guestStats->total_time_played_minutes,
+            'total_time_played_minutes' => $targetStats->total_time_played_minutes
+                + $guestStats->total_time_played_minutes,
             'best_shift_earnings' => max($targetStats->best_shift_earnings, $guestStats->best_shift_earnings),
             'best_shift_rides' => max($targetStats->best_shift_rides, $guestStats->best_shift_rides),
             'longest_shift_minutes' => max($targetStats->longest_shift_minutes, $guestStats->longest_shift_minutes),
             'bank_balance' => $targetStats->bank_balance + $guestStats->bank_balance,
             'lore_fragments' => $targetStats->lore_fragments + $guestStats->lore_fragments,
-            'unlocked_skills' => array_values(array_unique(array_merge($targetStats->unlocked_skills, $guestStats->unlocked_skills))),
-            'passengers_encountered' => array_values(array_unique(array_merge($targetStats->passengers_encountered, $guestStats->passengers_encountered))),
-            'backstories_unlocked' => array_values(array_unique(array_merge($targetStats->backstories_unlocked, $guestStats->backstories_unlocked))),
-            'legendary_passengers' => array_values(array_unique(array_merge($targetStats->legendary_passengers, $guestStats->legendary_passengers))),
-            'achievements_unlocked' => array_values(array_unique(array_merge($targetStats->achievements_unlocked, $guestStats->achievements_unlocked))),
-            'rules_violated_history' => array_values(array_merge($targetStats->rules_violated_history, $guestStats->rules_violated_history)),
+            'unlocked_skills' => $this->mergeUniqueArrays(
+                $targetStats->unlocked_skills,
+                $guestStats->unlocked_skills
+            ),
+            'passengers_encountered' => $this->mergeUniqueArrays(
+                $targetStats->passengers_encountered,
+                $guestStats->passengers_encountered
+            ),
+            'backstories_unlocked' => $this->mergeUniqueArrays(
+                $targetStats->backstories_unlocked,
+                $guestStats->backstories_unlocked
+            ),
+            'legendary_passengers' => $this->mergeUniqueArrays(
+                $targetStats->legendary_passengers,
+                $guestStats->legendary_passengers
+            ),
+            'achievements_unlocked' => $this->mergeUniqueArrays(
+                $targetStats->achievements_unlocked,
+                $guestStats->achievements_unlocked
+            ),
+            'rules_violated_history' => array_values(array_merge(
+                $targetStats->rules_violated_history,
+                $guestStats->rules_violated_history
+            )),
             'almanac_progress' => $mergedAlmanac,
         ]);
 
         $stmt = $this->pdo->prepare('DELETE FROM player_stats WHERE user_id = :guest_user_id');
         $stmt->execute(['guest_user_id' => $guestUserId]);
+    }
+
+    /**
+     * @param array<mixed> $first
+     * @param array<mixed> $second
+     * @return array<mixed>
+     */
+    private function mergeUniqueArrays(array $first, array $second): array
+    {
+        return array_values(array_unique(array_merge($first, $second)));
     }
 
     private function mergeGameSave(int $guestUserId, int $targetUserId): void
@@ -260,7 +321,9 @@ final class AuthController
 
         $targetSave = $this->saveRepo->findByUserId($targetUserId);
         if ($targetSave === null) {
-            $stmt = $this->pdo->prepare('UPDATE game_saves SET user_id = :target_user_id WHERE user_id = :guest_user_id');
+            $stmt = $this->pdo->prepare(
+                'UPDATE game_saves SET user_id = :target_user_id WHERE user_id = :guest_user_id'
+            );
             $stmt->execute([
                 'target_user_id' => $targetUserId,
                 'guest_user_id' => $guestUserId,
@@ -306,17 +369,29 @@ final class AuthController
 
     private function mergeAlmanacEntries(int $guestUserId, int $targetUserId): void
     {
-        $select = $this->pdo->prepare('SELECT passenger_id, knowledge_level, unlocked_secrets FROM almanac_entries WHERE user_id = :user_id');
+        $select = $this->pdo->prepare(
+            'SELECT passenger_id, knowledge_level, unlocked_secrets
+             FROM almanac_entries
+             WHERE user_id = :user_id'
+        );
         $select->execute(['user_id' => $guestUserId]);
         $guestEntries = $select->fetchAll(\PDO::FETCH_ASSOC) ?: [];
 
-        $targetSelect = $this->pdo->prepare('SELECT id, knowledge_level, unlocked_secrets FROM almanac_entries WHERE user_id = :user_id AND passenger_id = :passenger_id LIMIT 1');
+        $targetSelect = $this->pdo->prepare(
+            'SELECT id, knowledge_level, unlocked_secrets
+             FROM almanac_entries
+             WHERE user_id = :user_id AND passenger_id = :passenger_id
+             LIMIT 1'
+        );
         $insert = $this->pdo->prepare(
-            'INSERT INTO almanac_entries (user_id, passenger_id, knowledge_level, unlocked_secrets, created_at, updated_at)
+            'INSERT INTO almanac_entries (
+                 user_id, passenger_id, knowledge_level, unlocked_secrets, created_at, updated_at
+             )
              VALUES (:user_id, :passenger_id, :knowledge_level, :unlocked_secrets, NOW(), NOW())'
         );
         $update = $this->pdo->prepare(
-            'UPDATE almanac_entries SET knowledge_level = :knowledge_level, unlocked_secrets = :unlocked_secrets, updated_at = NOW()
+            'UPDATE almanac_entries
+             SET knowledge_level = :knowledge_level, unlocked_secrets = :unlocked_secrets, updated_at = NOW()
              WHERE id = :id'
         );
 
@@ -342,8 +417,11 @@ final class AuthController
 
             $targetSecrets = json_decode((string) ($targetEntry['unlocked_secrets'] ?? '[]'), true) ?: [];
             $update->execute([
-                'knowledge_level' => max((int) $targetEntry['knowledge_level'], (int) $entry['knowledge_level']),
-                'unlocked_secrets' => json_encode(array_values(array_unique(array_merge($targetSecrets, $guestSecrets)))),
+                'knowledge_level' => max(
+                    (int) $targetEntry['knowledge_level'],
+                    (int) $entry['knowledge_level']
+                ),
+                'unlocked_secrets' => json_encode($this->mergeUniqueArrays($targetSecrets, $guestSecrets)),
                 'id' => (int) $targetEntry['id'],
             ]);
         }

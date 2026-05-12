@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { gameApi } from '../api/gameApi';
 import type { PlayerStats } from '../types/game';
+import { env } from '../config/env';
 import {
   clearGuestSession,
   getFrontpageToken,
@@ -60,20 +61,24 @@ export const useAuthSession = () => {
     setError(null);
 
     try {
-      const params = new URLSearchParams(window.location.search);
-      const linkingGuestUserId = Number(params.get('guest_user_id') || '0');
       const frontpageToken = getFrontpageToken();
       const guestSession = getGuestSession();
 
-      if (linkingGuestUserId > 0 && frontpageToken) {
-        const linked = await gameApi.linkGuestAccount(linkingGuestUserId, frontpageToken);
+      if (frontpageToken && guestSession?.token) {
+        const linked = await gameApi.linkGuestAccount(guestSession.token, frontpageToken);
         clearGuestSession();
         const linkedUser = enrichUsername(linked.user, true);
         setUser(linkedUser);
         setStats(linked.stats);
-        params.delete('guest_user_id');
-        const nextQuery = params.toString();
-        window.history.replaceState({}, document.title, `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash}`);
+        setIsLoading(false);
+        return;
+      }
+
+      if (frontpageToken) {
+        const sessionData = await gameApi.session(frontpageToken);
+        const frontpageUser = enrichUsername(sessionData.user, true);
+        setUser(frontpageUser);
+        setStats(sessionData.stats);
         setIsLoading(false);
         return;
       }
@@ -83,15 +88,6 @@ export const useAuthSession = () => {
         const guestUser = enrichUsername(sessionData.user, false);
         saveGuestSession({ token: guestSession.token, user: guestUser });
         setUser(guestUser);
-        setStats(sessionData.stats);
-        setIsLoading(false);
-        return;
-      }
-
-      if (frontpageToken) {
-        const sessionData = await gameApi.session(frontpageToken);
-        const frontpageUser = enrichUsername(sessionData.user, true);
-        setUser(frontpageUser);
         setStats(sessionData.stats);
         setIsLoading(false);
         return;
@@ -147,20 +143,13 @@ export const useAuthSession = () => {
   }, [enrichUsername]);
 
   const getLinkAccountUrl = useCallback((): string => {
-    const baseLoginUrl =
-      loginUrl ||
-      import.meta.env.VITE_WEB_HATCHERY_LOGIN_URL ||
-      '/login';
+    const baseLoginUrl = loginUrl || env.webHatcheryLoginUrl;
 
     const url = new URL(baseLoginUrl, window.location.origin);
     url.searchParams.set('return_to', window.location.href);
 
-    if (user?.is_guest && user.id) {
-      url.searchParams.set('guest_user_id', String(user.id));
-    }
-
     return url.toString();
-  }, [loginUrl, user]);
+  }, [loginUrl]);
 
   return {
     user,

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Core;
@@ -8,9 +9,8 @@ final class Router
     /** @var array<string, array<string, array{controller: object, method: string}>> */
     private array $routes = [];
     private string $basePath = '';
-    /** @var callable[] */
+/** @var callable[] */
     private array $middleware = [];
-
     public function setBasePath(string $basePath): void
     {
         $this->basePath = rtrim($basePath, '/');
@@ -54,8 +54,7 @@ final class Router
         $httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
         $path = parse_url($requestUri, PHP_URL_PATH) ?? '/';
-
-        // Strip base path
+// Strip base path
         if ($this->basePath !== '' && str_starts_with($path, $this->basePath)) {
             $path = substr($path, strlen($this->basePath));
         }
@@ -66,33 +65,30 @@ final class Router
 
         $request = new Request();
         $response = new Response();
-
-        // Run middleware
+// Run middleware
         foreach ($this->middleware as $mw) {
             $result = $mw($request, $response);
             if ($result === false) {
-                return; // Middleware halted the request
+                return;
+            // Middleware halted the request
             }
         }
 
         // Match route
         $matched = $this->matchRoute($httpMethod, $path);
-
         if ($matched === null) {
             $response->error('Route not found: ' . $httpMethod . ' ' . $path, 404);
             return;
         }
 
         ['route' => $route, 'params' => $params] = $matched;
-
-        // Set route params on request
+// Set route params on request
         foreach ($params as $key => $value) {
             $request->setAttribute($key, $value);
         }
 
         $controller = $route['controller'];
         $method = $route['method'];
-
         try {
             $controller->$method($request, $response);
         } catch (\Exception $e) {
@@ -106,7 +102,6 @@ final class Router
     private function matchRoute(string $httpMethod, string $path): ?array
     {
         $routes = $this->routes[$httpMethod] ?? [];
-
         foreach ($routes as $routePath => $route) {
             $params = $this->matchPath($routePath, $path);
             if ($params !== null) {
@@ -124,7 +119,6 @@ final class Router
     {
         $routeParts = explode('/', trim($routePath, '/'));
         $requestParts = explode('/', trim($requestPath, '/'));
-
         if (count($routeParts) !== count($requestParts)) {
             return null;
         }

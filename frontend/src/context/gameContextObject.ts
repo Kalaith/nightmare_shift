@@ -15,6 +15,7 @@ export interface GameContextType {
   showRideRequest: () => void;
   gameOver: (reason: string) => void;
   endShift: (successful: boolean, overrideReason?: string) => void;
+  hasSavedGame: boolean;
 }
 
 export const GameContext = createContext<GameContextType | undefined>(undefined);

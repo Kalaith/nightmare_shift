@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -15,8 +16,8 @@ final class RequestPassengerAction
         private readonly WeatherService $weatherService,
         private readonly GameSaveRepository $saveRepo,
         private readonly GameSessionLogger $logger
-    ) {}
-
+    ) {
+    }
     /**
      * Select and assign the next passenger.
      *
@@ -35,12 +36,16 @@ final class RequestPassengerAction
         $weather = $gameState['currentWeather'] ?? [];
         $timeOfDay = $gameState['timeOfDay'] ?? [];
         $season = $gameState['season'] ?? [];
-
-        // Select passenger with environmental awareness
+// Select passenger with environmental awareness
         $passenger = !empty($weather)
-            ? $this->passengerService->selectWeatherAwarePassenger($usedPassengers, $difficultyLevel, $weather, $timeOfDay, $season)
+            ? $this->passengerService->selectWeatherAwarePassenger(
+                $usedPassengers,
+                $difficultyLevel,
+                $weather,
+                $timeOfDay,
+                $season
+            )
             : $this->passengerService->selectRandomPassenger($usedPassengers, $difficultyLevel);
-
         if ($passenger === null) {
             throw new \RuntimeException('No passengers available');
         }
@@ -57,21 +62,14 @@ final class RequestPassengerAction
             'radioOn' => false,
         ];
         $gameState['pendingTipOffer'] = null;
-
-        // Update weather
-        $gameState['currentWeather'] = $this->weatherService->updateWeather(
-            $weather,
-            time(),
-            $season
-        );
-
-        // Save
+// Update weather
+        $gameState['currentWeather'] = $this->weatherService->updateWeather($weather, time(), $season);
+// Save
         $this->saveRepo->save($userId, $gameState);
         $this->logger->log($userId, $gameState, 'passenger_requested', [
             'passengerId' => $passenger['id'] ?? null,
             'passengerName' => $passenger['name'] ?? null,
         ]);
-
         return $gameState;
     }
 }

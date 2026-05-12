@@ -291,9 +291,9 @@ export class RouteService {
   > {
     return ErrorHandling.wrap(
       () => {
-        // Handle negative values gracefully instead of throwing errors
-        const safeFuel = Math.max(0, currentFuel);
-        const safeTime = Math.max(0, currentTime);
+        // Resource values are currently advisory; backend route validation owns the final decision.
+        void currentFuel;
+        void currentTime;
 
         const routes = [
           {

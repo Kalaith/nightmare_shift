@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -16,8 +17,8 @@ final class EndShiftAction
         private readonly LeaderboardRepository $leaderboardRepo,
         private readonly GameSaveRepository $saveRepo,
         private readonly GameSessionLogger $logger
-    ) {}
-
+    ) {
+    }
     /**
      * End a shift — calculate final score, update stats, add to leaderboard.
      *
@@ -31,21 +32,19 @@ final class EndShiftAction
         }
 
         $gameState = $save->game_state;
-
         $earnings = (float) ($gameState['earnings'] ?? 0);
         $ridesCompleted = (int) ($gameState['ridesCompleted'] ?? 0);
         $timeRemaining = (float) ($gameState['timeRemaining'] ?? 0);
         $rulesViolated = (int) ($gameState['rulesViolated'] ?? 0);
         $difficultyLevel = (int) ($gameState['difficultyLevel'] ?? 0);
         $survived = ($gameState['gamePhase'] ?? '') === 'success';
-
         $shiftStartTime = (int) ($gameState['shiftStartTime'] ?? time());
         $timeSpent = (time() - $shiftStartTime) / 60; // minutes
 
         // Calculate score
         $score = (int) round($earnings * 0.4 + $ridesCompleted * 20 + $timeSpent * 0.1);
         if ($survived) {
-            $score += 50; // Survival bonus
+            $score += 50;
         }
 
         // Update player stats
@@ -63,15 +62,22 @@ final class EndShiftAction
             $bankTransfer = $survived
                 ? (int) floor($earnings * 0.2)
                 : (int) floor($earnings * 0.1);
-
             $usedPassengers = is_array($gameState['usedPassengers'] ?? null)
                 ? array_map('intval', $gameState['usedPassengers'])
                 : [];
-            $allEncountered = array_values(array_unique(array_merge($stats->passengers_encountered, $usedPassengers)));
-
-            $unlockedBackstories = array_keys(is_array($gameState['passengerBackstories'] ?? null) ? $gameState['passengerBackstories'] : []);
-            $allBackstories = array_values(array_unique(array_merge($stats->backstories_unlocked, array_map('intval', $unlockedBackstories))));
-
+            $allEncountered = array_values(array_unique(array_merge(
+                $stats->passengers_encountered,
+                $usedPassengers
+            )));
+            $unlockedBackstories = array_keys(
+                is_array($gameState['passengerBackstories'] ?? null)
+                    ? $gameState['passengerBackstories']
+                    : []
+            );
+            $allBackstories = array_values(array_unique(array_merge(
+                $stats->backstories_unlocked,
+                array_map('intval', $unlockedBackstories)
+            )));
             $updates = [
                 'total_rides_completed' => $stats->total_rides_completed + $ridesCompleted,
                 'total_earnings' => $stats->total_earnings + $earnings,
@@ -89,7 +95,6 @@ final class EndShiftAction
             }
             $this->statsRepo->updateStats($userId, $updates);
         }
-
         // Add to leaderboard
         $entry = new LeaderboardEntry();
         $entry->user_id = $userId;
@@ -100,7 +105,6 @@ final class EndShiftAction
         $entry->rules_violated = $rulesViolated;
         $entry->survived = $survived;
         $this->leaderboardRepo->addScore($entry);
-
         $finalState = $gameState;
         $finalState['gamePhase'] = $survived ? 'success' : ($gameState['gamePhase'] ?? 'gameOver');
         $this->logger->log($userId, $finalState, 'shift_ended', [
@@ -109,10 +113,8 @@ final class EndShiftAction
             'bankTransfer' => $bankTransfer,
             'loreReward' => $loreReward,
         ]);
-
-        // Clear save
+        // Clear save.
         $this->saveRepo->deleteByUserId($userId);
-
         return [
             'score' => $score,
             'earnings' => $earnings,

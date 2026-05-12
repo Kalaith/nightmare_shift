@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -18,8 +19,8 @@ final class StartShiftAction
         private readonly GameSaveRepository $saveRepo,
         private readonly PlayerStatsRepository $statsRepo,
         private readonly GameSessionLogger $logger
-    ) {}
-
+    ) {
+    }
     /**
      * Start a new shift — generate rules, weather, and initial game state.
      *
@@ -32,17 +33,14 @@ final class StartShiftAction
         $playerExperience = $stats
             ? $this->gameEngine->calculatePlayerExperience($stats->toArray())
             : 0;
-
-        // Generate rules/guidelines
+// Generate rules/guidelines
         $engineResult = $this->gameEngine->generateShiftRules($playerExperience);
-
-        // Generate weather
+// Generate weather
         $season = $this->weatherService->getCurrentSeason();
         $weather = $this->weatherService->generateInitialWeather($season);
         $timeOfDay = $this->weatherService->updateTimeOfDay(time(), time());
         $hazards = $this->weatherService->generateEnvironmentalHazards($weather, $timeOfDay, $season);
-
-        // Build initial game state
+// Build initial game state
         $gameState = [
             'currentScreen' => Constants::SCREEN_GAME,
             'fuel' => Constants::INITIAL_FUEL,
@@ -80,8 +78,7 @@ final class StartShiftAction
             'pendingTipOffer' => null,
             'sessionId' => uniqid('shift_', true),
         ];
-
-        // Update stats
+// Update stats
         if ($stats) {
             $this->statsRepo->updateStats($userId, [
                 'total_shifts_started' => $stats->total_shifts_started + 1,
@@ -93,7 +90,6 @@ final class StartShiftAction
         $this->logger->log($userId, $gameState, 'shift_started', [
             'difficultyLevel' => $engineResult['difficultyLevel'],
         ]);
-
         return $gameState;
     }
 }

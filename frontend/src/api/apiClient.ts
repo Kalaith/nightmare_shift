@@ -1,18 +1,13 @@
 import axios from 'axios';
 import { getActiveToken, persistLoginUrl } from '../auth/storage';
-
-// Determine the base URL from the environment or use a relative path
-const BASE_URL = import.meta.env.VITE_API_URL;
-if (!BASE_URL) {
-    throw new Error('VITE_API_URL environment variable is not set. Please add it to your .env file.');
-}
+import { env } from '../config/env';
 
 /**
  * Standardized Web Hatchery Axios Instance
  * Automatically handles Bearer tokens and 401 Unauthorized redirects.
  */
 export const apiClient = axios.create({
-    baseURL: BASE_URL,
+    baseURL: env.apiUrl,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -49,7 +44,7 @@ apiClient.interceptors.response.use(
         if (error.response?.status === 401) {
             const loginUrl =
                 error.response?.data?.login_url ||
-                import.meta.env.VITE_WEB_HATCHERY_LOGIN_URL;
+                env.webHatcheryLoginUrl;
 
             if (loginUrl) {
                 try {

@@ -112,10 +112,10 @@ export const gameApi = {
     return res.data.data;
   },
 
-  async linkGuestAccount(guestUserId: number, token: string): Promise<SessionData> {
+  async linkGuestAccount(guestToken: string, token: string): Promise<SessionData> {
     const res = await apiClient.post<BackendResponse<SessionData>>(
       '/auth/link-guest',
-      { guest_user_id: guestUserId },
+      { guest_token: guestToken },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -167,8 +167,9 @@ export const gameApi = {
     return res.data.data;
   },
 
-  async saveGame(gameState: GameState): Promise<void> {
-    await apiClient.post('/game/save', { gameState });
+  async saveGame(): Promise<GameState> {
+    const res = await apiClient.post<BackendResponse<GameState>>('/game/save');
+    return res.data.data;
   },
 
   async loadGame(): Promise<GameState | null> {

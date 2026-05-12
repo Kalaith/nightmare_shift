@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -13,9 +14,9 @@ use App\External\GameContentRepository;
  */
 final class PassengerService
 {
-    public function __construct(
-        private readonly GameContentRepository $contentRepo
-    ) {}
+    public function __construct(private readonly GameContentRepository $contentRepo)
+    {
+    }
 
     /**
      * Select a random passenger considering used list and difficulty.
@@ -26,9 +27,8 @@ final class PassengerService
     public function selectRandomPassenger(array $usedPassengers = [], int $difficultyLevel = 0): ?array
     {
         $available = $this->contentRepo->getAvailablePassengers($usedPassengers);
-
         if (empty($available)) {
-            // All passengers used, reset pool
+        // All passengers used, reset pool
             $available = $this->contentRepo->getAllPassengers();
         }
 
@@ -49,14 +49,12 @@ final class PassengerService
         array $season = []
     ): ?array {
         $available = $this->contentRepo->getAvailablePassengers($usedPassengers);
-
         if (empty($available)) {
             $available = $this->contentRepo->getAllPassengers();
         }
 
         // Apply environmental weights
         $weighted = $this->applyEnvironmentalWeights($available, $weather, $timeOfDay, $season, $difficultyLevel);
-
         return $this->selectFromWeightedPool($weighted);
     }
 
@@ -68,8 +66,7 @@ final class PassengerService
         $chance = $isFirstEncounter
             ? Constants::BACKSTORY_UNLOCK_FIRST
             : Constants::BACKSTORY_UNLOCK_REPEAT;
-
-        // Legendary passengers always unlock on first encounter
+// Legendary passengers always unlock on first encounter
         if ($isFirstEncounter && ($passenger['rarity'] ?? 'common') === 'legendary') {
             return true;
         }
@@ -102,7 +99,6 @@ final class PassengerService
 
         $weights = $this->getAdjustedRarityWeights($difficultyLevel);
         $weighted = [];
-
         foreach ($passengers as $passenger) {
             $rarity = $passenger['rarity'] ?? 'common';
             $weight = $weights[$rarity] ?? 1;
@@ -116,7 +112,6 @@ final class PassengerService
     {
         $base = Constants::RARITY_WEIGHTS;
         $diffMod = min(1.0, $difficultyLevel * 0.15);
-
         return [
             'common' => max(10, $base['common'] - (int) ($diffMod * 20)),
             'uncommon' => $base['uncommon'] ?? 25,
@@ -133,16 +128,13 @@ final class PassengerService
         int $difficultyLevel
     ): array {
         $weighted = [];
-
         foreach ($passengers as $passenger) {
             $rarity = $passenger['rarity'] ?? 'common';
             $baseWeight = $this->getBaseRarityWeight($rarity, $difficultyLevel);
-
-            // Apply environmental modifiers
+        // Apply environmental modifiers
             $weatherMod = $this->getWeatherModifier($passenger, $weather);
             $timeMod = $this->getTimeModifier($passenger, $timeOfDay);
             $seasonMod = $this->getSeasonalModifier($passenger, $season);
-
             $finalWeight = max(1, (int) ($baseWeight * $weatherMod * $timeMod * $seasonMod));
             $weighted[] = ['passenger' => $passenger, 'weight' => $finalWeight];
         }
@@ -160,8 +152,7 @@ final class PassengerService
     {
         $weatherType = $weather['type'] ?? 'clear';
         $supernatural = $passenger['supernatural'] ?? '';
-
-        // Supernatural passengers more likely in bad weather
+// Supernatural passengers more likely in bad weather
         if ($supernatural !== '' && $weatherType !== 'clear') {
             return 1.5;
         }
@@ -173,8 +164,7 @@ final class PassengerService
     {
         $phase = $timeOfDay['phase'] ?? 'night';
         $rarity = $passenger['rarity'] ?? 'common';
-
-        // Rare/legendary passengers more likely at late night
+// Rare/legendary passengers more likely at late night
         if ($phase === 'latenight' && in_array($rarity, ['rare', 'legendary'], true)) {
             return 2.0;
         }
@@ -201,7 +191,6 @@ final class PassengerService
 
         $roll = random_int(1, $totalWeight);
         $cumulative = 0;
-
         foreach ($weighted as $entry) {
             $cumulative += $entry['weight'];
             if ($roll <= $cumulative) {

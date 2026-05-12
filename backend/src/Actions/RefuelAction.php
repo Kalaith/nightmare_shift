@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -11,7 +12,8 @@ final class RefuelAction
     public function __construct(
         private readonly GameSaveRepository $saveRepo,
         private readonly GameSessionLogger $logger
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<string, mixed>

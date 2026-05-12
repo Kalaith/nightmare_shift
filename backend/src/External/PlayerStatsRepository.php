@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\External;
@@ -8,16 +9,15 @@ use PDO;
 
 final class PlayerStatsRepository
 {
-    public function __construct(
-        private readonly PDO $db
-    ) {}
+    public function __construct(private readonly PDO $db)
+    {
+    }
 
     public function findByUserId(int $userId): ?PlayerStats
     {
         $stmt = $this->db->prepare('SELECT * FROM player_stats WHERE user_id = :user_id LIMIT 1');
         $stmt->execute(['user_id' => $userId]);
         $data = $stmt->fetch();
-
         return $data ? $this->mapToModel($data) : null;
     }
 
@@ -32,13 +32,11 @@ final class PlayerStatsRepository
              VALUES (:user_id, NOW(), NOW(), NOW(), NOW())'
         );
         $stmt->execute(['user_id' => $userId]);
-
         $stats = new PlayerStats();
         $stats->id = (int) $this->db->lastInsertId();
         $stats->user_id = $userId;
         $stats->first_play_date = $now;
         $stats->last_play_date = $now;
-
         return $stats;
     }
 
@@ -55,10 +53,8 @@ final class PlayerStatsRepository
             'legendary_passengers', 'achievements_unlocked', 'rules_violated_history',
             'almanac_progress'
         ];
-
         $sets = [];
         $params = ['user_id' => $userId];
-
         foreach ($updates as $key => $value) {
             if (in_array($key, $jsonFields, true)) {
                 $sets[] = "{$key} = :val_{$key}";
@@ -71,7 +67,6 @@ final class PlayerStatsRepository
 
         $sets[] = 'last_play_date = NOW()';
         $sets[] = 'updated_at = NOW()';
-
         $sql = 'UPDATE player_stats SET ' . implode(', ', $sets) . ' WHERE user_id = :user_id';
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
@@ -107,7 +102,6 @@ final class PlayerStatsRepository
         $stats->last_play_date = $data['last_play_date'] ?? null;
         $stats->created_at = $data['created_at'] ?? '';
         $stats->updated_at = $data['updated_at'] ?? '';
-
         return $stats;
     }
 }

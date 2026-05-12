@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controllers;
@@ -22,12 +23,14 @@ final class PlayerController
         private readonly GetAlmanacAction $getAlmanacAction,
         private readonly PurchaseSkillAction $purchaseSkillAction,
         private readonly UpgradeAlmanacAction $upgradeAlmanacAction
-    ) {}
-
+    ) {
+    }
     public function getStats(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         try {
             $stats = $this->getStatsAction->execute($userId);
@@ -44,7 +47,6 @@ final class PlayerController
     public function getLeaderboard(Request $request, Response $response): void
     {
         $limit = (int) ($request->query()['limit'] ?? 10);
-
         try {
             $leaderboard = $this->getLeaderboardAction->execute($limit);
             $response->success($leaderboard, 'Leaderboard');
@@ -56,7 +58,9 @@ final class PlayerController
     public function getAlmanac(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         try {
             $almanac = $this->getAlmanacAction->execute($userId);
@@ -68,8 +72,11 @@ final class PlayerController
 
     public function purchaseSkill(Request $request, Response $response): void
     {
+
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         $skillId = (string) $request->get('skill_id', '');
         if ($skillId === '') {
@@ -88,7 +95,9 @@ final class PlayerController
     public function upgradeAlmanac(Request $request, Response $response): void
     {
         $userId = $this->getUserId($request, $response);
-        if ($userId === null) return;
+        if ($userId === null) {
+            return;
+        }
 
         $passengerId = (int) $request->get('passenger_id', 0);
         if ($passengerId <= 0) {
@@ -103,7 +112,6 @@ final class PlayerController
             $response->error($e->getMessage(), 400);
         }
     }
-
     private function getUserId(Request $request, Response $response): ?int
     {
         $authUser = $request->getAttribute('auth_user');

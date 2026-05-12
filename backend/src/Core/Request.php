@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Core;
@@ -7,11 +8,9 @@ final class Request
 {
     /** @var array<string, mixed> */
     private array $attributes = [];
-
-    /** @var array<string, mixed>|null */
+/** @var array<string, mixed>|null */
     private ?array $parsedBody = null;
-
-    /**
+/**
      * Get all input data (merged query + body).
      * @return array<string, mixed>
      */
@@ -49,7 +48,6 @@ final class Request
         }
 
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-
         if (str_contains($contentType, 'application/json')) {
             $rawBody = file_get_contents('php://input');
             $this->parsedBody = $rawBody ? (json_decode($rawBody, true) ?? []) : [];

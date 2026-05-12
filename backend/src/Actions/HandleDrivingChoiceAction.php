@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -19,7 +20,8 @@ final class HandleDrivingChoiceAction
         private readonly GameEngineService $gameEngine,
         private readonly GameSaveRepository $saveRepo,
         private readonly GameSessionLogger $logger
-    ) {}
+    ) {
+    }
 
     /**
      * Process a driving route choice.
@@ -126,7 +128,8 @@ final class HandleDrivingChoiceAction
             }
         }
 
-        $gameState['rideProgress']['routeChoicesMade'] = (int) ($gameState['rideProgress']['routeChoicesMade'] ?? 0) + 1;
+        $gameState['rideProgress']['routeChoicesMade'] =
+            (int) ($gameState['rideProgress']['routeChoicesMade'] ?? 0) + 1;
         $gameState['rideProgress']['stepIndex'] = min(4, (int) ($gameState['rideProgress']['stepIndex'] ?? 0) + 1);
         $gameState['currentDrivingPhase'] = $phase === 'pickup' ? 'destination' : $phase;
         $gameState['gamePhase'] = 'interaction';

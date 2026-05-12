@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\External;
@@ -7,7 +8,9 @@ use PDO;
 
 final class GameSessionLogRepository
 {
-    public function __construct(private readonly PDO $db) {}
+    public function __construct(private readonly PDO $db)
+    {
+    }
 
     /**
      * @param array<string, mixed> $eventData
@@ -22,7 +25,9 @@ final class GameSessionLogRepository
         array $stateSnapshot
     ): void {
         $stmt = $this->db->prepare(
-            'INSERT INTO game_session_logs (user_id, session_id, event_type, game_phase, event_data, state_snapshot, created_at)
+            'INSERT INTO game_session_logs (
+                 user_id, session_id, event_type, game_phase, event_data, state_snapshot, created_at
+             )
              VALUES (:user_id, :session_id, :event_type, :game_phase, :event_data, :state_snapshot, NOW())'
         );
         $stmt->execute([

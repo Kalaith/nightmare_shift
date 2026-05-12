@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -14,7 +15,8 @@ final class LeaderboardEntry
     public int $rules_violated = 0;
     public bool $survived = false;
     public string $played_at = '';
-    public ?string $username = null; // Joined from users table
+    public ?string $username = null;
+// Joined from users table
 
     /**
      * @return array<string, mixed>

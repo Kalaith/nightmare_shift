@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Core;
@@ -76,21 +77,54 @@ final class Container
         $sessionLogger      = new GameSessionLogger($sessionLogRepo);
 
         // ── Actions ─────────────────────────────────────────────────
-        $startShiftAction         = new StartShiftAction($gameEngineService, $weatherService, $saveRepo, $statsRepo, $sessionLogger);
-        $requestPassengerAction   = new RequestPassengerAction($passengerService, $weatherService, $saveRepo, $sessionLogger);
-        $declineRideAction        = new DeclineRideAction($saveRepo, $sessionLogger);
-        $handleDrivingChoiceAction = new HandleDrivingChoiceAction($routeService, $reputationService, $weatherService, $gameEngineService, $saveRepo, $sessionLogger);
-        $handleInteractionAction  = new HandleInteractionAction($gameEngineService, $guidelineService, $itemService, $saveRepo, $sessionLogger);
-        $completeRideAction       = new CompleteRideAction($reputationService, $itemService, $passengerService, $statsRepo, $backstoryRepo, $almanacRepo, $saveRepo, $sessionLogger);
-        $endShiftAction           = new EndShiftAction($statsRepo, $leaderboardRepo, $saveRepo, $sessionLogger);
-        $saveGameAction           = new SaveGameAction($saveRepo);
-        $loadGameAction           = new LoadGameAction($saveRepo);
-        $refuelAction             = new RefuelAction($saveRepo, $sessionLogger);
-        $getStatsAction           = new GetPlayerStatsAction($statsRepo);
-        $getLeaderboardAction     = new GetLeaderboardAction($leaderboardRepo);
-        $getAlmanacAction         = new GetAlmanacAction($almanacRepo);
-        $purchaseSkillAction      = new PurchaseSkillAction($statsRepo, $contentRepo, $sessionLogger);
-        $upgradeAlmanacAction     = new UpgradeAlmanacAction($statsRepo, $contentRepo, $almanacRepo, $sessionLogger);
+        $startShiftAction = new StartShiftAction(
+            $gameEngineService,
+            $weatherService,
+            $saveRepo,
+            $statsRepo,
+            $sessionLogger
+        );
+        $requestPassengerAction = new RequestPassengerAction(
+            $passengerService,
+            $weatherService,
+            $saveRepo,
+            $sessionLogger
+        );
+        $declineRideAction = new DeclineRideAction($saveRepo, $sessionLogger);
+        $handleDrivingChoiceAction = new HandleDrivingChoiceAction(
+            $routeService,
+            $reputationService,
+            $weatherService,
+            $gameEngineService,
+            $saveRepo,
+            $sessionLogger
+        );
+        $handleInteractionAction = new HandleInteractionAction(
+            $gameEngineService,
+            $guidelineService,
+            $itemService,
+            $saveRepo,
+            $sessionLogger
+        );
+        $completeRideAction = new CompleteRideAction(
+            $reputationService,
+            $itemService,
+            $passengerService,
+            $statsRepo,
+            $backstoryRepo,
+            $almanacRepo,
+            $saveRepo,
+            $sessionLogger
+        );
+        $endShiftAction = new EndShiftAction($statsRepo, $leaderboardRepo, $saveRepo, $sessionLogger);
+        $saveGameAction = new SaveGameAction($saveRepo);
+        $loadGameAction = new LoadGameAction($saveRepo);
+        $refuelAction = new RefuelAction($saveRepo, $sessionLogger);
+        $getStatsAction = new GetPlayerStatsAction($statsRepo);
+        $getLeaderboardAction = new GetLeaderboardAction($leaderboardRepo);
+        $getAlmanacAction = new GetAlmanacAction($almanacRepo);
+        $purchaseSkillAction = new PurchaseSkillAction($statsRepo, $contentRepo, $sessionLogger);
+        $upgradeAlmanacAction = new UpgradeAlmanacAction($statsRepo, $contentRepo, $almanacRepo, $sessionLogger);
 
         // ── Controllers ─────────────────────────────────────────────
         $this->controllers = [
@@ -110,7 +144,13 @@ final class Container
                 $routeService,
                 $ruleRepo
             ),
-            'player'  => new PlayerController($getStatsAction, $getLeaderboardAction, $getAlmanacAction, $purchaseSkillAction, $upgradeAlmanacAction),
+            'player'  => new PlayerController(
+                $getStatsAction,
+                $getLeaderboardAction,
+                $getAlmanacAction,
+                $purchaseSkillAction,
+                $upgradeAlmanacAction
+            ),
             'admin'   => new AdminController($sessionLogRepo),
         ];
     }

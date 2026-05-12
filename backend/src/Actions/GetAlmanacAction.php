@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -7,9 +8,9 @@ use App\External\AlmanacRepository;
 
 final class GetAlmanacAction
 {
-    public function __construct(
-        private readonly AlmanacRepository $almanacRepo
-    ) {}
+    public function __construct(private readonly AlmanacRepository $almanacRepo)
+    {
+    }
 
     /**
      * @return array<int, array<string, mixed>>

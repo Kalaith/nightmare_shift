@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -23,8 +24,8 @@ final class CompleteRideAction
         private readonly AlmanacRepository $almanacRepo,
         private readonly GameSaveRepository $saveRepo,
         private readonly GameSessionLogger $logger
-    ) {}
-
+    ) {
+    }
     /**
      * Complete a ride — handle drop-off, items, backstory, reputation.
      *
@@ -40,36 +41,34 @@ final class CompleteRideAction
         $gameState = $save->game_state;
         $passenger = $gameState['currentPassenger'] ?? null;
         $ride = $gameState['currentRide'] ?? null;
-
         if ($passenger === null || $ride === null) {
             throw new \RuntimeException('No active ride to complete');
         }
 
         $passengerId = (int) ($passenger['id'] ?? 0);
         $fare = (float) ($ride['actualFare'] ?? $passenger['fare'] ?? 10);
-
-        // Apply reputation modifier to fare
+        // Apply reputation modifier to fare.
         $reputationMap = $gameState['passengerReputation'] ?? [];
         $reputation = $this->reputationService->getPassengerReputation($reputationMap, $passengerId);
         $repMod = $this->reputationService->getReputationModifier($reputation);
         $fare *= $repMod['fareMultiplier'];
 
-        // Add earnings
+        // Add earnings.
         $gameState['earnings'] = ($gameState['earnings'] ?? 0) + $fare;
         $gameState['ridesCompleted'] = ($gameState['ridesCompleted'] ?? 0) + 1;
 
-        // Update reputation
+        // Update reputation.
         $gameState['passengerReputation'] = $this->reputationService->updateReputation(
             $reputationMap,
             $passengerId,
             $isPositiveOutcome
         );
 
-        // Handle items
+        // Handle items.
         $itemsReceived = [];
         $passengerItems = $passenger['items'] ?? [];
         if (!empty($passengerItems)) {
-            // Random chance to receive an item
+            // Random chance to receive an item.
             if ((random_int(0, 100) / 100) < 0.3) {
                 $itemName = $passengerItems[array_rand($passengerItems)];
                 $newItem = $this->itemService->createInventoryItem($itemName, $passenger['name'] ?? 'Unknown');
@@ -82,7 +81,6 @@ final class CompleteRideAction
         $passengerBackstories = $gameState['passengerBackstories'] ?? [];
         $isFirstEncounter = !isset($passengerBackstories[$passengerId]);
         $backstoryUnlocked = null;
-
         if ($this->passengerService->checkBackstoryUnlock($passenger, $isFirstEncounter)) {
             $backstoryUnlocked = [
                 'passenger' => $passenger['name'] ?? 'Unknown',
@@ -90,8 +88,7 @@ final class CompleteRideAction
             ];
             $passengerBackstories[$passengerId] = true;
             $gameState['passengerBackstories'] = $passengerBackstories;
-
-            // Persist to database
+            // Persist to database.
             $this->backstoryRepo->unlock($userId, $passengerId);
         }
 
@@ -110,14 +107,14 @@ final class CompleteRideAction
                 'passengerId' => $passengerId,
                 'encountered' => true,
                 'knowledgeLevel' => max(1, (int) ($existingEntry['knowledgeLevel'] ?? 0)),
-                'unlockedSecrets' => is_array($existingEntry['unlockedSecrets'] ?? null) ? $existingEntry['unlockedSecrets'] : [],
+                'unlockedSecrets' => is_array($existingEntry['unlockedSecrets'] ?? null)
+                    ? $existingEntry['unlockedSecrets']
+                    : [],
             ];
-
             $updates = [
                 'passengers_encountered' => array_values(array_unique($encountered)),
                 'almanac_progress' => $almanacProgress,
             ];
-
             if ($backstoryUnlocked !== null) {
                 $backstoriesUnlocked = $stats->backstories_unlocked;
                 if (!in_array($passengerId, $backstoriesUnlocked, true)) {
@@ -135,25 +132,22 @@ final class CompleteRideAction
             'duration' => time() - (int) ($ride['startTime'] ?? time()),
             'timestamp' => time(),
         ];
-
-        // Set last ride completion info
+        // Set last ride completion info.
         $gameState['lastRideCompletion'] = [
             'passenger' => $passenger,
             'fareEarned' => $fare,
             'itemsReceived' => $itemsReceived,
             'backstoryUnlocked' => $backstoryUnlocked,
         ];
-
-        // Reset ride state
+        // Reset ride state.
         $gameState['currentPassenger'] = null;
         $gameState['currentRide'] = null;
         $gameState['currentDrivingPhase'] = null;
         $gameState['gamePhase'] = 'dropOff';
-
-        // Process item deterioration
+        // Process item deterioration.
         $gameState['inventory'] = $this->itemService->processItemDeterioration($gameState['inventory'] ?? []);
 
-        // Check success condition
+        // Check success condition.
         if (($gameState['timeRemaining'] ?? 0) <= 0) {
             if (($gameState['earnings'] ?? 0) >= ($gameState['minimumEarnings'] ?? 30)) {
                 $gameState['gamePhase'] = 'success';

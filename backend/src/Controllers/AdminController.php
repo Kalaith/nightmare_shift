@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controllers;
@@ -9,7 +10,9 @@ use App\External\GameSessionLogRepository;
 
 final class AdminController
 {
-    public function __construct(private readonly GameSessionLogRepository $logRepo) {}
+    public function __construct(private readonly GameSessionLogRepository $logRepo)
+    {
+    }
 
     public function getSessions(Request $request, Response $response): void
     {
